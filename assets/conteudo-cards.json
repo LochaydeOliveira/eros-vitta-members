@@ -1,0 +1,36 @@
+{
+  "cards": [
+    {
+      "title": "LOJA 1",
+      "price": 399,
+      "subTitle": "Estoque Próprio",
+      "description": "Tenha uma loja virtual estruturada para gerenciar seu estoque próprio, feita na Yampi ou Shopify. Você vende, embala e entrega diretamente ao cliente.",
+      "features": [
+        "50 Produtos",
+        "Identidade Visual (Logo, Banner, Design Profissional)",        
+        "Configuração de Orderbump, UpSell, Cupons",
+        "Checkout Transparente",
+        "Suporte via Whatsapp"
+      ],
+      "buttonText": "CRIAR LOJA 1",
+      "buttonLink": "https://wa.me/556194216467?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20pacote%20LOJA%201%20-%20A%20loja%20de%20Estoque%20Pr%C3%B3prio%20por%20R%24%20399%2C00",
+      "paymentText": "Formas de Pagamento",
+      "paymentConditions": "PIX E CRÉDITO"
+    },
+    {
+      "title": "LOJA 2",
+      "price": 299,
+      "subTitle": "Loja de Dropshipping",
+      "description": "Loja virtual sem estoque e sem complicações, criada na Yampi ou Shopify. Você vende, o fornecedor entrega.",
+      "features": [
+        "Tudo da LOJA 1",
+        "+50 Produtos",
+        "Integração com Fornecedores"
+      ],
+      "buttonText": "CRIAR LOJA 2",
+      "buttonLink": "https://wa.me/message/ZLMXHQAQ5FW5P1",
+      "paymentText": "Formas de Pagamento",
+      "paymentConditions": "PIX E CRÉDITO"
+    }
+  ]
+}

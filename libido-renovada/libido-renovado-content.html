@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redescobrindo o Desejo: O Plano de 21 Dias</title>
+    <link rel="icon" type="image/png" href="assets/img/favicon-libido-renovado.png">
+    <link rel="apple-touch-icon" href="assets/img/favicon-libido-renovado.png">
+    <link rel="preload" as="image" href="assets/svg/logo-valida-pro-em-svg.svg">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="assets/css/custom.css" rel="stylesheet">
+    <link href="assets/css/logo.css" rel="stylesheet">
+
+<style>
+
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+    :root {
+        --color-primary: #f8f2ed;
+        --color-secondary: #E6B2B2;
+        --color-background: #F2F1EC;
+        --color-text: #333;
+        --color-white: #fff;
+        --font-family-libido: 'Cormorant Garamond', serif;
+        --font-family-mulish: 'Mulish', sans-serif;
+    }
+
+
+     /* ====== STYLES GLOBAL ====== */
+
+    body {
+        font-family: var(--font-family-libido)!important;
+        background-color: var(--color-background);
+        color: var(--color-text);
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 800px!important;
+        margin: 0 auto;
+        top: -20px;
+        position: relative;
+    }
+
+    main {
+        padding: 4rem;
+    }
+
+    .ebook-capa {
+        width: 100%;
+        margin: 0 auto;
+        background: #f8f2ed!important;
+        line-height: 1.7;
+        color: #333;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        z-index: 9;
+        position: relative;
+    }
+
+    .ebook-capa-image {
+        position: relative;
+        top: -140px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+
+    .ebook-capa h1 strong {
+        font-size: 4.2rem!important;
+
+    }
+
+    .title-ebook {
+        position: relative;
+        padding: 80px;
+        text-align: center;
+        z-index: 2;
+
+    }
+
+    .title-ebook p {
+        color: #fff!important;
+        width: 77%;
+        font-size: 1.2rem;
+        margin: 0 auto;
+    }
+
+    .ebook-capa-text {
+        z-index: 3;
+        position: relative;
+        color: #ffffff !important;
+        padding: 2.2rem 6rem;
+        text-align: center!important;
+        width: 80%;
+        margin: 0 auto;
+        top: -250px;
+        box-sizing: border-box;
+        font-weight: 600;
+        background: #bf825e;
+        font-size: 30px!important;
+        line-height: 30px;
+        font-style: italic;
+    }
+
+
+    .ebook-header h3 {
+        font-family: var(--font-family-libido)!important;
+        font-size: 1.2em;
+        color: #777;
+        font-style: italic;
+    }
+
+    .chapter {
+        margin-bottom: 60px;
+    }
+
+    .chapter h2 {
+        font-family: var(--font-family-libido)!important;
+        font-weight: 800;
+        font-size: 4em;
+        color: var(--color-primary);
+        padding-bottom: 5px;
+        margin: 0 0 20px 0;
+        width: 78%;
+        line-height: 4rem;
+        text-align: left;
+    }
+
+    .chapter h3 {
+        font-family: var(--font-family-libido)!important;
+        font-weight: 600;
+        font-size: 1.5em;
+        color: var(--color-text);
+        margin-top: 3.5rem;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 18px!important;
+        color: #5a4134!important;
+        text-align: justify!important;
+        margin-bottom: 20px!important;
+        font-family: var(--font-family-mulish)!important;
+    }
+
+
+    ul {
+        margin-bottom: 20px;
+        padding-left: 20px;
+        font-size: 18px!important;
+        color: #5a4134!important;
+        text-align: justify!important;
+    }
+
+    li {
+        margin-bottom: 10px;
+        font-size: 18px!important;
+        color: #5a4134!important;
+        text-align: justify!important;
+    }
+
+    strong {
+        font-size: 18px!important;
+        color: #5a4134!important;
+    }
+
+    .task-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .task-list li {
+        position: relative;
+        padding-left: 0;
+        margin-bottom: 15px;
+    }
+
+
+    footer {
+        background: #fff!important;
+    }
+
+    footer p {
+        text-align: center!important;
+        padding: 20px;
+        font-size: 0.9em!important;
+        color: #777!important;
+        border-top: 1px solid var(--color-secondary);
+    }
+
+    .chapter-header {
+        margin: 2rem 0;
+        display: flex;
+        font-size: 5rem;
+        text-align: center;
+        font-family: var(--font-family-libido)!important;
+        justify-content: center;
+        color: #bf825e;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* .ebook-grid-content .chapter-header::after {
+        content: '';
+        display: block;
+        width: 17%;
+        height: 3px;
+        background: linear-gradient(45deg, #bf825e, transparent);
+        margin-top: 10px;
+        position: absolute;
+        top: 155px;
+        left: 10%;
+    } */
+
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 2rem;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 0;
+        text-align: center;
+        font-weight: 600;
+        color: var(--color-primary);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .product-card h4 {
+        font-size: 15px;
+        color: #626262;
+        padding: 1rem 0 0;
+    }
+
+    .product-card p {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .product-card a {
+        padding: 7px 0;
+        background: #e3ae81;
+        color: #fff;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 15px;
+        margin: 0.6rem 0 0;
+        font-weight: 3;
+        transition: .5s;
+    }
+
+    .product-card a:hover {
+        background: #dd9a75;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .chapter-sub {
+        font-size: 3.2rem;
+        font-family: var(--font-family-libido);
+    }
+
+    .titulizacao {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 0 auto;
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    .titulizacao-conclusation {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 0 auto;
+        gap: 0rem;
+        justify-content: center;
+    }
+
+    .titulizacao-conclusation .chapter-header {
+        margin: 2rem auto;
+        display: flex;
+        font-size: 5rem;
+        text-align: center;
+        font-family: var(--font-family-libido)!important;
+        justify-content: center;
+        color: #bf825e;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .titulizacao-conclusation .chapter-sub {
+        font-size: 3.2rem;
+        font-family: var(--font-family-libido);
+        line-height: 3rem;
+        margin: 0 auto 2rem;
+    }
+
+    .sub-chapter-bold {
+        font-weight: 700;
+    }
+
+    .sub-chapter {
+        font-size: 30px;
+        top: -35px;
+        position: relative;
+        left: 5px;
+    }
+
+    .chapter-header-toy {
+        margin: 2rem 0;
+        display: flex;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .ebook-grid {
+        width: 100%;
+        max-width: 800px;
+        padding: 2rem 0 0;
+    }   
+
+    .ebook-grid-item {
+        width: 800px;
+        height: 1120px;
+        background: #fff;
+        box-shadow: 0 0 20px rgba(0,0,0,0.15);
+        padding: 0;
+        margin: 20px auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ebook-grid-content {
+        padding: 2rem 5rem;
+        font-family: var(--font-family-mulish)!important;
+    }
+
+    .ebook-grid-content h2 {
+        font-family: var(--font-family-mulish)!important;
+        font-weight: 600;
+        font-size: 1.5em;
+        color: var(--color-text);
+        margin-top: 3.5rem;
+        text-align: left;
+        margin-bottom: 20px;
+    }
+
+    .footer p {
+        padding: 0;
+    }
+
+    .text-sm {
+        font-size: 1.1rem!important;
+        font-family: var(--font-family-mulish);
+        color: #c57a53!important;
+    }
+
+    /* ====== SMARTPHONES (até 767px) ====== */
+    @media (max-width: 767px) {
+        main {
+            padding: 0 1rem;
+        }
+        .container {
+            padding: 0;
+            top: 0;
+        }
+        .ebook-grid {
+            padding: 0;
+        }
+        .ebook-grid-item {
+            width: 100%;
+            height: auto; /* remove altura fixa para caber no viewport */
+            margin: 16px auto;
+        }
+        .ebook-grid-content {
+            padding: 1.25rem 1.25rem;
+        }
+        .ebook-capa-image {
+            top: -40px; /* reduz o offset da imagem no mobile */
+        }
+        .title-ebook {
+            padding: 16px;
+        }
+        .ebook-capa h1 {
+            font-size: 1.8rem;
+            width: 92%;
+            margin: 2rem auto 2.5rem;
+            line-height: 30px;
+        }
+        .ebook-capa-text {
+            width: 92%;
+            top: -60px; /* aproxima do conteúdo no mobile */
+            padding: 1rem 1rem;
+            font-size: 1rem!important;
+            line-height: 1.4rem;
+        }
+        .chapter-header {
+            margin: 0 0 1rem 0;
+            font-weight: 400;
+            font-size: 4rem;
+            align-items: center;
+        }
+        .chapter-header-toy {
+            font-size: 1.25rem;
+        }
+        .chapter h2 {
+            text-align: left;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.9rem;
+            width: 100%;
+        }
+        .chapter h3 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+        }
+        .title-ebook p {
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        .titulizacao {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .titulizacao .chapter-sub,
+        .titulizacao-conclusation .chapter-sub {
+            font-size: 2.4rem;
+        }
+        .sub-chapter { 
+            font-size: 1.45rem;
+            top: -25px;
+            left: 0;
+            position: relative;
+        }
+        .ebook-capa h1 strong {
+            font-size: 2.2rem!important;
+        }
+        .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .product-card p {
+            font-size: 0.95rem;
+        }
+        .product-card a {
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        p, li, strong, ul {
+            font-size: 1rem!important;
+        }
+    }
+
+    /* ====== TABLETS (768px a 1199px) ====== */
+    @media (min-width: 768px) and (max-width: 1199px) {
+        main {
+            padding: 0 2rem;
+        }
+        .ebook-grid-item {
+            width: 100%;
+            height: auto;
+        }
+        .ebook-grid-content {
+            padding: 1.5rem 2rem;
+        }
+        .ebook-capa h1 {
+            font-size: 2.7rem;
+            width: 80%;
+            line-height: 40px;
+            margin: 0 auto 2rem;
+        }
+        .ebook-capa-image {
+            top: -80px;
+        }
+        .ebook-capa-text {
+            width: 85%;
+            top: -120px;
+            padding: 1.25rem 2rem;
+            font-size: 1.1rem!important;
+            line-height: 1.6rem;
+        }
+        .title-ebook p {
+            width: 90%;
+            font-size: 1.05rem;
+        }
+        .chapter h2 {
+            font-size: 2rem;
+            line-height: 2.2rem;
+            width: 100%;
+        }
+        .chapter h3 {
+            font-size: 1.25rem;
+        }
+        .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .ebook-capa h1 strong {
+            font-size: 3rem!important;
+        }
+    }
+
+    /* ====== NOTEBOOKS (>=1200px e <1440px) ====== */
+    @media (min-width: 1200px) and (max-width: 1439px) {
+        main {
+            padding: 3rem;
+        }
+        .ebook-grid-item {
+            width: 100%;
+            height: auto;
+        }
+        .ebook-grid-content {
+            padding: 2rem 3rem;
+        }
+        .title-ebook p {
+            width: 72%;
+            font-size: 1.15rem;
+        }
+        .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .ebook-capa h1 {
+            font-family: var(--font-family-libido)!important;
+            font-weight: 400;
+            font-size: 3.2rem;
+            color: var(--color-text);
+            margin: 0rem auto 2.5rem;
+            line-height: 1.1;
+            width: 68%;
+            padding-bottom: 1rem;
+            text-align: center;
+            z-index: 3;
+            position: relative;
+        }
+    }
+
+    /* ====== DESKTOP GRANDE (>=1440px) ====== */
+    @media (min-width: 1440px) {
+        main {
+            padding: 4rem;
+        }
+        .title-ebook p {
+            width: 70%;
+            font-size: 1.2rem;
+        }
+        .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+            display: grid;
+            gap: 10px;
+            margin-top: 2rem;
+        }
+        .ebook-capa h1 {
+            font-family: var(--font-family-libido)!important;
+            font-weight: 400;
+            font-size: 4rem;
+            color: var(--color-text);
+            margin: 0rem auto 3rem;
+            line-height: 1;
+            width: 65%;
+            padding-bottom: 1rem;
+            text-align: center;
+            z-index: 3;
+            position: relative;
+        }
+    }
+
+
+</style>
+
+</head>
+
+<body class="bg-gray-50 min-h-screen container">
+
+
+<div class="ebook-grid">
+
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <div class="logo-produtovencedor logo-small">
+                        <img src="assets/img/logo-libido-renovado.png" alt="Logo Libido Renovado">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">
+                        <i class="fas fa-user mr-1"></i>
+                        <!-- nome do usuário exibido após login; conteúdo estático não acessa sessão -->
+                    </span>
+                    <a href="logout.php" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="ebook-grid-item ebook-capa">
+
+            <div class="title-ebook">
+                <h1>O Plano de Ação de <strong>21 Dias</strong> para Reacender a Intimidade e a <strong>Libido</strong></h1>                
+            </div>
+
+            <div class="ebook-capa-image">
+                <img width="600" height="500" src="assets/img/img-casal-com-libido-renovado.png" alt="Capa do E-book">
+            </div>
+
+            <p class="ebook-capa-text">Chega de frustração. Este não é apenas um guia, é um plano de ação prático e transformador para vocês reconectarem a paixão, a conexão e o desejo.</p>
+ 
+    </div>
+
+    <div class="ebook-grid-item">
+        <div class="ebook-grid-content">
+            <div class="chapter-header">Introdução</div>
+            <h2>Chega de Falar, é Hora de Agir!</h2>
+            <p>
+                Querida leitora, querido leitor, a frustração é real. A rotina, os filhos, o cansaço... tudo isso pode ter apagado a chama que um dia ardia intensamente no seu relacionamento. Se você sente que a intimidade está diminuindo, não se contente com isso. A boa notícia é que você tem o poder de mudar essa realidade.
+                Este não é apenas um e-book, é um <strong>plano de ação</strong>. Durante os próximos 21 dias, você e seu parceiro vão embarcar em um desafio prático para reacender a paixão, a conexão e o desejo. Chega de sentir culpa. É hora de agir.
+                Acredite: vocês podem transformar essa situação em uma oportunidade para fortalecerem a relação. Preparados para o novo começo?
+            </p>
+        </div>
+    </div>
+
+    <div style="background: #f8f2ed;" class="ebook-grid-item">
+        <div class="ebook-grid-content">
+
+            <div class="titulizacao">
+                <div class="chapter-header">
+                    <div class="sub-chapter-bold">Fase 1 </div>
+                    <div class="sub-chapter">Dias 1 ao 7</div>
+                </div>
+                <div class="chapter-sub"> | Individualmente</div>
+            </div>
+
+                <h2>Preparando o Terreno</h2>
+                <p>
+                    Antes de pensarem como casal, a mulher precisa se reconectar com seu próprio corpo e mente.
+                    A sua libido não pode ser um projeto para o seu parceiro.
+                    Este é o seu desafio individual.
+                </p>
+                
+                <ul class="task-list">
+                    <li><strong>Reconecte-se com seu corpo:</strong> Dedique 15 minutos do seu dia a um ritual de autocuidado que te reconecte com suas sensações. Pode ser uma massagem, um banho relaxante com óleos essenciais ou uma sessão de yoga.</li>
+                    <li><strong>Crie seu Diário do Desejo:</strong> Pegue um caderno e comece a anotar o que te faz sentir bem, o que te dá energia e quando você percebe flutuações no seu humor e desejo.</li>
+                    <li><strong>Priorize o sono:</strong> Durma de 7 a 9 horas por noite. A falta de sono é a inimiga número um do desejo.</li>
+                </ul>
+
+                <ul class="task-list">
+                    <li><strong>Libido não é um interruptor:</strong> Não espere estar "pronta" para o sexo. Entenda que o desejo feminino é muitas vezes responsivo, ou seja, ele pode surgir durante a intimidade.</li>
+                    <li><strong>Mitos são os seus inimigos:</strong> Não se culpe. O problema não é seu, é do casal. O amor e o desejo são sentimentos diferentes e podem coexistir em diferentes intensidades.</li>
+                </ul>
+        </div>
+    </div>
+
+    <div class="ebook-grid-item">
+        <div class="ebook-grid-content">
+
+            <div class="titulizacao">
+                <div class="chapter-header">
+                    <div class="sub-chapter-bold">Fase 2</div>
+                    <div class="sub-chapter">Dias 8 a 14</div>
+                </div>
+                <div class="chapter-sub">  | Ele na Ação</div>
+            </div>
+        
+                
+            <h2>Trazendo o Parceiro para o Jogo</h2>
+            <p>
+                O problema é do casal, e a solução precisa da ajuda dele.
+                O papel do parceiro é ser um pilar de apoio, não uma fonte de cobrança.
+                Este é o desafio para ele.
+            </p>
+
+            <ul class="task-list">
+                <li><strong>Abrace o "toque sem objetivo":</strong> Por uma semana, foque em abraços, beijos e carícias que não tenham o sexo como único final. O objetivo é criar intimidade não sexual.</li>
+                <li><strong>Pratique a escuta ativa:</strong> Quando ela falar sobre o que sente, ouça sem interromper e valide os sentimentos dela. Use frases como "Eu entendo que você se sinta assim" e evite "Você não me deseja mais?".</li>
+                <li><strong>Dedique tempo a ela:</strong> Convide-a para um "encontro" ou um jantar a dois. Mostre que você a valoriza e se importa com a relação, e não apenas com a parte física dela.</li>
+            </ul>
+            
+            <ul class="task-list">
+                <li><strong>Paciência é a chave:</strong> A libido é um processo, não um evento. Cobrar só aumentará a pressão e a distância.</li>
+                <li><strong>A intimidade vai além do quarto:</strong> O romance e a conexão fora do sexo são a base do desejo. Um abraço, um elogio inesperado ou um bilhete carinhoso são investimentos diretos na vida sexual do casal.</li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="ebook-grid-item">
+        <div class="ebook-grid-content">
+
+            <div class="titulizacao">
+                <div class="chapter-header">
+                    <div class="sub-chapter-bold">Fase 3</div>
+                    <div class="sub-chapter">Dias 15 a 21</div>
+                </div>
+                <div class="chapter-sub">  | Ação em Equipe</div>
+            </div>
+
+            <h2>A Jornada do Casal</h2>
+            <p>Agora que ambos estão mais conectados individualmente, é hora de agir em equipe. A transformação final acontece aqui.</p>
+
+
+            <ul class="task-list">
+                <li><strong>Agendem o "Café da Intimidade":</strong> Escolham um horário tranquilo para conversar sobre o relacionamento. Sem julgamentos, apenas para ouvir um ao outro.</li>
+                <li><strong>Explorem o novo:</strong> Tentem uma massagem mútua, um banho juntos ou explorem o uso de <strong style="color: var(--color-primary);">brinquedos sexuais</strong> para descobrir novas sensações. A novidade é a melhor forma de quebrar a rotina.</li>
+                <li><strong>Revivam o Romance:</strong> Recriem a primeira noite de namoro, ou planejem um passeio que os lembrem de como se conheceram. A nostalgia pode ser uma poderosa ferramenta para reacender a chama.</li>
+            </ul>
+
+            <p>
+                A intimidade é um jardim que precisa ser regado diariamente, com carinho, comunicação e paciência.
+                A solução raramente está em uma única abordagem, mas sim em uma combinação de esforços.
+            </p>
+
+        </div>     
+    </div>
+
+    <div style="height: auto;background: #f8f2ed;" class="ebook-grid-item">        
+        <div class="ebook-grid-content">
+            <div class="chapter-header-toy">😈Sugetões para apimentar a relação</div>
+
+            <p>Para reacender a chama, é preciso investir em produtos que ajudam a criar uma atmosfera romântica e estimulante. Aqui estão algumas sugestões que podem ser essenciais para o seu plano de ação:</p>
+        
+            <div class="product-grid">
+
+                <div class="product-card">
+                    <img src="assets/img/vibrador-silencioso.jpg" alt="Vibrador Feminino e Sucção com 10 Pulsações - Vibrador Silencioso">
+                    <h4>Vibrador Feminino e Sucção com 10 Pulsações - Vibrador Silencioso</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Pulsa%C3%A7%C3%B5es-Estimulador-Vibradores-vibradoris-silenciosoB31/dp/B0CJFJH6S2?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-12&linkCode=ll1&tag=agencialed-20&linkId=ce05306b21501116db9f585b707aeb35&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/capa-peniana.jpg" alt="Pênis Prótese Em Silicone Macio Antialérgico">
+                    <h4>Capa Peniana Extensora Nós Dois Nube 16 cm x 4 cm</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Capa-Peniana-Extensora-Dois-Nube/dp/B09CRBNT33?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vgE_gMIq5KmA_r2H-mH_1ojDfBw6074UuwNSjCGDVhVtvxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.VCJ3zJmc4kVnJ0qZkcXdUeUREhYuMBH95kABLBelOXw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756075483&sprefix=brinquedo+er%2Caps%2C175&sr=8-2&linkCode=ll1&tag=agencialed-20&linkId=ea9f2dd8c3aa0a186d784e441620d6b0&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/kit-casais.jpg" alt="Kit Casais Sexuais, Brinquedos Sensuais Com 8 Peças Adultos">
+                    <h4>Kit Casais Sexuais Brinquedos Sensuais Com 8 Peças Adultos</h4>
+                    <!-- <p>R$ 99,90</p> -->
+                    <a href="https://www.amazon.com.br/Sexuais-Brinquedos-Sensuais-Acess%C3%B3rios-Er%C3%B3ticos/dp/B0D45S4MXD?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-10&ufe=app_do%3Aamzn1.fos.6d798eae-cadf-45de-946a-f477d47705b9&linkCode=ll1&tag=agencialed-20&linkId=c03e556d7dd1a90bb46c9ee74d4edf01&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/dados-eroticos.jpg" alt="Dado Erótico Posição Prazer e Diversão Hétero">
+                    <h4>Dado Erótico Posição Prazer e Diversão Hétero BRILHA NO ESCURO</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Er%C3%B3tico-Posi%C3%A7%C3%A3o-Prazer-Divers%C3%A3o-Kamin/dp/B0BNJRPCSC?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-11&linkCode=ll1&tag=agencialed-20&linkId=ca17db16ed3563aa69e2fa35d9130d85&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/kit-jogos-de-desejo.jpg" alt="Kit Jogo Erótico Desejos e Drinks Jogo de Cartas + Dados Sexy Romantic Dice Copo Shot">
+                    <h4>Kit Jogo Erótico Desejos e Drinks Jogo de Cartas + Dados Sexy Romantic Dice Copo Shot</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Er%C3%B3tico-Desejos-Drinks-Cartas-Romantic/dp/B0DVGZ3323?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-18&linkCode=ll1&tag=agencialed-20&linkId=de0ca5f458facb0de03d765dd475ade7&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/kit-varios-produtinhos.jpg" alt="Kit 10 Produtos Sex Shop com Gel Deslizante Comestíveis Excitantes Masculino e Feminino Bolinhas Explosivas">
+                    <h4>Kit 10 Produtos Sex Shop com Gel Deslizante Comestíveis Excitantes Masculino e Feminino Bolinhas Explosivas</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Lubrificantes-Comest%C3%ADveis-Excitantes-Masculino-Explosivas/dp/B0CCQ9X9DJ?pd_rd_w=WVKXJ&content-id=amzn1.sym.ebf6c53b-8563-45af-833e-25b1308ef797&pf_rd_p=ebf6c53b-8563-45af-833e-25b1308ef797&pf_rd_r=EX9ZX2HKGY2K1ZB46ZNW&pd_rd_wg=dn8xU&pd_rd_r=fa7f618c-fb65-4662-a676-6eed3de43349&pd_rd_i=B0CCQ9X9DJ&psc=1&linkCode=ll1&tag=agencialed-20&linkId=c84d4b8e5ca714e13724a0d898955682&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/kit-Sexshop-casal-e-Feminino.jpg" alt="kit Sexshop casal e Feminino, Vibrador Snapy30 Modos de Vibração, a pilha,Plug Anal, Cápsula bullut,Vibrador Ponto G e Masturbador Egg">
+                    <h4>kit Sexshop casal e Feminino, Vibrador Snapy30 Modos de Vibração, a pilha,Plug Anal, Cápsula bullut,Vibrador Ponto G e Masturbador Egg</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/dp/B0F6FDKSWW?psc=1&pd_rd_i=B0F6FDKSWW&pd_rd_w=UKY30&content-id=amzn1.sym.1868afab-d777-4b70-8899-1b323ad91d95&pf_rd_p=1868afab-d777-4b70-8899-1b323ad91d95&pf_rd_r=VZ3NYSTANX91K0QS37EF&pd_rd_wg=VBCYW&pd_rd_r=eeea86d2-ecbc-41eb-ade9-7c84787b5c4f&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWw&linkCode=ll1&tag=agencialed-20&linkId=8bce2e33223dc50e96d0b4489a0f0326&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <div class="product-card">
+                    <img src="assets/img/vibrador-feminino-estimulador-clitoris.jpg" alt="Vibrador Feminino Erótico Estimulador Clitóris e Ponto G - 10 modos de Vibração">
+                    <h4>Vibrador Feminino Erótico Estimulador Clitóris e Ponto G - 10 modos de Vibração</h4>
+                    <!-- <p>R$ 49,90</p> -->
+                    <a href="https://www.amazon.com.br/Vibradoris-Feminino-Brinquedos-Er%C3%B3ticos-Estimulador/dp/B0C5CL2YKM?pd_rd_w=eFgJL&content-id=amzn1.sym.53b2f13e-ab3a-40f2-aab9-7e4b988d3762&pf_rd_p=53b2f13e-ab3a-40f2-aab9-7e4b988d3762&pf_rd_r=ZC20B3K616WRSQ7MJP1S&pd_rd_wg=wa8Zd&pd_rd_r=ea93acf2-a079-4c80-bcd7-497aca3a2694&pd_rd_i=B0C5CL2YKM&psc=1&linkCode=ll1&tag=agencialed-20&linkId=9f770390bba6dc3b05b37935b2235794&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
+                </div>
+
+                <!-- 
+                    <div class="product-card">
+                        <img src="assets/img/Pênis Prótese Em Silicone Macio Antialérgico 15,5cm Promoção.webp" alt="Pênis Prótese Em Silicone Macio Antialérgico">
+                        <h4>Pênis Prótese Em Silicone Macio Antialérgico</h4>
+                        <p>R$ 49,90</p>
+                        <a href="https://s.shopee.com.br/1g8ga6vHsk" target="_blank" class="btn-primary">Comprar</a>
+                    </div>
+                -->
+
+
+            </div>
+
+        </div>     
+    </div>
+
+    <div class="ebook-grid-item">   
+        <div class="ebook-grid-content">
+
+            <div class="titulizacao-conclusation">
+                <div class="chapter-header">
+                    <div class="sub-chapter-bold">Conclusão</div>
+                    <div class="sub-chapter">A Chama Reacendida</div>
+                </div>
+                <div class="chapter-sub">Um Novo Começo</div>
+            </div>
+
+            <p>
+                Você chegou ao final do seu plano de ação de 21 dias.
+                A jornada é desafiadora, mas a chama da paixão está à espera de ser reacendida.
+                A partir de hoje, a vida de vocês a dois será diferente.
+                Não guarde este e-book. Volte a ele sempre que precisar.
+                E, mais importante, comece hoje mesmo a aplicar as estratégias.
+                A persistência, o amor e a ação são os ingredientes mágicos para reacender o desejo e viver uma vida a dois plena e feliz.
+                <strong>Sua tarefa final é a mais importante: comecem agora!</strong>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<footer class="container" >
+    <div style="max-width: 100%; padding: 0;">
+        <p>&copy; <strong>2025 Libido Renovado.</strong> <br> Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+
+    
+</body>
+</html> 

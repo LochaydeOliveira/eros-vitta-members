@@ -1,0 +1,216 @@
+/* ========================================
+   CUSTOMIZAÇÕES DO CHECKLIST PRODUTO VENCEDOR
+   ======================================== */
+
+/* Botões CTA */
+.cta-button {
+    background: linear-gradient(135deg, #b03d3d 0%, #111111 100%);
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(176, 61, 61, 0.4);
+}
+
+/* Barras de Progresso */
+.progress-bar-container {
+    width: 100%;
+    max-width: 50rem;
+    min-width: 6rem;
+    height: 1.2rem;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+    transition: width 0.3s ease;
+}
+
+/* Análise Estratégica */
+.analise-estrategica {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.analise-estrategica .categoria {
+    transition: all 0.3s ease;
+}
+
+.analise-estrategica .categoria:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.analise-estrategica input[type="radio"]:checked + div {
+    background-color: #fed7aa;
+    border-color: #ea580c;
+}
+
+.analise-estrategica input[type="radio"]:checked + div span {
+    color: #ea580c;
+    font-weight: 600;
+}
+
+/* Animações */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade para barras de progresso */
+@media (max-width: 1024px) {
+    .progress-bar-container {
+        max-width: 40rem;
+        height: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn-fixed {
+        position: fixed;
+        bottom: 0;
+        background: #ffffff;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        z-index: 99;
+        left: 0;
+        padding: 0.8rem 0;
+        box-shadow: 0px -14px 15px 0px #0000001f;
+    }
+    .progress-bar-container {
+        max-width: 100%;
+        height: 0.9rem;
+        min-width: 8rem;
+    }
+    
+    .analise-estrategica .categoria {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .btn-fixed {
+        position: fixed;
+        bottom: 0;
+        background: #ffffff;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        z-index: 99;
+        left: 0;
+        padding: 0.8rem 0;
+        box-shadow: 0px -14px 15px 0px #0000001f;
+    }
+    .progress-bar-container {
+        max-width: 100%;
+        height: 0.8rem;
+        min-width: 6rem;
+    }
+    
+    .analise-estrategica h4 {
+        font-size: 1rem;
+    }
+    
+    .analise-estrategica .space-y-3 > label {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-fixed {
+        position: fixed;
+        bottom: 0;
+        background: #ffffff;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        z-index: 99;
+        left: 0;
+        padding: 0.8rem 0;
+        box-shadow: 0px -14px 15px 0px #0000001f;
+    }
+    .progress-bar-container {
+        max-width: 100%;
+        height: 0.7rem;
+        min-width: 8rem;
+    }
+    
+    .analise-estrategica {
+        padding: 1rem;
+    }
+    
+    .analise-estrategica .categoria {
+        padding: 0.75rem;
+    }
+}
+
+/* Outras customizações podem ser adicionadas aqui */ 
+
+/* Gradiente principal do fundo */
+.gradient-bg {
+    background: #c67b54;
+    padding: 0 2rem;
+}
+
+/* Botão CTA igual LP */
+.btn-cta {
+    color: #fff;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: none;
+    background: #c67b54!important;
+}
+.btn-cta:hover, .btn-cta:focus {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(176, 61, 61, 0.4);
+    background: #8a573c;
+}
+
+/* Botão secundário (branco translúcido) */
+.btn-secondary {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    transition: all 0.3s;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+    background: rgba(255,255,255,0.25);
+}
+
+/* Inputs modernos */
+.input-modern {
+    border-radius: 0.4rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.input-modern:focus {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 2px #f9731633;
+    outline: none;
+}
+
+/* Títulos com gradiente */
+.title-gradient {
+    background: #000000;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 20px!important;
+} 
+
+.mg-bt-cst {
+    margin-bottom: 10rem!important;
+}

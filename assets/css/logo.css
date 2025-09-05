@@ -1,0 +1,120 @@
+/* ========================================
+   LOGO VALIDAPRO
+   ======================================== */
+
+.logo-validapro {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 800;
+    text-decoration: none;
+    color: inherit;
+    flex-direction: column;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    animation: shine 3s infinite;
+}
+
+.logo-icon i {
+    color: white;
+    font-size: 20px;
+    z-index: 1;
+    position: relative;
+}
+
+.logo-text {
+    font-size: 24px;
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.logo-tagline {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: -2px;
+    letter-spacing: 0.5px;
+}
+
+/* Animação de brilho */
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 8px;
+    }
+    
+    .logo-icon i {
+        font-size: 16px;
+    }
+    
+    .logo-text {
+        font-size: 20px;
+    }
+    
+    .logo-tagline {
+        font-size: 10px;
+    }
+}
+
+/* Variações da logo */
+.logo-white .logo-text {
+    background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-white .logo-tagline {
+    color: #ffffff;
+    margin: -1.2rem 0;
+}
+
+.logo-small .logo-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+}
+
+.logo-small .logo-icon i {
+    font-size: 14px;
+}
+
+.logo-small .logo-text {
+    font-size: 18px;
+}
+
+.logo-small .logo-tagline {
+    font-size: 9px;
+} 
