@@ -102,6 +102,25 @@ function createTables($pdo) {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
 
+        // Tabela de compras/entitlements básicos
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS purchases (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_slug VARCHAR(100) DEFAULT 'libido-renovado',
+                status ENUM('approved','refunded','chargeback','pending','canceled') DEFAULT 'approved',
+                approved_at DATETIME DEFAULT NULL,
+                refunded_at DATETIME DEFAULT NULL,
+                provider VARCHAR(50) DEFAULT 'hotmart',
+                provider_payload JSON NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_user (user_id),
+                INDEX idx_status (status),
+                INDEX idx_approved (approved_at),
+                CONSTRAINT fk_purchases_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
         // error_log("Tabelas criadas/verificadas com sucesso."); // Removido para evitar output prematuro
 
         // Inserir usuário padrão admin se não existir

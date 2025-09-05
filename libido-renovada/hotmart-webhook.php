@@ -28,6 +28,15 @@ if (stripos($contentType, 'application/json') !== false) {
 $status = strtolower(trim($payload['status'] ?? $payload['purchase_status'] ?? $payload['event'] ?? ''));
 $buyerEmail = trim($payload['email'] ?? $payload['buyer_email'] ?? ($payload['buyer']['email'] ?? ''));
 $buyerName  = trim($payload['name']  ?? $payload['buyer_name'] ?? ($payload['buyer']['name'] ?? ''));
+// Datas
+$approvedAt = null;
+if (!empty($payload['approved_at'])) {
+    $approvedAt = date('Y-m-d H:i:s', strtotime($payload['approved_at']));
+} elseif (!empty($payload['purchase']['approved_date'])) {
+    $approvedAt = date('Y-m-d H:i:s', strtotime($payload['purchase']['approved_date']));
+} else {
+    $approvedAt = date('Y-m-d H:i:s');
+}
 
 $approvedStatuses = ['approved', 'paid', 'confirmed', 'completed'];
 if (!$buyerEmail || !in_array($status, $approvedStatuses, true)) {
@@ -47,6 +56,13 @@ if ($user) {
         $up = $pdo->prepare('UPDATE users SET active = 1 WHERE id = ?');
         $up->execute([(int)$user['id']]);
     }
+    // Registrar/atualizar compra aprovada
+    try {
+        $ins = $pdo->prepare('INSERT INTO purchases (user_id, status, approved_at, provider, provider_payload) VALUES (?, ?, ?, ?, ?)');
+        $ins->execute([(int)$user['id'], 'approved', $approvedAt, 'hotmart', json_encode($payload, JSON_UNESCAPED_UNICODE)]);
+    } catch (Throwable $e) {
+        error_log('Falha ao registrar purchase: ' . $e->getMessage());
+    }
     $html = '<p>Olá ' . htmlspecialchars($user['name'] ?: $buyerName) . ',</p>'
           . '<p>Seu acesso ao e-book <strong>Libido Renovado</strong> está ativo.</p>'
           . '<p>Use seu e-mail <b>' . htmlspecialchars($user['email']) . '</b> e a senha cadastrada para entrar.</p>'
@@ -59,6 +75,15 @@ if ($user) {
     $ativo = 1;
     $ins = $pdo->prepare('INSERT INTO users (name, email, password, active) VALUES (?, ?, ?, ?)');
     $ins->execute([$nome, $buyerEmail, $hash, $ativo]);
+    $newUserId = (int)$pdo->lastInsertId();
+
+    // Registrar compra aprovada
+    try {
+        $ins2 = $pdo->prepare('INSERT INTO purchases (user_id, status, approved_at, provider, provider_payload) VALUES (?, ?, ?, ?, ?)');
+        $ins2->execute([$newUserId, 'approved', $approvedAt, 'hotmart', json_encode($payload, JSON_UNESCAPED_UNICODE)]);
+    } catch (Throwable $e) {
+        error_log('Falha ao registrar purchase (novo usuário): ' . $e->getMessage());
+    }
 
     $html = '<p>Olá ' . htmlspecialchars($nome) . ',</p>'
           . '<p>Bem-vindo! Aqui estão seus dados de acesso ao e-book <strong>Libido Renovado</strong>:</p>'

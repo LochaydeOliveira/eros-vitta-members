@@ -9,7 +9,7 @@ if (!defined('DB_TYPE')) {
     // Banco de Dados
     define('DB_TYPE', 'mysql');
     define('DB_HOST', 'localhost'); 
-    define('DB_NAME', 'paymen58_validapro');
+    define('DB_NAME', 'paymen58_db_libido');
     define('DB_USER', 'paymen58');
     define('DB_PASS', 'u4q7+B6ly)obP_gxN9sNe');
 

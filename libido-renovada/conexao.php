@@ -49,7 +49,7 @@ register_shutdown_function(function(){
 // Ajuste se necessário: primeiro tenta localhost, depois IP do provedor
 define('DB_HOST_LOCAL_LIBIDO', 'localhost');
 define('DB_HOST_IP_LIBIDO', '192.185.222.27');
-define('DB_NAME_LIBIDO', 'paymen58_validapro');
+define('DB_NAME_LIBIDO', 'paymen58_db_libido');
 define('DB_USER_LIBIDO', 'paymen58');
 define('DB_PASS_LIBIDO', 'u4q7+B6ly)obP_gxN9sNe');
 

@@ -36,9 +36,9 @@ $nichos = getAllNichos();
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Redescobrindo o Desejo: O Plano de 21 Dias</title>
-        <link rel="icon" type="image/png" href="assets/img/favicon-libido-renovado.png">
-        <link rel="apple-touch-icon" href="assets/img/favicon-libido-renovado.png">
-        <link rel="preload" as="image" href="assets/svg/logo-valida-pro-em-svg.svg">
+        <link rel="icon" type="image/png" href="../assets/img/favicon-libido-renovado.png">
+        <link rel="apple-touch-icon" href="../assets/img/favicon-libido-renovado.png">
+        <link rel="preload" as="image" href="../assets/svg/logo-valida-pro-em-svg.svg">
         
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,8 +48,8 @@ $nichos = getAllNichos();
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link href="assets/css/custom.css" rel="stylesheet">
-        <link href="assets/css/logo.css" rel="stylesheet">
+        <link href="../assets/css/custom.css" rel="stylesheet">
+        <link href="../assets/css/logo.css" rel="stylesheet">
 
         <style>
 
@@ -645,7 +645,7 @@ $nichos = getAllNichos();
                     <div class="flex justify-between items-center py-4">
                         <div class="flex items-center">
                             <div class="logo-produtovencedor logo-small">
-                                <img src="assets/img/logo-libido-renovado.png" alt="Logo Libido Renovado">
+                                <img src="../assets/img/logo-libido-renovado.png" alt="Logo Libido Renovado">
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -662,12 +662,61 @@ $nichos = getAllNichos();
             </header>
 
             <div class="ebook-grid-item ebook-capa">
+                    <?php
+                    // Verificar se download está liberado (após 7 dias da compra aprovada)
+                    $canDownload = false;
+                    $daysRemaining = 7;
+                    try {
+                        $stmt = $pdo->prepare("SELECT MAX(approved_at) AS last_approved FROM purchases WHERE user_id = ? AND status = 'approved'");
+                        $stmt->execute([(int)$user['id']]);
+                        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($row && !empty($row['last_approved'])) {
+                            $approvedAt = strtotime($row['last_approved']);
+                            $diffDays = floor((time() - $approvedAt) / 86400);
+                            $canDownload = ($diffDays >= 7);
+                            $daysRemaining = max(0, 7 - $diffDays);
+                        }
+                    } catch (Throwable $e) {
+                        error_log('Erro ao checar liberação de download: ' . $e->getMessage());
+                    }
+                    ?>
                     <div class="title-ebook">
                         <h1>O Plano de Ação de <strong>21 Dias</strong> para Reacender a Intimidade e a <strong>Libido</strong></h1>                
+                        <div class="sans" style="margin-top:1rem; display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap;">
+                            <?php
+                            // Listar PDFs da pasta e-books
+                            $ebooks = [];
+                            $ebooksDir = __DIR__ . '/e-books';
+                            if (is_dir($ebooksDir)) {
+                                $dh = opendir($ebooksDir);
+                                if ($dh) {
+                                    while (($f = readdir($dh)) !== false) {
+                                        if ($f === '.' || $f === '..') continue;
+                                        if (preg_match('/\.pdf$/i', $f)) {
+                                            $ebooks[] = $f;
+                                        }
+                                    }
+                                    closedir($dh);
+                                }
+                            }
+                            sort($ebooks, SORT_NATURAL | SORT_FLAG_CASE);
+                            foreach ($ebooks as $pdf):
+                            ?>
+                                <a href="view.php?type=ebook&file=<?php echo rawurlencode($pdf); ?>" class="btn-primary" style="padding:.6rem 1rem; border-radius:.5rem; background:#9b7a67;">Ler: <?php echo htmlspecialchars(pathinfo($pdf, PATHINFO_FILENAME)); ?></a>
+                                <?php if ($canDownload): ?>
+                                    <a href="download.php?type=ebook&file=<?php echo rawurlencode($pdf); ?>" class="btn-primary" style="padding:.6rem 1rem; border-radius:.5rem;">Baixar</a>
+                                <?php else: ?>
+                                    <button disabled title="Disponível após 7 dias" class="btn-primary" style="padding:.6rem 1rem; border-radius:.5rem; opacity:.6; cursor:not-allowed;">Baixar (em <?php echo (int)$daysRemaining; ?>d)</button>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                            <?php if (empty($ebooks)): ?>
+                                <span style="color:#7a5a49">Nenhum e-book disponível no momento.</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <div class="ebook-capa-image">
-                        <img width="600" height="500" src="assets/img/img-casal-com-libido-renovado.png" alt="Capa do E-book">
+                        <img width="600" height="500" src="../assets/img/img-casal-com-libido-renovado.png" alt="Capa do E-book">
                     </div>
 
                     <p class="ebook-capa-text">Chega de frustração. Este não é apenas um guia, é um plano de ação prático e transformador para vocês reconectarem a paixão, a conexão e o desejo.</p>    
@@ -787,56 +836,56 @@ $nichos = getAllNichos();
                     <div class="product-grid">
 
                         <div class="product-card">
-                            <img src="assets/img/vibrador-silencioso.jpg" alt="Vibrador Feminino e Sucção com 10 Pulsações - Vibrador Silencioso">
+                            <img src="../assets/img/vibrador-silencioso.jpg" alt="Vibrador Feminino e Sucção com 10 Pulsações - Vibrador Silencioso">
                             <h4>Vibrador Feminino e Sucção com 10 Pulsações - Vibrador Silencioso</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Pulsa%C3%A7%C3%B5es-Estimulador-Vibradores-vibradoris-silenciosoB31/dp/B0CJFJH6S2?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-12&linkCode=ll1&tag=agencialed-20&linkId=ce05306b21501116db9f585b707aeb35&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/capa-peniana.jpg" alt="Pênis Prótese Em Silicone Macio Antialérgico">
+                            <img src="../assets/img/capa-peniana.jpg" alt="Pênis Prótese Em Silicone Macio Antialérgico">
                             <h4>Capa Peniana Extensora Nós Dois Nube 16 cm x 4 cm</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Capa-Peniana-Extensora-Dois-Nube/dp/B09CRBNT33?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vgE_gMIq5KmA_r2H-mH_1ojDfBw6074UuwNSjCGDVhVtvxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.VCJ3zJmc4kVnJ0qZkcXdUeUREhYuMBH95kABLBelOXw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756075483&sprefix=brinquedo+er%2Caps%2C175&sr=8-2&linkCode=ll1&tag=agencialed-20&linkId=ea9f2dd8c3aa0a186d784e441620d6b0&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/kit-casais.jpg" alt="Kit Casais Sexuais, Brinquedos Sensuais Com 8 Peças Adultos">
+                            <img src="../assets/img/kit-casais.jpg" alt="Kit Casais Sexuais, Brinquedos Sensuais Com 8 Peças Adultos">
                             <h4>Kit Casais Sexuais Brinquedos Sensuais Com 8 Peças Adultos</h4>
                             <!-- <p>R$ 99,90</p> -->
                             <a href="https://www.amazon.com.br/Sexuais-Brinquedos-Sensuais-Acess%C3%B3rios-Er%C3%B3ticos/dp/B0D45S4MXD?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-10&ufe=app_do%3Aamzn1.fos.6d798eae-cadf-45de-946a-f477d47705b9&linkCode=ll1&tag=agencialed-20&linkId=c03e556d7dd1a90bb46c9ee74d4edf01&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/dados-eroticos.jpg" alt="Dado Erótico Posição Prazer e Diversão Hétero">
+                            <img src="../assets/img/dados-eroticos.jpg" alt="Dado Erótico Posição Prazer e Diversão Hétero">
                             <h4>Dado Erótico Posição Prazer e Diversão Hétero BRILHA NO ESCURO</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Er%C3%B3tico-Posi%C3%A7%C3%A3o-Prazer-Divers%C3%A3o-Kamin/dp/B0BNJRPCSC?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-11&linkCode=ll1&tag=agencialed-20&linkId=ca17db16ed3563aa69e2fa35d9130d85&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/kit-jogos-de-desejo.jpg" alt="Kit Jogo Erótico Desejos e Drinks Jogo de Cartas + Dados Sexy Romantic Dice Copo Shot">
+                            <img src="../assets/img/kit-jogos-de-desejo.jpg" alt="Kit Jogo Erótico Desejos e Drinks Jogo de Cartas + Dados Sexy Romantic Dice Copo Shot">
                             <h4>Kit Jogo Erótico Desejos e Drinks Jogo de Cartas + Dados Sexy Romantic Dice Copo Shot</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Er%C3%B3tico-Desejos-Drinks-Cartas-Romantic/dp/B0DVGZ3323?crid=1S1845K4IYGH6&dib=eyJ2IjoiMSJ9.Tshk-p6_nYnBqM_whfanbIZA4eg2WFTzKCg2HPh4khEv7UWcZ0omct2tlKMzmBEs1UeRIvE6LthXzr76fo7_2j6R0thkIpCPxhzJD8r3g1lEGDwNMhxv7WCuXaeU1okIAb6YbuyEocDUly5xiX_4vnwUBMIbRu8MIQtzVifDLkXm8xKMQ5Ws4Biha6MLbQR0vxsuhTsG_z4XbaFL4wTlVg_fONpoeFYgjq70OBU9BZQhgMwhqQ_z_bsKOcbEDVTkbWHEe6ndvOuS2QeHjd6Uj0yebbIotIWIEZg_04RF1WU.eX_wicrQzKL8z-qy2JSL2SFPQMU-Jfj_xZTjZLwt7rw&dib_tag=se&keywords=brinquedo+er%C3%B3tico&qid=1756076903&sprefix=brinquedo+er%2Caps%2C175&sr=8-18&linkCode=ll1&tag=agencialed-20&linkId=de0ca5f458facb0de03d765dd475ade7&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/kit-varios-produtinhos.jpg" alt="Kit 10 Produtos Sex Shop com Gel Deslizante Comestíveis Excitantes Masculino e Feminino Bolinhas Explosivas">
+                            <img src="../assets/img/kit-varios-produtinhos.jpg" alt="Kit 10 Produtos Sex Shop com Gel Deslizante Comestíveis Excitantes Masculino e Feminino Bolinhas Explosivas">
                             <h4>Kit 10 Produtos Sex Shop com Gel Deslizante Comestíveis Excitantes Masculino e Feminino Bolinhas Explosivas</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Lubrificantes-Comest%C3%ADveis-Excitantes-Masculino-Explosivas/dp/B0CCQ9X9DJ?pd_rd_w=WVKXJ&content-id=amzn1.sym.ebf6c53b-8563-45af-833e-25b1308ef797&pf_rd_p=ebf6c53b-8563-45af-833e-25b1308ef797&pf_rd_r=EX9ZX2HKGY2K1ZB46ZNW&pd_rd_wg=dn8xU&pd_rd_r=fa7f618c-fb65-4662-a676-6eed3de43349&pd_rd_i=B0CCQ9X9DJ&psc=1&linkCode=ll1&tag=agencialed-20&linkId=c84d4b8e5ca714e13724a0d898955682&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/kit-Sexshop-casal-e-Feminino.jpg" alt="kit Sexshop casal e Feminino, Vibrador Snapy30 Modos de Vibração, a pilha,Plug Anal, Cápsula bullut,Vibrador Ponto G e Masturbador Egg">
+                            <img src="../assets/img/kit-Sexshop-casal-e-Feminino.jpg" alt="kit Sexshop casal e Feminino, Vibrador Snapy30 Modos de Vibração, a pilha,Plug Anal, Cápsula bullut,Vibrador Ponto G e Masturbador Egg">
                             <h4>kit Sexshop casal e Feminino, Vibrador Snapy30 Modos de Vibração, a pilha,Plug Anal, Cápsula bullut,Vibrador Ponto G e Masturbador Egg</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/dp/B0F6FDKSWW?psc=1&pd_rd_i=B0F6FDKSWW&pd_rd_w=UKY30&content-id=amzn1.sym.1868afab-d777-4b70-8899-1b323ad91d95&pf_rd_p=1868afab-d777-4b70-8899-1b323ad91d95&pf_rd_r=VZ3NYSTANX91K0QS37EF&pd_rd_wg=VBCYW&pd_rd_r=eeea86d2-ecbc-41eb-ade9-7c84787b5c4f&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWw&linkCode=ll1&tag=agencialed-20&linkId=8bce2e33223dc50e96d0b4489a0f0326&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>
                         </div>
 
                         <div class="product-card">
-                            <img src="assets/img/vibrador-feminino-estimulador-clitoris.jpg" alt="Vibrador Feminino Erótico Estimulador Clitóris e Ponto G - 10 modos de Vibração">
+                            <img src="../assets/img/vibrador-feminino-estimulador-clitoris.jpg" alt="Vibrador Feminino Erótico Estimulador Clitóris e Ponto G - 10 modos de Vibração">
                             <h4>Vibrador Feminino Erótico Estimulador Clitóris e Ponto G - 10 modos de Vibração</h4>
                             <!-- <p>R$ 49,90</p> -->
                             <a href="https://www.amazon.com.br/Vibradoris-Feminino-Brinquedos-Er%C3%B3ticos-Estimulador/dp/B0C5CL2YKM?pd_rd_w=eFgJL&content-id=amzn1.sym.53b2f13e-ab3a-40f2-aab9-7e4b988d3762&pf_rd_p=53b2f13e-ab3a-40f2-aab9-7e4b988d3762&pf_rd_r=ZC20B3K616WRSQ7MJP1S&pd_rd_wg=wa8Zd&pd_rd_r=ea93acf2-a079-4c80-bcd7-497aca3a2694&pd_rd_i=B0C5CL2YKM&psc=1&linkCode=ll1&tag=agencialed-20&linkId=9f770390bba6dc3b05b37935b2235794&language=pt_BR&ref_=as_li_ss_tl" target="_blank" class="btn-primary">Comprar</a>

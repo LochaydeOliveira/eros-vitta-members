@@ -3,10 +3,10 @@ require_once __DIR__ . '/conexao.php';
 
 if (is_logged_in()) {
     if (!headers_sent()) {
-        header('Location: libido-renovado-content.html');
+        header('Location: index.php');
         exit();
     }
-    echo '<script>window.location.href = "libido-renovado-content.html";</script>';
+    echo '<script>window.location.href = "index.php";</script>';
     exit();
 }
 
@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
                 if (!headers_sent()) {
-                    header('Location: libido-renovado-content.html');
+                    header('Location: index.php');
                     exit();
                 }
-                echo '<script>window.location.href = "libido-renovado-content.html";</script>';
+                echo '<script>window.location.href = "index.php";</script>';
                 exit();
             }
             $error = 'E-mail ou senha incorretos!';
@@ -49,14 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login - Libido Renovado</title>
-    <link rel="icon" type="image/png" href="assets/img/favicon-oficial-validapro.png" />
-    <link rel="apple-touch-icon" href="assets/img/favicon-oficial-validapro.png" />
-    <link rel="preload" as="image" href="assets/svg/logo-valida-pro-em-svg.svg" />
+    <link rel="icon" type="image/png" href="../assets/img/favicon-oficial-validapro.png" />
+    <link rel="apple-touch-icon" href="../assets/img/favicon-oficial-validapro.png" />
+    <link rel="preload" as="image" href="../assets/svg/logo-valida-pro-em-svg.svg" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="assets/css/custom.css" rel="stylesheet" />
-    <link href="assets/css/password-toggle.css" rel="stylesheet" />
-    <script src="assets/js/password-toggle.js" defer></script>
+    <link href="../assets/css/custom.css" rel="stylesheet" />
+    <link href="../assets/css/password-toggle.css" rel="stylesheet" />
+    <script src="../assets/js/password-toggle.js" defer></script>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center">
     <div class="absolute inset-0 opacity-10 pointer-events-none z-0">
