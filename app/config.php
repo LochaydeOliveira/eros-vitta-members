@@ -2,8 +2,8 @@
 // Configurações gerais da aplicação
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'paymen58_eros_vitta');
-define('DB_USER', 'seu_usuario');
-define('DB_PASS', 'sua_senha');
+define('DB_USER', 'paymen58');
+define('DB_PASS', 'u4q7+B6ly)obP_gxN9sNe');
 define('DB_CHARSET', 'utf8mb4');
 
 // Configurações de email
