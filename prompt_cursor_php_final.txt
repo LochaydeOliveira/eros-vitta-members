@@ -1,0 +1,236 @@
+# 🚀 Prompt para Cursor AI (VSCode)
+
+Quero que você desenvolva uma aplicação em **PHP puro**, com **MySQL**, hospedada na **HostGator**, e que utilize **URL amigáveis**. O domínio é: `erosvitta.com.br`.  
+
+## 🎯 Objetivo da aplicação
+Criar uma **mini área de membros** onde os clientes da Hotmart possam acessar os conteúdos digitais adquiridos (Ebooks, Audiobooks, Vídeos).  
+O foco é que o cliente veja o material em versão online (HTML, áudio, vídeo), e só receba o **PDF final após 7 dias de garantia**.  
+
+---
+
+## 📂 Estrutura de Pastas
+
+```
+/eros-vitta
+│── public/                # Pasta pública (apontar domínio aqui)
+│   │── index.php           # Roteador principal
+│   │── .htaccess           # Regras de URL amigável
+│   │── assets/             # CSS, JS, imagens
+│
+│── app/
+│   │── config.php          # Configurações gerais (DB, etc.)
+│   │── routes.php          # Definição de rotas amigáveis
+│   │── db.php              # Conexão com MySQL
+│   │── auth.php            # Login, logout, sessão
+│   │── hotmartWebhook.php  # Endpoint para receber dados da Hotmart
+│   │── mailer.php          # Funções de envio de e-mail (PHPMailer)
+│
+│── views/
+│   │── header.php
+│   │── sidebar.php
+│   │── footer.php
+│   │── dashboard.php       # Tela principal
+│   │── ebook.php           # Exibição de ebook
+│   │── video.php           # Exibição de vídeo
+│   │── audio.php           # Exibição de áudio
+│   │── email_template.html # Template de email em HTML
+│
+│── storage/
+│   │── ebooks/
+│   │── videos/
+│   │── audios/
+```
+
+---
+
+## ⚙️ Configuração de `.htaccess`
+
+Na pasta `public/`:
+
+```apache
+RewriteEngine On
+
+# Redireciona tudo para index.php, exceto arquivos existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+```
+
+---
+
+## 🗄️ Banco de Dados MySQL
+
+```sql
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  senha VARCHAR(255) NOT NULL,
+  nome VARCHAR(150),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE materials (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  titulo VARCHAR(150) NOT NULL,
+  tipo ENUM('ebook','video','audio') NOT NULL,
+  caminho VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE user_materials (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  material_id INT NOT NULL,
+  liberado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (material_id) REFERENCES materials(id)
+);
+```
+
+---
+
+## 🔑 Requisitos Funcionais
+
+1. **Login e Autenticação**
+   - O usuário acessa via email + senha cadastrados no webhook da Hotmart.
+   - Senhas devem ser armazenadas com `password_hash()`.
+
+2. **Webhook da Hotmart**
+   - Endpoint em `/app/hotmartWebhook.php`.
+   - Recebe evento de compra aprovada.
+   - Cria usuário no banco com email, senha gerada automaticamente, e vincula os materiais comprados.
+   - **Envia email automático para o cliente** (via PHPMailer), contendo:
+     - Mensagem de boas-vindas
+     - Link de acesso à área de membros
+     - Usuário (email) e senha gerada
+   - O envio deve ser feito a partir do e-mail profissional: **contato@erosvitta.com.br**.
+
+3. **Dashboard**
+   - Layout dividido em **header, sidebar, main e footer**.
+   - **Header**: logo + nome do usuário + botão sair.
+   - **Sidebar**: lista dinâmica de materiais liberados (ebooks, vídeos, áudios).
+   - **Main**: área onde o material selecionado é exibido.
+   - **Footer**: copyright.
+
+4. **Controle de Entrega**
+   - Antes dos 7 dias → exibir ebooks apenas em HTML.
+   - Após 7 dias → liberar botão de download do PDF.
+
+5. **Segurança**
+   - Pasta `/storage/` não deve ser pública.
+   - Materiais devem ser servidos via PHP (`readfile()`), somente para usuários logados.
+   - Sessões seguras com `session_start()` e expiração de sessão.
+
+---
+
+## 📧 Template de E-mail em HTML (views/email_template.html)
+
+```html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bem-vindo à área de membros</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: #1a1a1a;
+      padding: 20px;
+      text-align: center;
+    }
+    .header img {
+      max-width: 150px;
+    }
+    .content {
+      padding: 30px;
+      color: #333333;
+      line-height: 1.6;
+    }
+    .content h1 {
+      font-size: 22px;
+      color: #1a1a1a;
+    }
+    .credentials {
+      background: #f3f3f3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: #007BFF;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+    .footer {
+      background: #f3f3f3;
+      padding: 15px;
+      text-align: center;
+      font-size: 12px;
+      color: #666666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://erosvitta.com.br/assets/logo.png" alt="Logo ErosVitta">
+    </div>
+    <div class="content">
+      <h1>Olá, {{NOME_CLIENTE}}!</h1>
+      <p>Obrigado pela sua compra na Hotmart. Agora você já tem acesso à sua <strong>Área de Membros Exclusiva</strong>.</p>
+      <p>Use as credenciais abaixo para acessar:</p>
+      <div class="credentials">
+        <p><strong>Usuário (E-mail):</strong> {{EMAIL_CLIENTE}}</p>
+        <p><strong>Senha:</strong> {{SENHA_GERADA}}</p>
+      </div>
+      <p>Clique no botão abaixo para entrar:</p>
+      <a href="https://erosvitta.com.br/login" class="btn">Acessar Área de Membros</a>
+      <p>⚠️ Importante: após 7 dias de garantia, o conteúdo em PDF será liberado para download.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2025 ErosVitta - Todos os direitos reservados</p>
+    </div>
+  </div>
+</body>
+</html>
+```
+
+Esse template deve ser carregado pelo `hotmartWebhook.php`, substituindo as variáveis `{{NOME_CLIENTE}}`, `{{EMAIL_CLIENTE}}`, `{{SENHA_GERADA}}` antes do envio.
+
+---
+
+## 🔌 Ferramentas/Bibliotecas Sugeridas
+- **PHPMailer** → envio de emails transacionais com template HTML.
+- **AltoRouter** (opcional) → roteamento de URLs amigáveis.
+- **Medoo** (opcional) → simplificação de queries no MySQL.
+- Mas a aplicação deve rodar mesmo em **PHP puro**, sem dependências externas obrigatórias.
+
+---
+
+👉 Gere todo o **código inicial completo** da aplicação com base nessa especificação, incluindo:
+
+- Estrutura de pastas
+- Arquivos principais
+- Conexão ao MySQL
+- Roteamento básico
+- Login e autenticação
+- Webhook da Hotmart com envio de email automático baseado no template HTML
+- Dashboard inicial com header, sidebar, main e footer

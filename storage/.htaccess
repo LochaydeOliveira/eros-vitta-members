@@ -1,0 +1,3 @@
+# Bloquear acesso direto à pasta storage
+Order Deny,Allow
+Deny from all
