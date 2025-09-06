@@ -1,0 +1,41 @@
+# Configurações para Área de Membros
+
+# Habilitar PHP
+<IfModule mime_module>
+    AddHandler application/x-httpd-php .php
+    # Alternativas comuns em cPanel (descomente a que se aplica)
+    # AddHandler application/x-httpd-ea-php82 .php
+    # AddHandler application/x-httpd-ea-php81 .php
+    # AddHandler application/x-httpd-php80 .php
+</IfModule>
+
+# Rewrite rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Permitir acesso a login e ferramentas
+    RewriteRule ^login\.php$ - [L]
+    RewriteRule ^tools/ - [L]
+    
+    # Bloquear acesso direto a includes sensíveis
+    RewriteRule ^includes/ - [F]
+    
+    # Opcional: forçar HTTPS (descomente se necessário)
+    # RewriteCond %{HTTPS} !=on
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Logs PHP personalizados (se permitido pelo host)
+php_value log_errors On
+php_value error_log "logs/php-error.log"
+
+# Configurações de segurança
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
