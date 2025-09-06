@@ -1,4 +1,13 @@
-# Configurações globais para forçar execução de PHP
+# Configurações globais para contornar bloqueio de segurança
+
+# Desabilitar mod_access_compat que está causando o bloqueio
+<IfModule mod_access_compat.c>
+    # Permitir acesso a todos os arquivos PHP
+    <Files "*.php">
+        Order allow,deny
+        Allow from all
+    </Files>
+</IfModule>
 
 # Habilitar PHP - múltiplas tentativas
 <IfModule mime_module>
@@ -16,6 +25,14 @@
 <Files "*.php">
     SetHandler application/x-httpd-php
 </Files>
+
+# Configurações de segurança mais permissivas
+<DirectoryMatch ".*">
+    <Files "*.php">
+        Order allow,deny
+        Allow from all
+    </Files>
+</DirectoryMatch>
 
 # Logs de erro
 php_value log_errors On

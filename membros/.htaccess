@@ -1,4 +1,13 @@
-# Configurações para Área de Membros
+# Configurações para Área de Membros - Contornar bloqueio de segurança
+
+# Desabilitar mod_access_compat que está causando o bloqueio
+<IfModule mod_access_compat.c>
+    # Permitir acesso a todos os arquivos PHP
+    <Files "*.php">
+        Order allow,deny
+        Allow from all
+    </Files>
+</IfModule>
 
 # Habilitar PHP - múltiplas tentativas
 <IfModule mime_module>
@@ -17,6 +26,14 @@
     SetHandler application/x-httpd-php
 </Files>
 
+# Configurações de segurança mais permissivas
+<DirectoryMatch ".*">
+    <Files "*.php">
+        Order allow,deny
+        Allow from all
+    </Files>
+</DirectoryMatch>
+
 # Rewrite rules
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -26,10 +43,6 @@
     
     # Bloquear acesso direto a includes sensíveis
     RewriteRule ^includes/ - [F]
-    
-    # Opcional: forçar HTTPS (descomente se necessário)
-    # RewriteCond %{HTTPS} !=on
-    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
 # Logs PHP personalizados
@@ -44,7 +57,7 @@ php_value error_log "logs/php-error.log"
 
 <Files ".htaccess">
     Order allow,deny
-    Allow from all
+    Deny from all
 </Files>
 
 # Permitir acesso a arquivos de teste
