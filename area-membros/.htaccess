@@ -26,13 +26,51 @@
     SetHandler application/x-httpd-php
 </Files>
 
-# Configurações de segurança mais permissivas
-<DirectoryMatch ".*">
-    <Files "*.php">
-        Order allow,deny
-        Allow from all
-    </Files>
-</DirectoryMatch>
+# Permitir acesso a arquivos PHP específicos
+<Files "test.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "status.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "login.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "index.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "logout.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "view.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "download.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "webhook.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "hotmart-webhook.php">
+    Order allow,deny
+    Allow from all
+</Files>
 
 # Rewrite rules
 <IfModule mod_rewrite.c>
@@ -58,17 +96,6 @@ php_value error_log "logs/php-error.log"
 <Files ".htaccess">
     Order allow,deny
     Deny from all
-</Files>
-
-# Permitir acesso a arquivos de teste
-<Files "test.php">
-    Order allow,deny
-    Allow from all
-</Files>
-
-<Files "status.php">
-    Order allow,deny
-    Allow from all
 </Files>
 
 <Files "status.txt">

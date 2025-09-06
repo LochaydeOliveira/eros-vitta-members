@@ -26,25 +26,7 @@
     SetHandler application/x-httpd-php
 </Files>
 
-# Configurações de segurança mais permissivas
-<DirectoryMatch ".*">
-    <Files "*.php">
-        Order allow,deny
-        Allow from all
-    </Files>
-</DirectoryMatch>
-
-# Logs de erro
-php_value log_errors On
-php_value error_log "php-errors.log"
-
-# Configurações de segurança
-<Files "*.log">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# Permitir acesso a arquivos de debug
+# Permitir acesso a arquivos PHP específicos
 <Files "test-php-simple.php">
     Order allow,deny
     Allow from all
@@ -68,4 +50,14 @@ php_value error_log "php-errors.log"
 <Files "test-log.php">
     Order allow,deny
     Allow from all
+</Files>
+
+# Logs de erro
+php_value log_errors On
+php_value error_log "php-errors.log"
+
+# Configurações de segurança
+<Files "*.log">
+    Order allow,deny
+    Deny from all
 </Files>
