@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../app/config.php';
-require_once '../app/routes.php';
+require_once 'app/config.php';
+require_once 'app/routes.php';
 
 // Inicializa o roteador
 $router = new Router();

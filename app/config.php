@@ -24,7 +24,7 @@ define('LOGIN_URL', BASE_URL . '/login');
 define('DASHBOARD_URL', BASE_URL . '/dashboard');
 
 // Caminhos
-define('ROOT_PATH', dirname(__DIR__));
+define('ROOT_PATH', __DIR__ . '/..');
 define('STORAGE_PATH', ROOT_PATH . '/storage');
 define('VIEWS_PATH', ROOT_PATH . '/views');
 define('ASSETS_PATH', ROOT_PATH . '/public/assets');

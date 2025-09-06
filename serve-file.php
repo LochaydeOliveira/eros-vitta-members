@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once '../app/config.php';
-require_once '../app/db.php';
-require_once '../app/auth.php';
+require_once 'app/config.php';
+require_once 'app/db.php';
+require_once 'app/auth.php';
 
 // Verifica se o usuário está logado
 $auth = new Auth();

@@ -75,12 +75,12 @@ Sistema de área de membros desenvolvido em PHP puro para a ErosVitta, integrado
 
 ### 3. Configuração do Domínio
 
-1. No cPanel, configure o domínio `erosvitta.com.br` para apontar para a pasta `public/`
+1. No cPanel, configure o domínio `erosvitta.com.br` para apontar para a pasta raiz do projeto
 2. Certifique-se de que o `.htaccess` está funcionando
 
 ### 4. Upload dos Arquivos
 
-1. Faça upload de todos os arquivos para o servidor
+1. Faça upload de todos os arquivos para a pasta raiz do servidor
 2. Crie a pasta `storage/` e subpastas (`ebooks/`, `videos/`, `audios/`)
 3. Configure permissões adequadas (755 para pastas, 644 para arquivos)
 
