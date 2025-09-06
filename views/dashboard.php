@@ -8,7 +8,7 @@ include 'sidebar.php';
 <main class="main-content">
     <div class="dashboard-header">
         <h2>Bem-vindo à sua Área de Membros</h2>
-        <p>Aqui você encontra todos os seus conteúdos exclusivos</p>
+        <p class="sans">Aqui você encontra todos os seus conteúdos exclusivos</p>
     </div>
     
     <div class="dashboard-content">
@@ -16,7 +16,7 @@ include 'sidebar.php';
             <div class="empty-state">
                 <i class="fas fa-folder-open"></i>
                 <h3>Nenhum material disponível</h3>
-                <p>Você ainda não possui materiais liberados. Aguarde a confirmação da sua compra.</p>
+                <p class="sans">Você ainda não possui materiais liberados. Aguarde a confirmação da sua compra.</p>
             </div>
         <?php else: ?>
             <div class="materials-grid">
@@ -27,10 +27,10 @@ include 'sidebar.php';
                         </div>
                         <div class="material-info">
                             <h3><?php echo htmlspecialchars($material['titulo']); ?></h3>
-                            <p class="material-type">
+                            <p class="material-type sans">
                                 <?php echo ucfirst($material['tipo']); ?>
                             </p>
-                            <p class="material-date">
+                            <p class="material-date sans">
                                 Liberado em: <?php echo date('d/m/Y H:i', strtotime($material['liberado_em'])); ?>
                             </p>
                         </div>
