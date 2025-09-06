@@ -1,6 +1,17 @@
 <?php
 require_once __DIR__ . '/conexao.php';
 
+// Log de diagnóstico de acesso ao login
+try {
+    $ip  = $_SERVER['REMOTE_ADDR'] ?? '';
+    $xff = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+    $ua  = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    app_log("ACCESS login.php method=" . ($_SERVER['REQUEST_METHOD'] ?? '') . " ip=$ip xff=$xff ua=" . substr($ua,0,120) . " uri=$uri");
+} catch (Throwable $e) {
+    // ignora falha de log
+}
+
 if (is_logged_in()) {
     if (!headers_sent()) {
         header('Location: index.php');

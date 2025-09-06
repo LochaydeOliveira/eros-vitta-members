@@ -1,3 +1,21 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Permitir acesso a login e ferramentas
+RewriteRule ^login\.php$ - [L]
+RewriteRule ^tools/ - [L]
+
+# Bloquear acesso direto a includes sensíveis
+RewriteRule ^includes/ - [F]
+
+# Opcional: forçar HTTPS (descomente se necessário)
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Logs PHP personalizados (se permitido pelo host)
+php_value log_errors On
+php_value error_log "logs/php-error.log"
 # Configurações de Segurança
 <IfModule mod_rewrite.c>
     RewriteEngine On
