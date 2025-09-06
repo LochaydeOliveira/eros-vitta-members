@@ -41,6 +41,9 @@ class Router {
             case 'landing':
                 $this->handleLanding();
                 break;
+            case 'upsell':
+                $this->handleUpsell();
+                break;
             case 'ebook':
                 $this->handleEbook($params[0] ?? null);
                 break;
@@ -95,6 +98,17 @@ class Router {
         
         if (file_exists($landingFile)) {
             include $landingFile;
+        } else {
+            $this->show404();
+        }
+    }
+    
+    private function handleUpsell() {
+        // Exibe a página de upsell sem autenticação
+        $upsellFile = ROOT_PATH . '/libido-renovada-up.html';
+        
+        if (file_exists($upsellFile)) {
+            include $upsellFile;
         } else {
             $this->show404();
         }
