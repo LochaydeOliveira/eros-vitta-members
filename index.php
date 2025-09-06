@@ -11,6 +11,7 @@ $router->addRoute('', 'dashboard');
 $router->addRoute('login', 'login');
 $router->addRoute('logout', 'logout');
 $router->addRoute('dashboard', 'dashboard');
+$router->addRoute('libido-renovada', 'landing');
 $router->addRoute('ebook/(\d+)', 'ebook');
 $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');

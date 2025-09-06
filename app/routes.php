@@ -38,6 +38,9 @@ class Router {
             case 'dashboard':
                 $this->handleDashboard();
                 break;
+            case 'landing':
+                $this->handleLanding();
+                break;
             case 'ebook':
                 $this->handleEbook($params[0] ?? null);
                 break;
@@ -84,6 +87,17 @@ class Router {
         $materials = $this->auth->getUserMaterials($user['id']);
         
         include VIEWS_PATH . '/dashboard.php';
+    }
+    
+    private function handleLanding() {
+        // Exibe a landing page sem autenticação
+        $landingFile = ROOT_PATH . '/libido-renovada.html';
+        
+        if (file_exists($landingFile)) {
+            include $landingFile;
+        } else {
+            $this->show404();
+        }
     }
     
     private function handleEbook($id) {
