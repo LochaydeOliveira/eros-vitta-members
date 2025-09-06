@@ -28,17 +28,27 @@ php_value error_log "php-errors.log"
 </Files>
 
 # Permitir acesso a arquivos de debug
+<Files "test-php-simple.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "test-php-info.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
 <Files "error-log.php">
     Order allow,deny
     Allow from all
 </Files>
 
-<Files "test-log.php">
+<Files "debug-403.php">
     Order allow,deny
     Allow from all
 </Files>
 
-<Files "debug-403.php">
+<Files "test-log.php">
     Order allow,deny
     Allow from all
 </Files>

@@ -1,21 +1,28 @@
 # Configurações para Área de Membros
 
-# Habilitar PHP
+# Habilitar PHP - múltiplas tentativas
 <IfModule mime_module>
     AddHandler application/x-httpd-php .php
-    # Alternativas comuns em cPanel (descomente a que se aplica)
-    # AddHandler application/x-httpd-ea-php82 .php
-    # AddHandler application/x-httpd-ea-php81 .php
-    # AddHandler application/x-httpd-php80 .php
+    AddHandler application/x-httpd-php80 .php
+    AddHandler application/x-httpd-php81 .php
+    AddHandler application/x-httpd-php82 .php
+    AddHandler application/x-httpd-ea-php80 .php
+    AddHandler application/x-httpd-ea-php81 .php
+    AddHandler application/x-httpd-ea-php82 .php
+    AddHandler application/x-httpd-ea-php83 .php
 </IfModule>
+
+# Forçar execução de PHP
+<Files "*.php">
+    SetHandler application/x-httpd-php
+</Files>
 
 # Rewrite rules
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Permitir acesso a login e ferramentas
-    RewriteRule ^login\.php$ - [L]
-    RewriteRule ^tools/ - [L]
+    # Permitir acesso a todos os arquivos PHP
+    RewriteRule ^.*\.php$ - [L]
     
     # Bloquear acesso direto a includes sensíveis
     RewriteRule ^includes/ - [F]
@@ -25,7 +32,7 @@
     # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
-# Logs PHP personalizados (se permitido pelo host)
+# Logs PHP personalizados
 php_value log_errors On
 php_value error_log "logs/php-error.log"
 
@@ -37,5 +44,21 @@ php_value error_log "logs/php-error.log"
 
 <Files ".htaccess">
     Order allow,deny
-    Deny from all
+    Allow from all
+</Files>
+
+# Permitir acesso a arquivos de teste
+<Files "test.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "status.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "status.txt">
+    Order allow,deny
+    Allow from all
 </Files>
