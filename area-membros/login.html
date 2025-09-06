@@ -63,27 +63,28 @@
         </div>
     </div>
 
+    <script src="api.js"></script>
     <script>
-        // Simulação de login (substituir por API real)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Sistema de login com API JavaScript
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            // Simulação de validação
-            if (email === 'admin@exemplo.com' && password === '123456') {
-                showSuccess('Login realizado com sucesso!');
-                setTimeout(() => {
-                    window.location.href = 'index.html?logged=true';
-                }, 1000);
-            } else if (email === 'veramdssoares@gmail.com' && password === 'Jw5$Gp8ews') {
-                showSuccess('Login realizado com sucesso!');
-                setTimeout(() => {
-                    window.location.href = 'index.html?logged=true';
-                }, 1000);
-            } else {
-                showError('Email ou senha incorretos.');
+            try {
+                const result = await memberAPI.login(email, password);
+                if (result.success) {
+                    showSuccess('Login realizado com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('Erro no sistema. Tente novamente.');
+                memberAPI.log('Erro no login: ' + error.message, 'error');
             }
         });
 

@@ -95,21 +95,28 @@
         </div>
     </div>
 
+    <script src="api.js"></script>
     <script>
-        // Simulação de login (substituir por API real)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Sistema de login com API JavaScript
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            // Simulação de validação
-            if (email === 'admin@exemplo.com' && password === '123456') {
-                showDashboard(email);
-            } else if (email === 'veramdssoares@gmail.com' && password === 'Jw5$Gp8ews') {
-                showDashboard(email);
-            } else {
-                showError('Email ou senha incorretos.');
+            try {
+                const result = await memberAPI.login(email, password);
+                if (result.success) {
+                    showSuccess('Login realizado com sucesso!');
+                    setTimeout(() => {
+                        showDashboard(result.user);
+                    }, 1000);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('Erro no sistema. Tente novamente.');
+                memberAPI.log('Erro no login: ' + error.message, 'error');
             }
         });
 
@@ -127,94 +134,132 @@
             setTimeout(() => successDiv.classList.add('hidden'), 5000);
         }
 
-        function showDashboard(email) {
+        async function showDashboard(user) {
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('user-info').textContent = 'Logado como: ' + email;
+            document.getElementById('user-info').textContent = 'Logado como: ' + user.name + ' (' + user.email + ')';
+            
+            // Verificar compra e permissões
+            const purchase = await memberAPI.checkPurchase(user.id || 1);
+            if (purchase.hasPurchase) {
+                if (purchase.canDownload) {
+                    showSuccess('✅ Downloads liberados! Você pode baixar todos os materiais.');
+                } else {
+                    showError('⏳ Downloads serão liberados em ' + purchase.daysLeft + ' dia(s). Por enquanto, você pode apenas visualizar os materiais.');
+                }
+            }
             
             // Carregar conteúdos
-            loadEbooks();
-            loadAudios();
+            await loadEbooks();
+            await loadAudios();
         }
 
-        function loadEbooks() {
-            // Simulação de e-books (substituir por API real)
-            const ebooks = [
-                { name: 'Guia Completo - Libido Renovado', file: 'guia-completo.pdf' },
-                { name: 'Exercícios Práticos', file: 'exercicios-praticos.pdf' }
-            ];
-            
-            const ebooksList = document.getElementById('ebooks-list');
-            ebooksList.innerHTML = ebooks.map(ebook => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
-                    <span class="font-medium">${ebook.name}</span>
-                    <div class="flex space-x-2">
-                        <button onclick="viewFile('ebook', '${ebook.file}')" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
-                            📖 Ler
-                        </button>
-                        <button onclick="downloadFile('ebook', '${ebook.file}')" 
-                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
-                            ⬇️ Baixar
-                        </button>
+        async function loadEbooks() {
+            try {
+                const ebooks = await memberAPI.getEbooks();
+                const ebooksList = document.getElementById('ebooks-list');
+                ebooksList.innerHTML = ebooks.map(ebook => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div>
+                            <span class="font-medium">${ebook.name}</span>
+                            <span class="text-sm text-gray-500 ml-2">(${ebook.size})</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="viewFile('ebook', '${ebook.file}')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                                📖 Ler
+                            </button>
+                            <button onclick="downloadFile('ebook', '${ebook.file}')" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                ⬇️ Baixar
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                memberAPI.log('Erro ao carregar e-books: ' + error.message, 'error');
+                document.getElementById('ebooks-list').innerHTML = '<p class="text-red-500">Erro ao carregar e-books</p>';
+            }
         }
 
-        function loadAudios() {
-            // Simulação de áudios (substituir por API real)
-            const audios = [
-                { name: 'Meditação Guiada - Relaxamento', file: 'meditacao-relaxamento.mp3' },
-                { name: 'Exercícios de Respiração', file: 'exercicios-respiracao.mp3' }
-            ];
-            
-            const audiosList = document.getElementById('audios-list');
-            audiosList.innerHTML = audios.map(audio => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
-                    <span class="font-medium">${audio.name}</span>
-                    <div class="flex space-x-2">
-                        <button onclick="playAudio('${audio.file}')" 
-                                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">
-                            ▶️ Reproduzir
-                        </button>
-                        <button onclick="downloadFile('audio', '${audio.file}')" 
-                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
-                            ⬇️ Baixar
-                        </button>
+        async function loadAudios() {
+            try {
+                const audios = await memberAPI.getAudios();
+                const audiosList = document.getElementById('audios-list');
+                audiosList.innerHTML = audios.map(audio => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div>
+                            <span class="font-medium">${audio.name}</span>
+                            <span class="text-sm text-gray-500 ml-2">(${audio.size})</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="playAudio('${audio.file}')" 
+                                    class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">
+                                ▶️ Reproduzir
+                            </button>
+                            <button onclick="downloadFile('audio', '${audio.file}')" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                ⬇️ Baixar
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                memberAPI.log('Erro ao carregar áudios: ' + error.message, 'error');
+                document.getElementById('audios-list').innerHTML = '<p class="text-red-500">Erro ao carregar áudios</p>';
+            }
         }
 
-        function viewFile(type, file) {
-            // Simulação de visualização
-            alert(`Visualizando ${type}: ${file}\n\nEm uma implementação real, isso abriria o arquivo em uma nova aba.`);
+        async function viewFile(type, file) {
+            try {
+                const result = await memberAPI.viewFile(type, file);
+                if (result.success) {
+                    showSuccess('Visualização aberta: ' + file);
+                } else {
+                    showError('Erro ao abrir visualização');
+                }
+            } catch (error) {
+                showError('Erro ao visualizar arquivo');
+                memberAPI.log('Erro ao visualizar: ' + error.message, 'error');
+            }
         }
 
-        function downloadFile(type, file) {
-            // Simulação de download
-            alert(`Baixando ${type}: ${file}\n\nEm uma implementação real, isso iniciaria o download do arquivo.`);
+        async function downloadFile(type, file) {
+            try {
+                const result = await memberAPI.downloadFile(type, file);
+                if (result.success) {
+                    showSuccess('Download iniciado: ' + file);
+                } else {
+                    showError('Erro ao iniciar download');
+                }
+            } catch (error) {
+                showError('Erro ao baixar arquivo');
+                memberAPI.log('Erro ao baixar: ' + error.message, 'error');
+            }
         }
 
         function playAudio(file) {
             // Simulação de reprodução
-            alert(`Reproduzindo áudio: ${file}\n\nEm uma implementação real, isso iniciaria a reprodução do áudio.`);
+            showSuccess('Reproduzindo áudio: ' + file);
+            memberAPI.log('Áudio reproduzido: ' + file, 'info');
         }
 
         // Logout
         document.getElementById('logout-btn').addEventListener('click', function() {
+            memberAPI.logout();
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('login-form').classList.remove('hidden');
             document.getElementById('email').value = '';
             document.getElementById('password').value = '';
+            showSuccess('Logout realizado com sucesso!');
         });
 
-        // Verificar se já está logado (simulação)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('logged') === 'true') {
-            showDashboard('usuário@exemplo.com');
-        }
+        // Verificar se já está logado
+        window.addEventListener('load', function() {
+            if (memberAPI.isLoggedIn()) {
+                showDashboard(memberAPI.currentUser);
+            }
+        });
     </script>
 </body>
 </html>
