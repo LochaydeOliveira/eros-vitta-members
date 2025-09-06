@@ -16,6 +16,15 @@ RewriteRule ^includes/ - [F]
 # Logs PHP personalizados (se permitido pelo host)
 php_value log_errors On
 php_value error_log "logs/php-error.log"
+
+# Habilitar PHP na pasta (ajuste conforme o ambiente do host)
+<IfModule mime_module>
+  AddHandler application/x-httpd-php .php
+  # Alternativas comuns em cPanel (descomente a que se aplica)
+  # AddHandler application/x-httpd-ea-php82 .php
+  # AddHandler application/x-httpd-ea-php81 .php
+  # AddHandler application/x-httpd-php80 .php
+</IfModule>
 # Configurações de Segurança
 <IfModule mod_rewrite.c>
     RewriteEngine On
