@@ -1,0 +1,28 @@
+# Configurações globais para forçar execução de PHP
+
+# Habilitar PHP - múltiplas tentativas
+<IfModule mime_module>
+    AddHandler application/x-httpd-php .php
+    AddHandler application/x-httpd-php80 .php
+    AddHandler application/x-httpd-php81 .php
+    AddHandler application/x-httpd-php82 .php
+    AddHandler application/x-httpd-ea-php80 .php
+    AddHandler application/x-httpd-ea-php81 .php
+    AddHandler application/x-httpd-ea-php82 .php
+    AddHandler application/x-httpd-ea-php83 .php
+</IfModule>
+
+# Forçar execução de PHP
+<Files "*.php">
+    SetHandler application/x-httpd-php
+</Files>
+
+# Logs de erro
+php_value log_errors On
+php_value error_log "php-errors.log"
+
+# Configurações de segurança
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
