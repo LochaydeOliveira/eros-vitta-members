@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ErosVitta</title>
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css?v=<?php echo time(); ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
     <div class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="ErosVitta">
+                <img src="<?php echo BASE_URL; ?>/assets/logo.png" alt="ErosVitta">
                 <h1>ErosVitta</h1>
                 <p class="sans">Área de Membros Exclusiva</p>
             </div>
