@@ -1,6 +1,3 @@
--- Script SQL para criar as tabelas da ErosVitta
--- Execute este script no banco paymen58_eros_vitta da HostGator
--- (O banco de dados já foi criado manualmente)
 
 USE paymen58_eros_vitta;
 
