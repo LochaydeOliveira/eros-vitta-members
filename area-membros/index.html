@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área de Membros - Libido Renovado</title>
+    <link href="../assets/css/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .login-form { max-width: 400px; margin: 0 auto; }
+        .error { background: #fee; border: 1px solid #fcc; color: #c33; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #efe; border: 1px solid #cfc; color: #3c3; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <div class="mx-auto h-12 w-auto flex justify-center">
+                <img class="h-12 w-auto" src="../assets/img/logo-libido-renovado.png" alt="Libido Renovado">
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Área de Membros
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Faça login para acessar seus conteúdos exclusivos
+            </p>
+        </div>
+        
+        <!-- Formulário de Login -->
+        <div id="login-form" class="login-form">
+            <form id="loginForm" class="mt-8 space-y-6">
+                <div id="error-message" class="error hidden"></div>
+                <div id="success-message" class="success hidden"></div>
+                
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="email" class="sr-only">Email</label>
+                        <input id="email" name="email" type="email" autocomplete="email" required 
+                               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                               placeholder="Seu email">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Senha</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required 
+                               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                               placeholder="Sua senha">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" 
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Entrar
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        Não tem acesso? Entre em contato conosco.
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dashboard (oculto inicialmente) -->
+        <div id="dashboard" class="hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Bem-vindo à Área de Membros!</h2>
+                <p class="text-gray-600 mb-4">Seus conteúdos exclusivos estão disponíveis abaixo:</p>
+                
+                <!-- E-books -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">📚 E-books</h3>
+                    <div id="ebooks-list" class="space-y-2">
+                        <p class="text-gray-500">Carregando e-books...</p>
+                    </div>
+                </div>
+
+                <!-- Áudio-books -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">🎧 Áudio-books</h3>
+                    <div id="audios-list" class="space-y-2">
+                        <p class="text-gray-500">Carregando áudio-books...</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        Sair
+                    </button>
+                    <span id="user-info" class="text-sm text-gray-600"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulação de login (substituir por API real)
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulação de validação
+            if (email === 'admin@exemplo.com' && password === '123456') {
+                showDashboard(email);
+            } else if (email === 'veramdssoares@gmail.com' && password === 'Jw5$Gp8ews') {
+                showDashboard(email);
+            } else {
+                showError('Email ou senha incorretos.');
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => successDiv.classList.add('hidden'), 5000);
+        }
+
+        function showDashboard(email) {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('user-info').textContent = 'Logado como: ' + email;
+            
+            // Carregar conteúdos
+            loadEbooks();
+            loadAudios();
+        }
+
+        function loadEbooks() {
+            // Simulação de e-books (substituir por API real)
+            const ebooks = [
+                { name: 'Guia Completo - Libido Renovado', file: 'guia-completo.pdf' },
+                { name: 'Exercícios Práticos', file: 'exercicios-praticos.pdf' }
+            ];
+            
+            const ebooksList = document.getElementById('ebooks-list');
+            ebooksList.innerHTML = ebooks.map(ebook => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span class="font-medium">${ebook.name}</span>
+                    <div class="flex space-x-2">
+                        <button onclick="viewFile('ebook', '${ebook.file}')" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                            📖 Ler
+                        </button>
+                        <button onclick="downloadFile('ebook', '${ebook.file}')" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                            ⬇️ Baixar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAudios() {
+            // Simulação de áudios (substituir por API real)
+            const audios = [
+                { name: 'Meditação Guiada - Relaxamento', file: 'meditacao-relaxamento.mp3' },
+                { name: 'Exercícios de Respiração', file: 'exercicios-respiracao.mp3' }
+            ];
+            
+            const audiosList = document.getElementById('audios-list');
+            audiosList.innerHTML = audios.map(audio => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <span class="font-medium">${audio.name}</span>
+                    <div class="flex space-x-2">
+                        <button onclick="playAudio('${audio.file}')" 
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">
+                            ▶️ Reproduzir
+                        </button>
+                        <button onclick="downloadFile('audio', '${audio.file}')" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                            ⬇️ Baixar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewFile(type, file) {
+            // Simulação de visualização
+            alert(`Visualizando ${type}: ${file}\n\nEm uma implementação real, isso abriria o arquivo em uma nova aba.`);
+        }
+
+        function downloadFile(type, file) {
+            // Simulação de download
+            alert(`Baixando ${type}: ${file}\n\nEm uma implementação real, isso iniciaria o download do arquivo.`);
+        }
+
+        function playAudio(file) {
+            // Simulação de reprodução
+            alert(`Reproduzindo áudio: ${file}\n\nEm uma implementação real, isso iniciaria a reprodução do áudio.`);
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        // Verificar se já está logado (simulação)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('logged') === 'true') {
+            showDashboard('usuário@exemplo.com');
+        }
+    </script>
+</body>
+</html>
