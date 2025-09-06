@@ -1,2 +1,54 @@
-# Configuração mínima para PHP
+# Configuração única para todo o projeto
+
+# Habilitar PHP
 AddHandler application/x-httpd-php .php
+
+# Permitir acesso a arquivos PHP em todas as pastas
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Bloquear acesso a includes sensíveis
+<Files "includes/*.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bloquear acesso a arquivos de configuração
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "conexao.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bloquear acesso a logs
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Permitir acesso a arquivos de teste
+<Files "test*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "status*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "debug*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "error*.php">
+    Order allow,deny
+    Allow from all
+</Files>
