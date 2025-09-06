@@ -827,6 +827,55 @@ $nichos = getAllNichos();
                 </div>     
             </div>
 
+            <div class="ebook-grid-item">
+                <div class="ebook-grid-content">
+                    <div class="chapter-header">Áudio-Books</div>
+                    <?php
+                    // Listar áudios (mp3) da pasta audios
+                    $audios = [];
+                    $audiosDir = __DIR__ . '/audios';
+                    if (!is_dir($audiosDir)) {
+                        // criar diretório se não existir
+                        @mkdir($audiosDir, 0755, true);
+                    }
+                    if (is_dir($audiosDir)) {
+                        $dh2 = opendir($audiosDir);
+                        if ($dh2) {
+                            while (($f = readdir($dh2)) !== false) {
+                                if ($f === '.' || $f === '..') continue;
+                                if (preg_match('/\.(mp3|wav|m4a)$/i', $f)) {
+                                    $audios[] = $f;
+                                }
+                            }
+                            closedir($dh2);
+                        }
+                    }
+                    sort($audios, SORT_NATURAL | SORT_FLAG_CASE);
+                    if (!empty($audios)) {
+                        echo '<ul class="sans" style="display:flex; flex-direction:column; gap:.5rem;">';
+                        foreach ($audios as $audio) {
+                            $name = htmlspecialchars(pathinfo($audio, PATHINFO_FILENAME));
+                            $url = 'audios/' . rawurlencode($audio);
+                            echo '<li>';
+                            echo '<audio controls style="width:100%; max-width:650px; display:block; margin:0 0 .25rem;">';
+                            echo '<source src="' . $url . '" type="audio/mpeg" />';
+                            echo 'Seu navegador não suporta áudio HTML5';
+                            echo '</audio>';
+                            if ($canDownload) {
+                                echo '<a class="btn-primary" style="padding:.5rem .8rem; border-radius:.4rem;" href="' . $url . '" download>Baixar</a>';
+                            } else {
+                                echo '<button disabled class="btn-primary" style="padding:.5rem .8rem; border-radius:.4rem; opacity:.6; cursor:not-allowed;">Baixar (em ' . (int)$daysRemaining . 'd)</button>';
+                            }
+                            echo '</li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<p class="sans" style="color:#7a5a49">Nenhum áudio disponível no momento. A pasta será utilizada assim que os arquivos forem adicionados.</p>';
+                    }
+                    ?>
+                </div>
+            </div>
+
             <div style="height: auto;background: #f8f2ed;" class="ebook-grid-item">        
                 <div class="ebook-grid-content">
                     <div class="chapter-header-toy">😈Sugetões para apimentar a relação</div>

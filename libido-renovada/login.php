@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
         <div class="text-center mb-8">
-            <img src="assets/img/logo-libido-renovado.png" alt="Libido Renovado Logo" class="h-16 mx-auto mb-4" />
+            <img src="../assets/img/logo-libido-renovado.png" alt="Libido Renovado Logo" class="h-16 mx-auto mb-4" />
             <p class="text-gray-700">Faça login para acessar seu e-book</p>
         </div>
 

@@ -1,30 +1,43 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
 finalizeInit();
-requireLogin();
 require_once __DIR__ . '/../includes/db.php';
 
-// Permitir apenas administradores (campo users.usuario = 'Administrador')
-$currentUserId = $_SESSION['user_id'] ?? 0;
-$isAdmin = false;
-try {
-    $st = $pdo->prepare('SELECT usuario FROM users WHERE id = ?');
-    $st->execute([$currentUserId]);
-    $u = $st->fetch(PDO::FETCH_ASSOC);
-    if ($u && strtolower((string)$u['usuario']) === 'administrador') {
-        $isAdmin = true;
+// Autorização: via token (GET token igual ao WEBHOOK_SHARED_SECRET) OU usuário logado Administrador
+$token = $_GET['token'] ?? '';
+$authorized = false;
+if (!empty($token) && defined('WEBHOOK_SHARED_SECRET') && hash_equals((string)WEBHOOK_SHARED_SECRET, (string)$token)) {
+    $authorized = true;
+} else {
+    // fallback: requer login + perfil administrador
+    if (!function_exists('requireLogin')) {
+        // Se a função não existir no contexto atual, negar
+        http_response_code(403);
+        echo 'Acesso negado (login não disponível).';
+        exit;
     }
-} catch (Throwable $e) {
-    $isAdmin = false;
+    requireLogin();
+    $currentUserId = $_SESSION['user_id'] ?? 0;
+    try {
+        $st = $pdo->prepare('SELECT usuario FROM users WHERE id = ?');
+        $st->execute([$currentUserId]);
+        $u = $st->fetch(PDO::FETCH_ASSOC);
+        if ($u && strtolower((string)$u['usuario']) === 'administrador') {
+            $authorized = true;
+        }
+    } catch (Throwable $e) {
+        $authorized = false;
+    }
 }
 
-if (!$isAdmin) {
+if (!$authorized) {
     http_response_code(403);
     echo 'Acesso negado.';
     exit;
 }
 
-$sqlPath = realpath(__DIR__ . '/../../sql/paymen58_db_libido.sql');
+// Usar script idempotente para evitar erros de "já existe"
+$sqlPath = realpath(__DIR__ . '/../../sql/update_idempotent.sql');
 if ($sqlPath === false || !is_file($sqlPath)) {
     http_response_code(404);
     echo 'Arquivo SQL não encontrado.';

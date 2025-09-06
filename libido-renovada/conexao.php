@@ -55,7 +55,7 @@ define('DB_PASS_LIBIDO', 'u4q7+B6ly)obP_gxN9sNe');
 
 // Webhook Secret (defina no provedor de checkout no header X-Webhook-Secret)
 if (!defined('WEBHOOK_SHARED_SECRET')) {
-    define('WEBHOOK_SHARED_SECRET', 'mude-este-segredo');
+    define('WEBHOOK_SHARED_SECRET', 'JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873');
 }
 
 // E-mails admins (opcional)
@@ -128,21 +128,21 @@ function send_app_email(string $toEmail, string $subject, string $htmlBody): boo
         if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer') && is_file($altPath)) { @require_once $altPath; }
     }
 
-    if (class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
         try {
-            $pm = new PHPMailer\\PHPMailer\\PHPMailer(true);
+            $pm = new PHPMailer\PHPMailer\PHPMailer(true);
             $pm->CharSet = 'UTF-8';
             $pm->Encoding = 'base64';
-            if (defined('SMTP_HOST') && defined('SMTP_USER') && defined('SMTP_PASS') && defined('SMTP_PORT')) {
+            if (defined('SMTP_HOST') && defined('SMTP_USERNAME') && defined('SMTP_PASSWORD') && defined('SMTP_PORT')) {
                 $pm->isSMTP();
                 $pm->Host = SMTP_HOST;
                 $pm->SMTPAuth = true;
-                $pm->Username = SMTP_USER;
-                $pm->Password = SMTP_PASS;
-                $pm->SMTPSecure = PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_STARTTLS;
+                $pm->Username = SMTP_USERNAME;
+                $pm->Password = SMTP_PASSWORD;
+                $pm->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                 $pm->Port = SMTP_PORT;
             }
-            $fromEmail = defined('SMTP_USER') ? SMTP_USER : 'no-reply@seu-dominio.com';
+            $fromEmail = defined('SMTP_USERNAME') ? SMTP_USERNAME : 'no-reply@seu-dominio.com';
             $fromName  = 'Libido Renovado';
             $pm->setFrom($fromEmail, $fromName);
             $pm->addAddress($toEmail);
