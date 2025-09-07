@@ -115,13 +115,14 @@
             <span class="sans text-xs text-[#7a5a49]">Pagamento seguro</span>
           </div>
         </div>
-        <!-- HOTMART - Sales Funnel Widget -->
+
+
         <div id="hotmart-sales-funnel"></div>
         <script src="https://checkout.hotmart.com/lib/hotmart-checkout-elements.js"></script>
         <script>
           checkoutElements.init('salesFunnel').mount('#hotmart-sales-funnel')
         </script>
-        <!-- HOTMART - Sales Funnel Widget -->
+
         <p class="sans text-xs text-center text-[#7a5a49] mt-3">Seu cartão está pré-aprovado. Um clique adiciona à sua compra.</p>
       </div>
     </div>
@@ -163,7 +164,7 @@
       video.addEventListener('timeupdate', function(){
         if (!video.duration || video.duration === Infinity) return;
         var progress = video.currentTime / video.duration;
-        if (progress >= 0.9) revealBenefits();
+        if (progress >= 0.98) revealBenefits();
       });
     })();
   </script>
