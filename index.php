@@ -14,6 +14,8 @@ $router->addRoute('dashboard', 'dashboard');
 $router->addRoute('libido-renovada', 'landing');
 $router->addRoute('upsell', 'upsell');
 $router->addRoute('libido-renovada-up', 'upsell');
+$router->addRoute('downsell', 'downsell');
+$router->addRoute('libido-renovada-down', 'downsell');
 $router->addRoute('ebook/(\d+)', 'ebook');
 $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');

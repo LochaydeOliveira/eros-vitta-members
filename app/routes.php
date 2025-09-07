@@ -44,6 +44,9 @@ class Router {
             case 'upsell':
                 $this->handleUpsell();
                 break;
+            case 'downsell':
+                $this->handleDownsell();
+                break;
             case 'ebook':
                 $this->handleEbook($params[0] ?? null);
                 break;
@@ -109,6 +112,17 @@ class Router {
         
         if (file_exists($upsellFile)) {
             include $upsellFile;
+        } else {
+            $this->show404();
+        }
+    }
+    
+    private function handleDownsell() {
+        // Exibe a página de downsell sem autenticação
+        $downsellFile = ROOT_PATH . '/libido-renovada-down.html';
+        
+        if (file_exists($downsellFile)) {
+            include $downsellFile;
         } else {
             $this->show404();
         }
