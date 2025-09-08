@@ -47,6 +47,9 @@ class Router {
             case 'downsell':
                 $this->handleDownsell();
                 break;
+            case 'obrigado':
+                $this->handleObrigado();
+                break;
             case 'ebook':
                 $this->handleEbook($params[0] ?? null);
                 break;
@@ -123,6 +126,17 @@ class Router {
         
         if (file_exists($downsellFile)) {
             include $downsellFile;
+        } else {
+            $this->show404();
+        }
+    }
+    
+    private function handleObrigado() {
+        // Exibe a página de obrigado sem autenticação
+        $obrigadoFile = ROOT_PATH . '/libido-renovada-obrigado.html';
+        
+        if (file_exists($obrigadoFile)) {
+            include $obrigadoFile;
         } else {
             $this->show404();
         }
