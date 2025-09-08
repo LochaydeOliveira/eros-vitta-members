@@ -2,9 +2,8 @@
 $pageTitle = 'Eros Vitta Members';
 $currentPage = 'dashboard';
 
-// Buscar materiais do usuário usando o novo sistema
-$accessControl = new AccessControl();
-$materials = $accessControl->getUserPurchasedMaterials($_SESSION['user']['id']);
+// Buscar materiais do usuário usando o sistema antigo (que funciona)
+$materials = $this->auth->getUserMaterials($_SESSION['user']['id']);
 
 include 'header.php';
 include 'sidebar.php';
@@ -30,22 +29,16 @@ include 'sidebar.php';
             <div class="materials-grid">
                 <?php foreach ($materials as $material): ?>
                     <div class="material-card">
-                        <div class="material-header">
-                            <div class="material-icon">
-                                <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
-                            </div>
-                            <div class="material-badges">
-                                <span class="material-type"><?= ucfirst($material['tipo']) ?></span>
-                                <?php if (isset($material['item_type'])): ?>
-                                    <span class="purchase-badge"><?= ucfirst($material['item_type']) ?></span>
-                                <?php endif; ?>
-                            </div>
+                        <div class="material-icon">
+                            <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
                         </div>
                         <div class="material-info">
                             <h3><?= htmlspecialchars($material['titulo']) ?></h3>
-                            <p class="material-description"><?= htmlspecialchars($material['descricao']) ?></p>
+                            <p class="material-type sans">
+                                <?= ucfirst($material['tipo']) ?>
+                            </p>
                             <p class="material-date sans">
-                                Comprado em: <?= date('d/m/Y H:i', strtotime($material['purchase_date'])) ?>
+                                Liberado em: <?= date('d/m/Y H:i', strtotime($material['liberado_em'])) ?>
                             </p>
                         </div>
                         <div class="material-actions">
@@ -58,7 +51,13 @@ include 'sidebar.php';
                             
                             <!-- Download com controle de tempo -->
                             <?php if ($material['tipo'] === 'ebook'): ?>
-                                <?php if ($accessControl->canAccessMaterial($_SESSION['user']['id'], $material['id'], 'download')): ?>
+                                <?php
+                                // Verifica se passou de 7 dias para liberar download
+                                $liberadoEm = new DateTime($material['liberado_em']);
+                                $agora = new DateTime();
+                                $diferenca = $agora->diff($liberadoEm);
+                                
+                                if ($diferenca->days >= 7): ?>
                                     <a href="<?= BASE_URL ?>/download/<?= $material['id'] ?>" 
                                        class="btn btn-secondary">
                                         <i class="fas fa-download"></i>
@@ -66,7 +65,7 @@ include 'sidebar.php';
                                     </a>
                                 <?php else: ?>
                                     <div class="download-locked">
-                                        🔒 Download liberado em <?= $accessControl->getDaysRemaining($material['purchase_date']) ?> dias
+                                        🔒 Download liberado em <?= 7 - $diferenca->days ?> dias
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
