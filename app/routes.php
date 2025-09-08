@@ -291,6 +291,7 @@ class Router {
     }
 
     private function handleGrantAccess() {
+        header('Content-Type: application/json');
         // Protegido por token simples de uso interno (aceita múltiplas formas)
         $queryOrBodyToken = $_GET['token'] ?? $_POST['token'] ?? '';
         $headerAuth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -323,7 +324,6 @@ class Router {
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Content-Type: application/json');
             echo json_encode([
                 'status' => 'ready',
                 'usage' => 'POST email=... hotmart_product_id=... [item_type=main|order_bump|upsell|downsell|bonus] [transaction=...]'
@@ -367,7 +367,6 @@ class Router {
             $accessControl->addUserPurchase($user['id'], $hotmartProductId, $transaction, $itemType, $itemName, $materialId);
 
             $db->commit();
-            header('Content-Type: application/json');
             echo json_encode([
                 'status' => 'success',
                 'user_id' => $user['id'],
@@ -378,7 +377,8 @@ class Router {
         } catch (Exception $e) {
             $db->rollback();
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Erro interno']);
+            error_log('grant-access error: ' . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Erro interno', 'detail' => $e->getMessage()]);
         }
     }
     
