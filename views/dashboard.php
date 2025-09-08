@@ -28,8 +28,8 @@ if (empty($materials)) {
     ", [$userId]);
 }
 
-include 'header.php';
-include 'sidebar.php';
+include VIEWS_PATH . '/header.php';
+include VIEWS_PATH . '/sidebar.php';
 ?>
 
 <main class="main-content">
@@ -105,4 +105,4 @@ include 'sidebar.php';
     </div>
 </main>
 
-<?php include 'footer.php'; ?>
+<?php include VIEWS_PATH . '/footer.php'; ?>
