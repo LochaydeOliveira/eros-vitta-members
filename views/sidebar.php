@@ -13,7 +13,7 @@
                     <li class="nav-item">
                         <a href="<?php echo BASE_URL; ?>/<?php echo $material['tipo']; ?>/<?php echo $material['id']; ?>" 
                            class="nav-link <?php echo ($currentPage === $material['tipo'] && $currentMaterialId == $material['id']) ? 'active' : ''; ?>">
-                            <i class="fas fa-<?php echo $this->getMaterialIcon($material['tipo']); ?>"></i>
+                            <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
                             <span><?php echo htmlspecialchars($material['titulo']); ?></span>
                         </a>
                     </li>
