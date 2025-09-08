@@ -344,10 +344,11 @@ class Router {
             return;
         }
 
-        $db = Database::getInstance();
+        $db = null;
         $auth = new Auth();
 
         try {
+            $db = Database::getInstance();
             $accessControl = new AccessControl();
             $db->beginTransaction();
 
@@ -376,7 +377,7 @@ class Router {
                 'item_type' => $itemType,
                 'transaction' => $transaction
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if ($db) { try { $db->rollback(); } catch (Exception $ignore) {} }
             http_response_code(500);
             error_log('grant-access error: ' . $e->getMessage());
