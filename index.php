@@ -22,6 +22,7 @@ $router->addRoute('debug-dashboard', 'debug-dashboard');
 $router->addRoute('teste-dashboard', 'teste-dashboard');
 $router->addRoute('dashboard-funcionando', 'dashboard-funcionando');
 $router->addRoute('dashboard-simples', 'dashboard-simples');
+$router->addRoute('verificar-arquivos', 'verificar-arquivos');
 $router->addRoute('ebook/(\d+)', 'ebook');
 $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');
