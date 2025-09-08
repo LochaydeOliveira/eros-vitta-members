@@ -68,6 +68,9 @@ class Router {
             case 'simular-compra':
                 $this->handleSimularCompra();
                 break;
+            case 'debug-dashboard':
+                $this->handleDebugDashboard();
+                break;
             default:
                 $this->show404();
         }
@@ -418,6 +421,92 @@ class Router {
             $db->rollback();
             echo "❌ Erro ao simular compra: " . $e->getMessage() . "<br>";
         }
+    }
+    
+    private function handleDebugDashboard() {
+        echo "<h2>🔍 Debug do Dashboard</h2>";
+        
+        // Verificar se usuário está logado
+        if (!$this->auth->isLoggedIn()) {
+            echo "❌ Você precisa estar logado.<br>";
+            echo "<a href='https://erosvitta.com.br/login'>Fazer Login</a><br>";
+            return;
+        }
+        
+        $userId = $_SESSION['user_id'];
+        echo "✅ Usuário logado: " . $_SESSION['user_nome'] . " (ID: $userId)<br>";
+        
+        try {
+            $db = Database::getInstance();
+            
+            // 1. Verificar compras do usuário
+            echo "<br><strong>🛒 Compras do usuário:</strong><br>";
+            $compras = $db->fetchAll("SELECT * FROM user_purchases WHERE user_id = ? AND status = 'active'", [$userId]);
+            
+            if ($compras) {
+                foreach ($compras as $compra) {
+                    echo "ID: {$compra['id']} | Produto: {$compra['hotmart_product_id']} | Tipo: {$compra['item_type']} | Material ID: {$compra['material_id']}<br>";
+                }
+            } else {
+                echo "❌ Nenhuma compra encontrada!<br>";
+            }
+            
+            // 2. Verificar mapeamento de produtos
+            echo "<br><strong>🗺️ Mapeamento de produtos:</strong><br>";
+            $mapeamentos = $db->fetchAll("SELECT * FROM product_material_mapping");
+            
+            if ($mapeamentos) {
+                foreach ($mapeamentos as $map) {
+                    echo "Produto: {$map['hotmart_product_id']} | Material ID: {$map['material_id']} | Tipo: {$map['material_type']}<br>";
+                }
+            } else {
+                echo "❌ Nenhum mapeamento encontrado!<br>";
+            }
+            
+            // 3. Verificar materiais do usuário (sistema antigo)
+            echo "<br><strong>📚 Materiais do usuário (sistema antigo):</strong><br>";
+            $materiaisAntigos = $db->fetchAll("
+                SELECT m.*, um.liberado_em 
+                FROM user_materials um 
+                JOIN materials m ON um.material_id = m.id 
+                WHERE um.user_id = ?
+            ", [$userId]);
+            
+            if ($materiaisAntigos) {
+                foreach ($materiaisAntigos as $material) {
+                    echo "ID: {$material['id']} | Título: {$material['titulo']} | Tipo: {$material['tipo']}<br>";
+                }
+            } else {
+                echo "❌ Nenhum material no sistema antigo!<br>";
+            }
+            
+            // 4. Testar query do dashboard
+            echo "<br><strong>🔍 Teste da query do dashboard:</strong><br>";
+            $materiais = $db->fetchAll("
+                SELECT DISTINCT m.*, up.purchase_date, up.item_type
+                FROM user_purchases up
+                LEFT JOIN product_material_mapping pmm ON up.hotmart_product_id = pmm.hotmart_product_id
+                LEFT JOIN materials m ON pmm.material_id = m.id
+                WHERE up.user_id = ? AND up.status = 'active' AND m.id IS NOT NULL
+                ORDER BY up.purchase_date DESC
+            ", [$userId]);
+            
+            if ($materiais) {
+                echo "✅ Materiais encontrados: " . count($materiais) . "<br>";
+                foreach ($materiais as $material) {
+                    echo "ID: {$material['id']} | Título: {$material['titulo']} | Tipo: {$material['tipo']} | Item: {$material['item_type']}<br>";
+                }
+            } else {
+                echo "❌ Nenhum material encontrado na query do dashboard!<br>";
+            }
+            
+        } catch (Exception $e) {
+            echo "❌ Erro: " . $e->getMessage() . "<br>";
+        }
+        
+        echo "<br><strong>🎯 Próximos passos:</strong><br>";
+        echo "1. <a href='https://erosvitta.com.br/dashboard' target='_blank'>Acessar Dashboard</a><br>";
+        echo "2. Se não funcionar, execute o script SQL novamente<br>";
     }
     
     private function show404() {

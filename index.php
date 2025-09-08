@@ -24,6 +24,7 @@ $router->addRoute('audio/(\d+)', 'audio');
 $router->addRoute('download/(\d+)', 'download');
 $router->addRoute('debug-login', 'debug-login');
 $router->addRoute('simular-compra', 'simular-compra');
+$router->addRoute('debug-dashboard', 'debug-dashboard');
 
 // Processa a requisição
 $url = $_GET['url'] ?? '';
