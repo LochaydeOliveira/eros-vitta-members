@@ -418,13 +418,14 @@ class Router {
     }
 
     private function handleTesteDashboard() {
-        // Verificar se o usuário está logado
+        // Se não estiver logado, usar usuário padrão para teste
         if (!isset($_SESSION['user']['id'])) {
-            header('Location: ' . LOGIN_URL);
-            exit;
+            $userId = 1; // Usar ID 1 (Lochayde Guerreiro) para teste
+            $userName = 'Lochayde Guerreiro (Modo Teste)';
+        } else {
+            $userId = $_SESSION['user']['id'];
+            $userName = $_SESSION['user']['nome'];
         }
-
-        $userId = $_SESSION['user']['id'];
         $db = Database::getInstance();
 
         // Query simples para buscar materiais
@@ -474,7 +475,7 @@ class Router {
                 Usuário ID: <?= $userId ?><br>
                 Total de materiais encontrados: <?= count($materials) ?><br>
                 Sessão ativa: <?= isset($_SESSION['user']) ? 'Sim' : 'Não' ?><br>
-                Nome do usuário: <?= $_SESSION['user']['nome'] ?? 'N/A' ?>
+                Nome do usuário: <?= $userName ?>
             </div>
 
             <h2>Materiais do Usuário</h2>
