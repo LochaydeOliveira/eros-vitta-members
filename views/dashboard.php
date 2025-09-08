@@ -1,14 +1,22 @@
 <?php
-$pageTitle = 'Dashboard - ErosVitta';
+$pageTitle = 'Eros Vitta Members';
 $currentPage = 'dashboard';
+
+// Buscar materiais do usuário usando o novo sistema
+$accessControl = new AccessControl();
+$materials = $accessControl->getUserPurchasedMaterials($_SESSION['user']['id']);
+
 include 'header.php';
 include 'sidebar.php';
 ?>
 
 <main class="main-content">
     <div class="dashboard-header">
-        <h2>Bem-vindo à sua Área de Membros</h2>
-        <p class="sans">Aqui você encontra todos os seus conteúdos exclusivos</p>
+        <h2>Eros Vitta Members</h2>
+        <p class="sans">Bem-vindo, <?= htmlspecialchars($_SESSION['user']['nome']) ?>!</p>
+        <div class="purchase-summary">
+            <p class="sans">Você tem <strong><?= count($materials) ?></strong> material(is) liberado(s)</p>
+        </div>
     </div>
     
     <div class="dashboard-content">
@@ -22,42 +30,45 @@ include 'sidebar.php';
             <div class="materials-grid">
                 <?php foreach ($materials as $material): ?>
                     <div class="material-card">
-                        <div class="material-icon">
-                            <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
+                        <div class="material-header">
+                            <div class="material-icon">
+                                <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
+                            </div>
+                            <div class="material-badges">
+                                <span class="material-type"><?= ucfirst($material['tipo']) ?></span>
+                                <?php if (isset($material['item_type'])): ?>
+                                    <span class="purchase-badge"><?= ucfirst($material['item_type']) ?></span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="material-info">
-                            <h3><?php echo htmlspecialchars($material['titulo']); ?></h3>
-                            <p class="material-type sans">
-                                <?php echo ucfirst($material['tipo']); ?>
-                            </p>
+                            <h3><?= htmlspecialchars($material['titulo']) ?></h3>
+                            <p class="material-description"><?= htmlspecialchars($material['descricao']) ?></p>
                             <p class="material-date sans">
-                                Liberado em: <?php echo date('d/m/Y H:i', strtotime($material['liberado_em'])); ?>
+                                Comprado em: <?= date('d/m/Y H:i', strtotime($material['purchase_date'])) ?>
                             </p>
                         </div>
                         <div class="material-actions">
-                            <a href="<?php echo BASE_URL; ?>/<?php echo $material['tipo']; ?>/<?php echo $material['id']; ?>" 
+                            <!-- Visualização sempre liberada -->
+                            <a href="<?= BASE_URL ?>/<?= $material['tipo'] ?>/<?= $material['id'] ?>" 
                                class="btn btn-primary">
                                 <i class="fas fa-eye"></i>
-                                Visualizar
+                                📖 Visualizar
                             </a>
                             
-                            <?php
-                            // Verifica se passou de 7 dias para liberar download
-                            $liberadoEm = new DateTime($material['liberado_em']);
-                            $agora = new DateTime();
-                            $diferenca = $agora->diff($liberadoEm);
-                            
-                            if ($diferenca->days >= 7): ?>
-                                <a href="<?php echo BASE_URL; ?>/download/<?php echo $material['id']; ?>" 
-                                   class="btn btn-secondary">
-                                    <i class="fas fa-download"></i>
-                                    Download
-                                </a>
-                            <?php else: ?>
-                                <span class="btn btn-disabled">
-                                    <i class="fas fa-clock"></i>
-                                    Download em <?php echo 7 - $diferenca->days; ?> dias
-                                </span>
+                            <!-- Download com controle de tempo -->
+                            <?php if ($material['tipo'] === 'ebook'): ?>
+                                <?php if ($accessControl->canAccessMaterial($_SESSION['user']['id'], $material['id'], 'download')): ?>
+                                    <a href="<?= BASE_URL ?>/download/<?= $material['id'] ?>" 
+                                       class="btn btn-secondary">
+                                        <i class="fas fa-download"></i>
+                                        📥 Download PDF
+                                    </a>
+                                <?php else: ?>
+                                    <div class="download-locked">
+                                        🔒 Download liberado em <?= $accessControl->getDaysRemaining($material['purchase_date']) ?> dias
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>

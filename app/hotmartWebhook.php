@@ -3,6 +3,7 @@ require_once 'config.php';
 require_once 'db.php';
 require_once 'auth.php';
 require_once 'mailer.php';
+require_once 'accessControl.php';
 
 // Verifica se é uma requisição POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -52,6 +53,7 @@ if (!filter_var($buyer['email'], FILTER_VALIDATE_EMAIL)) {
 $db = Database::getInstance();
 $auth = new Auth();
 $mailer = new Mailer();
+$accessControl = new AccessControl();
 
 try {
     $db->beginTransaction();
@@ -84,21 +86,8 @@ try {
         $user = $userData;
     }
     
-    // Processa os materiais do produto
-    $materials = $this->getProductMaterials($product['id']);
-    
-    foreach ($materials as $material) {
-        // Verifica se o material já foi liberado para o usuário
-        $existingMaterial = $db->fetch(
-            "SELECT id FROM user_materials WHERE user_id = ? AND material_id = ?",
-            [$userId, $material['id']]
-        );
-        
-        if (!$existingMaterial) {
-            // Libera o material para o usuário
-            $auth->addUserMaterial($userId, $material['id']);
-        }
-    }
+    // Processar compra usando o novo sistema
+    $this->processPurchase($data, $userId, $accessControl);
     
     $db->commit();
     
@@ -132,29 +121,69 @@ try {
 }
 
 /**
- * Busca os materiais associados a um produto
- * Em uma implementação real, isso viria de uma API ou banco de dados
+ * Processa a compra usando o novo sistema de mapeamento
  */
-function getProductMaterials($productId) {
-    $db = Database::getInstance();
+function processPurchase($data, $userId, $accessControl) {
+    $purchase = $data['data'];
+    $product = $purchase['product'];
+    $transaction = $purchase['transaction'] ?? uniqid('TXN_');
     
-    // Mapeamento de produtos para materiais (exemplo)
-    $productMaterials = [
-        '12345' => [1, 2, 3], // Produto 12345 tem materiais 1, 2 e 3
-        '67890' => [4, 5],    // Produto 67890 tem materiais 4 e 5
-    ];
+    // Processar item principal
+    processPurchasedItem($userId, $product, $transaction, 'main', $accessControl);
     
-    $materialIds = $productMaterials[$productId] ?? [];
-    
-    if (empty($materialIds)) {
-        return [];
+    // Processar Order Bump (se existir)
+    if (isset($purchase['order_bump']) && $purchase['order_bump']['status'] === 'APPROVED') {
+        processPurchasedItem($userId, $purchase['order_bump'], $transaction, 'order_bump', $accessControl);
     }
     
-    $placeholders = str_repeat('?,', count($materialIds) - 1) . '?';
+    // Processar Upsell (se existir)
+    if (isset($purchase['upsell']) && $purchase['upsell']['status'] === 'APPROVED') {
+        processUpsellPurchase($userId, $purchase['upsell'], $transaction, $accessControl);
+    }
     
-    return $db->fetchAll(
-        "SELECT * FROM materials WHERE id IN ($placeholders)",
-        $materialIds
-    );
+    // Processar Downsell (se existir)
+    if (isset($purchase['downsell']) && $purchase['downsell']['status'] === 'APPROVED') {
+        processPurchasedItem($userId, $purchase['downsell'], $transaction, 'downsell', $accessControl);
+    }
+}
+
+/**
+ * Processa um item comprado
+ */
+function processPurchasedItem($userId, $product, $transaction, $itemType, $accessControl) {
+    // Buscar material correspondente
+    $material = $accessControl->getMaterialByProductId($product['id']);
+    
+    if ($material) {
+        // Adicionar compra do usuário
+        $accessControl->addUserPurchase(
+            $userId,
+            $product['id'],
+            $transaction,
+            $itemType,
+            $product['name'],
+            $material['id']
+        );
+        
+        // Log para debug
+        error_log("Material liberado: {$material['titulo']} para usuário {$userId} (Tipo: {$itemType})");
+    } else {
+        // Log de erro se não encontrar mapeamento
+        error_log("ERRO: Produto {$product['id']} não encontrado no mapeamento");
+    }
+}
+
+/**
+ * Processa compra do Pacote Premium
+ */
+function processUpsellPurchase($userId, $upsell, $transaction, $accessControl) {
+    // Processar Pacote Premium (inclui múltiplos materiais)
+    if ($upsell['id'] === 'A101789933P') {
+        $accessControl->processUpsellPurchase($userId, $upsell['id'], $transaction, $upsell['name']);
+        error_log("Pacote Premium processado para usuário {$userId}");
+    } else {
+        // Processar upsell normal
+        processPurchasedItem($userId, $upsell, $transaction, 'upsell', $accessControl);
+    }
 }
 ?>
