@@ -277,17 +277,18 @@ class Router {
     
     
     private function handleDebugDashboard() {
-        // Verificar se o usuário está logado
-        if (!isset($_SESSION['user']['id'])) {
-            header('Location: ' . LOGIN_URL);
-            exit;
-        }
-
-        $userId = $_SESSION['user']['id'];
         $db = Database::getInstance();
-
-        echo "<h1>🔍 Debug do Dashboard</h1>";
-        echo "<h2>Usuário: " . $_SESSION['user']['nome'] . " (ID: $userId)</h2>";
+        
+        // Se não estiver logado, usar usuário padrão para debug
+        if (!isset($_SESSION['user']['id'])) {
+            $userId = 1; // Usar ID 1 (Lochayde Guerreiro) para debug
+            echo "<h1>🔍 Debug do Dashboard (Modo Debug - Usuário ID: $userId)</h1>";
+            echo "<p><strong>⚠️ Você não está logado. Usando usuário padrão para debug.</strong></p>";
+        } else {
+            $userId = $_SESSION['user']['id'];
+            echo "<h1>🔍 Debug do Dashboard</h1>";
+            echo "<h2>Usuário: " . $_SESSION['user']['nome'] . " (ID: $userId)</h2>";
+        }
 
         // 1. Verificar se o usuário existe
         echo "<h3>1. Verificação do Usuário</h3>";
