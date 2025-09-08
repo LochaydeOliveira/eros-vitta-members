@@ -53,6 +53,9 @@ class Router {
             case 'debug-dashboard':
                 $this->handleDebugDashboard();
                 break;
+            case 'teste-dashboard':
+                $this->handleTesteDashboard();
+                break;
             case 'ebook':
                 $this->handleEbook($params[0] ?? null);
                 break;
@@ -412,6 +415,120 @@ class Router {
         }
 
         echo "<br><a href='" . BASE_URL . "/dashboard'>← Voltar ao Dashboard</a>";
+    }
+
+    private function handleTesteDashboard() {
+        // Verificar se o usuário está logado
+        if (!isset($_SESSION['user']['id'])) {
+            header('Location: ' . LOGIN_URL);
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $db = Database::getInstance();
+
+        // Query simples para buscar materiais
+        $materials = $db->fetchAll("
+            SELECT DISTINCT m.*, up.purchase_date, up.item_type
+            FROM user_purchases up
+            LEFT JOIN product_material_mapping pmm ON up.hotmart_product_id = pmm.hotmart_product_id
+            LEFT JOIN materials m ON pmm.material_id = m.id
+            WHERE up.user_id = ? AND up.status = 'active' AND m.id IS NOT NULL
+            ORDER BY up.purchase_date DESC
+        ", [$userId]);
+
+        // Se não encontrar materiais no sistema novo, usar o sistema antigo
+        if (empty($materials)) {
+            $materials = $db->fetchAll("
+                SELECT m.*, um.liberado_em as purchase_date, 'legacy' as item_type
+                FROM user_materials um
+                JOIN materials m ON um.material_id = m.id
+                WHERE um.user_id = ?
+                ORDER BY um.liberado_em DESC
+            ", [$userId]);
+        }
+
+        ?>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Teste Dashboard - Eros Vitta</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .material-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                .material-card h3 { color: #333; margin: 0 0 10px 0; }
+                .material-card p { margin: 5px 0; color: #666; }
+                .btn { display: inline-block; padding: 8px 16px; background: #007cba; color: white; text-decoration: none; border-radius: 3px; margin: 5px 5px 5px 0; }
+                .btn:hover { background: #005a87; }
+                .empty-state { text-align: center; padding: 40px; color: #666; }
+                .debug-info { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 3px; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <h1>🧪 Teste Dashboard Simples</h1>
+            
+            <div class="debug-info">
+                <strong>Debug Info:</strong><br>
+                Usuário ID: <?= $userId ?><br>
+                Total de materiais encontrados: <?= count($materials) ?><br>
+                Sessão ativa: <?= isset($_SESSION['user']) ? 'Sim' : 'Não' ?><br>
+                Nome do usuário: <?= $_SESSION['user']['nome'] ?? 'N/A' ?>
+            </div>
+
+            <h2>Materiais do Usuário</h2>
+            
+            <?php if (empty($materials)): ?>
+                <div class="empty-state">
+                    <h3>❌ Nenhum material disponível</h3>
+                    <p>Você ainda não possui materiais liberados.</p>
+                </div>
+            <?php else: ?>
+                <div class="materials-list">
+                    <?php foreach ($materials as $material): ?>
+                        <div class="material-card">
+                            <h3><?= htmlspecialchars($material['titulo']) ?></h3>
+                            <p><strong>Tipo:</strong> <?= ucfirst($material['tipo']) ?></p>
+                            <p><strong>Item Type:</strong> <?= $material['item_type'] ?></p>
+                            <p><strong>Data de Compra:</strong> <?= date('d/m/Y H:i', strtotime($material['purchase_date'])) ?></p>
+                            <p><strong>Caminho:</strong> <?= htmlspecialchars($material['caminho']) ?></p>
+                            
+                            <div class="actions">
+                                <a href="<?= BASE_URL ?>/<?= $material['tipo'] ?>/<?= $material['id'] ?>" class="btn">
+                                    📖 Visualizar
+                                </a>
+                                
+                                <?php if ($material['tipo'] === 'ebook'): ?>
+                                    <?php
+                                    $dataRef = new DateTime($material['purchase_date']);
+                                    $agora = new DateTime();
+                                    $diferenca = $agora->diff($dataRef);
+                                    $diasRestantes = 7 - $diferenca->days;
+                                    ?>
+                                    
+                                    <?php if ($diferenca->days >= 7): ?>
+                                        <a href="<?= BASE_URL ?>/download/<?= $material['id'] ?>" class="btn">
+                                            📥 Download PDF
+                                        </a>
+                                    <?php else: ?>
+                                        <span style="color: #999;">
+                                            🔒 Download liberado em <?= $diasRestantes ?> dias
+                                        </span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <hr>
+            <p><a href="<?= BASE_URL ?>/dashboard">← Voltar ao Dashboard Original</a></p>
+            <p><a href="<?= BASE_URL ?>/debug-dashboard">🔍 Ver Debug Completo</a></p>
+        </body>
+        </html>
+        <?php
     }
 
     private function show404() {
