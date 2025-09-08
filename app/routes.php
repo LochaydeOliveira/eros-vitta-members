@@ -1,6 +1,8 @@
 <?php
 require_once 'auth.php';
 require_once 'mailer.php';
+require_once 'db.php';
+require_once 'accessControl.php';
 
 class Router {
     private $routes = [];
@@ -343,10 +345,10 @@ class Router {
         }
 
         $db = Database::getInstance();
-        $accessControl = new AccessControl();
         $auth = new Auth();
 
         try {
+            $accessControl = new AccessControl();
             $db->beginTransaction();
 
             $user = $db->fetch("SELECT * FROM users WHERE email = ?", [$email]);
