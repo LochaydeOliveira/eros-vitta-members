@@ -20,6 +20,7 @@ $router->addRoute('obrigado', 'obrigado');
 $router->addRoute('libido-renovada-obrigado', 'obrigado');
 $router->addRoute('debug-dashboard', 'debug-dashboard');
 $router->addRoute('teste-dashboard', 'teste-dashboard');
+$router->addRoute('dashboard-funcionando', 'dashboard-funcionando');
 $router->addRoute('ebook/(\d+)', 'ebook');
 $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');
