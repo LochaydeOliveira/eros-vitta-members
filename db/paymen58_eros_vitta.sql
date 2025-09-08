@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Tempo de geração: 08/09/2025 às 06:32
+-- Tempo de geração: 08/09/2025 às 13:29
 -- Versão do servidor: 5.7.23-23
 -- Versão do PHP: 8.1.33
 
@@ -78,7 +78,7 @@ CREATE TABLE `materials` (
 --
 
 INSERT INTO `materials` (`id`, `titulo`, `tipo`, `caminho`, `descricao`, `criado_em`, `version`, `file_size`, `file_hash`, `is_active`) VALUES
-(6, '5 Toques Mágicos', 'ebook', 'ebooks/guia-5-toques-magicos.html', 'Um Caminho Simples para Reacender a Intimidade e a Conexão no Dia a Dia', '2025-09-06 15:43:39', '1.0', NULL, NULL, 1),
+(6, '5 Toques Mágicos', 'ebook', 'ebooks/o-guia-dos-5-toques-magicos.html', 'Um Caminho Simples para Reacender a Intimidade e a Conexão no Dia a Dia', '2025-09-06 15:43:39', '1.0', NULL, NULL, 1),
 (7, 'Libido Renovada - O Plano de 21 Dias Para Casais', 'ebook', 'ebooks/libido-renovada.html', 'O Plano de Ação de 21 Dias para Reacender a Intimidade e a Libido', '2025-09-06 15:43:39', '1.0', NULL, NULL, 1),
 (8, 'Sem Desejo Nunca Mais', 'ebook', 'ebooks/sem-desejo-nunca-mais.html', 'Descubra como usar sua sensualidade para viver uma paixão que não acaba mais', '2025-09-06 15:43:39', '1.0', NULL, NULL, 1),
 (9, 'O Segredo da Resistência', 'ebook', 'ebooks/o-segredo-da-resistencia.html', 'O Guia Para Ele Durar Mais Tempo na Cama', '2025-09-06 15:43:39', '1.0', NULL, NULL, 1),
@@ -263,6 +263,21 @@ CREATE TABLE `user_purchases` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
+-- Despejando dados para a tabela `user_purchases`
+--
+
+INSERT INTO `user_purchases` (`id`, `user_id`, `hotmart_transaction`, `hotmart_product_id`, `item_type`, `item_name`, `material_id`, `purchase_date`, `status`, `updated_at`, `refund_reason`, `refund_date`) VALUES
+(22, 1, '1', 'A101789933P', 'upsell', 'Pacote PREMIUM - Libido Renovado', 10, '2025-09-08 09:45:15', 'active', '2025-09-08 09:46:39', NULL, NULL),
+(23, 1, '1', 'A101789933P', 'upsell', 'Pacote PREMIUM - Libido Renovado', 7, '2025-09-08 09:45:15', 'active', '2025-09-08 09:45:15', NULL, NULL),
+(24, 1, '1', 'A101789933P', 'upsell', 'Pacote PREMIUM - Libido Renovado', 9, '2025-09-08 09:45:15', 'active', '2025-09-08 09:45:15', NULL, NULL),
+(25, 1, '1', 'A101789933P', 'upsell', 'Pacote PREMIUM - Libido Renovado', 8, '2025-09-08 09:45:15', 'active', '2025-09-08 09:45:15', NULL, NULL),
+(26, 1, '1', 'E101649402I', 'main', 'Libido Renovada: O Plano de 21 Dias para Casais', 7, '2025-09-08 10:18:13', 'active', '2025-09-08 10:18:13', NULL, NULL),
+(27, 1, '1', 'F101670521N', 'order_bump', 'O Guia Rápido dos 5 Toques Mágicos', 6, '2025-09-08 10:18:13', 'active', '2025-09-08 10:18:13', NULL, NULL),
+(28, 1, '1', 'V101660433I', 'downsell', 'Versão em Áudio: Libido Renovada - O Plano de 21 Dias Para Casais', 10, '2025-09-08 10:18:13', 'active', '2025-09-08 10:18:13', NULL, NULL),
+(29, 1, '1', 'R101782112U', 'bonus', 'O Segredo da Resistência: O guia prático para durar mais tempo na cama', 9, '2025-09-08 10:18:13', 'active', '2025-09-08 10:18:13', NULL, NULL),
+(30, 1, '1', 'D101782229U', 'bonus', 'Sem Desejo Nunca Mais! Descubra como usar sua sensualidade para viver uma paixão que não acaba mais', 8, '2025-09-08 10:18:13', 'active', '2025-09-08 10:18:13', NULL, NULL);
+
+--
 -- Acionadores `user_purchases`
 --
 DELIMITER $$
@@ -420,7 +435,7 @@ ALTER TABLE `user_notifications`
 -- AUTO_INCREMENT de tabela `user_purchases`
 --
 ALTER TABLE `user_purchases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Restrições para tabelas despejadas

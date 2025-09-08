@@ -908,6 +908,10 @@ class Router {
         echo "</div>";
     }
 
+    private function handleDebugDashboardCompleto() {
+        include 'debug-dashboard-completo.php';
+    }
+
     private function show404() {
         http_response_code(404);
         include VIEWS_PATH . '/404.php';
