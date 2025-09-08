@@ -291,10 +291,33 @@ class Router {
     }
 
     private function handleGrantAccess() {
-        // Protegido por token simples de uso interno
-        $token = $_GET['token'] ?? $_POST['token'] ?? '';
-        if (empty(INTERNAL_API_TOKEN) || !hash_equals(INTERNAL_API_TOKEN, $token)) {
+        // Protegido por token simples de uso interno (aceita múltiplas formas)
+        $queryOrBodyToken = $_GET['token'] ?? $_POST['token'] ?? '';
+        $headerAuth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        $headerXToken = $_SERVER['HTTP_X_HOTMART_TOKEN'] ?? '';
+
+        $bearer = '';
+        if ($headerAuth && preg_match('/Bearer\s+(.*)/i', $headerAuth, $m)) {
+            $bearer = trim($m[1]);
+        }
+
+        $providedToken = $queryOrBodyToken ?: $headerXToken ?: $bearer;
+        $validTokens = array_filter([
+            defined('INTERNAL_API_TOKEN') ? INTERNAL_API_TOKEN : null,
+            defined('HOTMART_WEBHOOK_TOKEN') ? HOTMART_WEBHOOK_TOKEN : null,
+        ]);
+
+        $authorized = false;
+        foreach ($validTokens as $valid) {
+            if (!empty($providedToken) && hash_equals((string)$valid, (string)$providedToken)) {
+                $authorized = true;
+                break;
+            }
+        }
+
+        if (!$authorized) {
             http_response_code(401);
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
             return;
         }
