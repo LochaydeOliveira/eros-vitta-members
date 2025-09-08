@@ -23,6 +23,7 @@ $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');
 $router->addRoute('download/(\d+)', 'download');
 $router->addRoute('debug-login', 'debug-login');
+$router->addRoute('simular-compra', 'simular-compra');
 
 // Processa a requisição
 $url = $_GET['url'] ?? '';

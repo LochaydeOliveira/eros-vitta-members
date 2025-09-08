@@ -65,6 +65,9 @@ class Router {
             case 'debug-login':
                 $this->handleDebugLogin();
                 break;
+            case 'simular-compra':
+                $this->handleSimularCompra();
+                break;
             default:
                 $this->show404();
         }
@@ -349,6 +352,72 @@ class Router {
         echo "1. Se tudo estiver ✅, tente fazer login em: <a href='https://erosvitta.com.br/login' target='_blank'>https://erosvitta.com.br/login</a><br>";
         echo "2. Use: lochaydeguerreiro@hotmail.com / 12345<br>";
         echo "3. Se ainda não funcionar, o problema pode estar no redirecionamento<br>";
+    }
+    
+    private function handleSimularCompra() {
+        echo "<h2>🛒 Simulador de Compra - Pacote Premium</h2>";
+        
+        // Verificar se usuário está logado
+        if (!$this->auth->isLoggedIn()) {
+            echo "❌ Você precisa estar logado para simular uma compra.<br>";
+            echo "<a href='https://erosvitta.com.br/login'>Fazer Login</a><br>";
+            return;
+        }
+        
+        $userId = $_SESSION['user_id'];
+        $userEmail = $_SESSION['user_email'];
+        
+        echo "✅ Usuário logado: " . $_SESSION['user_nome'] . "<br>";
+        echo "📧 Email: " . $userEmail . "<br>";
+        
+        // Simular compra do Pacote Premium
+        echo "<br><strong>🛍️ Simulando compra do Pacote Premium:</strong><br>";
+        
+        try {
+            $db = Database::getInstance();
+            $db->beginTransaction();
+            
+            // 1. Produto Principal: Libido Renovada
+            echo "📖 Adicionando: Libido Renovada (Produto Principal)<br>";
+            $this->auth->addUserMaterial($userId, 1);
+            
+            // 2. Order Bump: 5 Toques Mágicos
+            echo "🎁 Adicionando: 5 Toques Mágicos (Order Bump)<br>";
+            $this->auth->addUserMaterial($userId, 6);
+            
+            // 3. Pacote Premium: Versão em Áudio
+            echo "🎧 Adicionando: Versão em Áudio (Pacote Premium)<br>";
+            $this->auth->addUserMaterial($userId, 7);
+            
+            // 4. Bônus 1: O Segredo da Resistência
+            echo "📚 Adicionando: O Segredo da Resistência (Bônus)<br>";
+            $this->auth->addUserMaterial($userId, 9);
+            
+            // 5. Bônus 2: Sem Desejo Nunca Mais
+            echo "💎 Adicionando: Sem Desejo Nunca Mais (Bônus)<br>";
+            $this->auth->addUserMaterial($userId, 8);
+            
+            $db->commit();
+            
+            echo "<br>✅ <strong>Compra simulada com sucesso!</strong><br>";
+            echo "🎉 Você agora tem acesso a todos os materiais do Pacote Premium!<br>";
+            
+            echo "<br><strong>📚 Materiais liberados:</strong><br>";
+            echo "1. 📖 Libido Renovada (Ebook Principal)<br>";
+            echo "2. 🎁 5 Toques Mágicos (Order Bump)<br>";
+            echo "3. 🎧 Versão em Áudio (Pacote Premium)<br>";
+            echo "4. 📚 O Segredo da Resistência (Bônus)<br>";
+            echo "5. 💎 Sem Desejo Nunca Mais (Bônus)<br>";
+            
+            echo "<br><strong>🎯 Próximos passos:</strong><br>";
+            echo "1. <a href='https://erosvitta.com.br/dashboard' target='_blank'>Acessar Dashboard</a><br>";
+            echo "2. Verificar todos os materiais liberados<br>";
+            echo "3. Testar visualização e downloads<br>";
+            
+        } catch (Exception $e) {
+            $db->rollback();
+            echo "❌ Erro ao simular compra: " . $e->getMessage() . "<br>";
+        }
     }
     
     private function show404() {
