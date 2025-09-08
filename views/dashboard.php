@@ -2,8 +2,24 @@
 $pageTitle = 'Eros Vitta Members';
 $currentPage = 'dashboard';
 
-// Buscar materiais do usuário usando o sistema antigo (que funciona)
-$materials = $this->auth->getUserMaterials($_SESSION['user']['id']);
+// Buscar materiais do usuário usando o sistema de compras
+$db = Database::getInstance();
+$userId = $_SESSION['user']['id'];
+
+// Buscar materiais baseados nas compras do usuário
+$materials = $db->fetchAll("
+    SELECT DISTINCT m.*, up.purchase_date, up.item_type
+    FROM user_purchases up
+    LEFT JOIN product_material_mapping pmm ON up.hotmart_product_id = pmm.hotmart_product_id
+    LEFT JOIN materials m ON pmm.material_id = m.id
+    WHERE up.user_id = ? AND up.status = 'active' AND m.id IS NOT NULL
+    ORDER BY up.purchase_date DESC
+", [$userId]);
+
+// Se não encontrar materiais no sistema novo, usar o sistema antigo
+if (empty($materials)) {
+    $materials = $this->auth->getUserMaterials($userId);
+}
 
 include 'header.php';
 include 'sidebar.php';
@@ -38,7 +54,11 @@ include 'sidebar.php';
                                 <?= ucfirst($material['tipo']) ?>
                             </p>
                             <p class="material-date sans">
-                                Liberado em: <?= date('d/m/Y H:i', strtotime($material['liberado_em'])) ?>
+                                <?php if (isset($material['purchase_date'])): ?>
+                                    Comprado em: <?= date('d/m/Y H:i', strtotime($material['purchase_date'])) ?>
+                                <?php else: ?>
+                                    Liberado em: <?= date('d/m/Y H:i', strtotime($material['liberado_em'])) ?>
+                                <?php endif; ?>
                             </p>
                         </div>
                         <div class="material-actions">
@@ -52,10 +72,11 @@ include 'sidebar.php';
                             <!-- Download com controle de tempo -->
                             <?php if ($material['tipo'] === 'ebook'): ?>
                                 <?php
-                                // Verifica se passou de 7 dias para liberar download
-                                $liberadoEm = new DateTime($material['liberado_em']);
+                                // Usar data de compra se disponível, senão usar data de liberação
+                                $dataReferencia = isset($material['purchase_date']) ? $material['purchase_date'] : $material['liberado_em'];
+                                $dataRef = new DateTime($dataReferencia);
                                 $agora = new DateTime();
-                                $diferenca = $agora->diff($liberadoEm);
+                                $diferenca = $agora->diff($dataRef);
                                 
                                 if ($diferenca->days >= 7): ?>
                                     <a href="<?= BASE_URL ?>/download/<?= $material['id'] ?>" 
