@@ -62,6 +62,9 @@ class Router {
             case 'download':
                 $this->handleDownload($params[0] ?? null);
                 break;
+            case 'debug-login':
+                $this->handleDebugLogin();
+                break;
             default:
                 $this->show404();
         }

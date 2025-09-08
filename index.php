@@ -22,6 +22,7 @@ $router->addRoute('ebook/(\d+)', 'ebook');
 $router->addRoute('video/(\d+)', 'video');
 $router->addRoute('audio/(\d+)', 'audio');
 $router->addRoute('download/(\d+)', 'download');
+$router->addRoute('debug-login', 'debug-login');
 
 // Processa a requisição
 $url = $_GET['url'] ?? '';
