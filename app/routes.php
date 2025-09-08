@@ -377,7 +377,7 @@ class Router {
                 'transaction' => $transaction
             ]);
         } catch (Exception $e) {
-            $db->rollback();
+            if ($db) { try { $db->rollback(); } catch (Exception $ignore) {} }
             http_response_code(500);
             error_log('grant-access error: ' . $e->getMessage());
             echo json_encode(['status' => 'error', 'message' => 'Erro interno', 'detail' => $e->getMessage()]);

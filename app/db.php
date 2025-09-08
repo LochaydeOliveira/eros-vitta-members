@@ -14,7 +14,7 @@ class Database {
                 PDO::ATTR_EMULATE_PREPARES => false
             ]);
         } catch (PDOException $e) {
-            die("Erro na conexão com o banco: " . $e->getMessage());
+            throw new Exception("Erro na conexão com o banco: " . $e->getMessage());
         }
     }
     
