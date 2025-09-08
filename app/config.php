@@ -18,6 +18,10 @@ define('FROM_NAME', 'ErosVitta');
 define('SESSION_TIMEOUT', 3600); // 1 hora
 define('SALT', 'erosvitta_salt_2025');
 
+// Hotmart Webhook (definir via env quando possível)
+define('HOTMART_WEBHOOK_SECRET', getenv('HOTMART_WEBHOOK_SECRET') ?: '');
+define('HOTMART_WEBHOOK_TOKEN', getenv('HOTMART_WEBHOOK_TOKEN') ?: '');
+
 // URLs
 define('BASE_URL', 'https://erosvitta.com.br');
 define('LOGIN_URL', BASE_URL . '/login');
@@ -32,6 +36,9 @@ define('ASSETS_PATH', ROOT_PATH . '/public/assets');
 // Configurações de upload
 define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50MB
 define('ALLOWED_EXTENSIONS', ['pdf', 'mp4', 'mp3', 'wav', 'html']);
+
+// API interna para testes/liberação manual
+define('INTERNAL_API_TOKEN', getenv('INTERNAL_API_TOKEN') ?: '');
 
 // Timezone
 date_default_timezone_set('America/Sao_Paulo');

@@ -77,6 +77,9 @@ class Router {
             case 'download':
                 $this->handleDownload($params[0] ?? null);
                 break;
+            case 'grant-access':
+                $this->handleGrantAccess();
+                break;
             default:
                 $this->show404();
         }
@@ -285,6 +288,75 @@ class Router {
         
         readfile($filePath);
         exit;
+    }
+
+    private function handleGrantAccess() {
+        // Protegido por token simples de uso interno
+        $token = $_GET['token'] ?? $_POST['token'] ?? '';
+        if (empty(INTERNAL_API_TOKEN) || !hash_equals(INTERNAL_API_TOKEN, $token)) {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'ready',
+                'usage' => 'POST email=... hotmart_product_id=... [item_type=main|order_bump|upsell|downsell|bonus] [transaction=...]'
+            ]);
+            return;
+        }
+
+        $email = $_POST['email'] ?? '';
+        $hotmartProductId = $_POST['hotmart_product_id'] ?? '';
+        $itemType = $_POST['item_type'] ?? 'main';
+        $transaction = $_POST['transaction'] ?? ('MANUAL_' . date('YmdHis'));
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($hotmartProductId)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Parâmetros inválidos']);
+            return;
+        }
+
+        $db = Database::getInstance();
+        $accessControl = new AccessControl();
+        $auth = new Auth();
+
+        try {
+            $db->beginTransaction();
+
+            $user = $db->fetch("SELECT * FROM users WHERE email = ?", [$email]);
+            if (!$user) {
+                $userData = $auth->createUser($email, 'Cliente', null);
+                if (!$userData) {
+                    throw new Exception('Falha ao criar usuário');
+                }
+                $user = $userData;
+            }
+
+            // Mapeia material, se existir
+            $material = $accessControl->getMaterialByProductId($hotmartProductId);
+            $materialId = $material['id'] ?? null;
+            $itemName = $material['titulo'] ?? ('Produto ' . $hotmartProductId);
+
+            // Registra compra/liberação (idempotente)
+            $accessControl->addUserPurchase($user['id'], $hotmartProductId, $transaction, $itemType, $itemName, $materialId);
+
+            $db->commit();
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'success',
+                'user_id' => $user['id'],
+                'material_id' => $materialId,
+                'item_type' => $itemType,
+                'transaction' => $transaction
+            ]);
+        } catch (Exception $e) {
+            $db->rollback();
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Erro interno']);
+        }
     }
     
     
@@ -903,14 +975,10 @@ class Router {
 
         echo "<hr style='margin: 30px 0;'>";
         echo "<div style='text-align: center;'>";
-        echo "<p><a href='" . BASE_URL . "/dashboard-simples' style='color: #c67b54; margin: 0 10px;'>← Voltar ao Dashboard</a></p>";
-        echo "<p><a href='" . BASE_URL . "/dashboard' style='color: #c67b54; margin: 0 10px;'>🏠 Dashboard Original</a></p>";
+        echo "<p><a href='" . BASE_URL . "/dashboard' style='color: #c67b54; margin: 0 10px;'>← Voltar ao Dashboard</a></p>";
         echo "</div>";
     }
 
-    private function handleDebugDashboardCompleto() {
-        include 'debug-dashboard-completo.php';
-    }
 
     private function show404() {
         http_response_code(404);

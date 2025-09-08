@@ -5,6 +5,26 @@ require_once 'auth.php';
 require_once 'mailer.php';
 require_once 'accessControl.php';
 
+// Validação básica do token/assinatura do webhook
+function isValidHotmartRequest($rawInput) {
+    $secret = HOTMART_WEBHOOK_SECRET;
+    $providedSignature = $_SERVER['HTTP_X_HOTMART_SIGNATURE'] ?? $_SERVER['HTTP_X_HOTMART_HMAC_SHA256'] ?? null;
+    if (!empty($secret) && !empty($providedSignature)) {
+        $calculated = base64_encode(hash_hmac('sha256', $rawInput, $secret, true));
+        if (!hash_equals($calculated, $providedSignature)) {
+            return false;
+        }
+        return true;
+    }
+
+    $token = HOTMART_WEBHOOK_TOKEN;
+    $providedToken = $_GET['token'] ?? $_SERVER['HTTP_X_HOTMART_TOKEN'] ?? null;
+    if (!empty($token)) {
+        return hash_equals($token, (string)$providedToken);
+    }
+    return false;
+}
+
 // Verifica se é uma requisição POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -13,6 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Lê o corpo da requisição
 $input = file_get_contents('php://input');
+
+// Verifica assinatura/token
+if (!isValidHotmartRequest($input)) {
+    http_response_code(401);
+    die('Assinatura/Token inválido');
+}
+
 $data = json_decode($input, true);
 
 // Verifica se o JSON é válido
@@ -21,10 +48,11 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     die('JSON inválido');
 }
 
-// Valida se é um evento de compra aprovada
-if (!isset($data['event']) || $data['event'] !== 'PURCHASE_APPROVED') {
+// Valida evento e roteia
+$event = $data['event'] ?? '';
+if (!$event) {
     http_response_code(200);
-    die('Evento não processado');
+    die('Evento não informado');
 }
 
 // Valida dados obrigatórios
@@ -86,8 +114,28 @@ try {
         $user = $userData;
     }
     
-    // Processar compra usando o novo sistema
-    $this->processPurchase($data, $userId, $accessControl);
+    // Roteamento por tipo de evento
+    switch ($event) {
+        case 'PURCHASE_APPROVED':
+            processPurchase($data, $userId, $accessControl);
+            break;
+        case 'PURCHASE_REFUNDED':
+        case 'PURCHASE_CHARGEBACK':
+        case 'SUBSCRIPTION_CANCELED':
+            $transaction = $data['data']['transaction'] ?? null;
+            $reason = $data['data']['reason'] ?? $event;
+            if ($transaction) {
+                if ($event === 'SUBSCRIPTION_CANCELED' || $event === 'PURCHASE_CHARGEBACK') {
+                    $accessControl->markCancelledByTransaction($transaction, $reason);
+                } else {
+                    $accessControl->markRefundedByTransaction($transaction, $reason);
+                }
+            }
+            break;
+        default:
+            // Eventos não mapeados respondem 200
+            break;
+    }
     
     $db->commit();
     

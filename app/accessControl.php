@@ -133,6 +133,11 @@ class AccessControl {
      * Adiciona compra do usuário
      */
     public function addUserPurchase($userId, $hotmartProductId, $transaction, $itemType, $itemName, $materialId = null) {
+        // Idempotência: evita duplicidade pela mesma transação/produto/item/material
+        if ($this->purchaseExists($userId, $transaction, $hotmartProductId, $itemType, $materialId)) {
+            return true;
+        }
+
         $stmt = $this->db->prepare("
             INSERT INTO user_purchases (user_id, hotmart_transaction, hotmart_product_id, item_type, item_name, material_id, purchase_date, status)
             VALUES (?, ?, ?, ?, ?, ?, NOW(), 'active')
@@ -154,6 +159,47 @@ class AccessControl {
         }
         
         return true;
+    }
+
+    /**
+     * Verifica se já existe um registro de compra para idempotência
+     */
+    private function purchaseExists($userId, $transaction, $hotmartProductId, $itemType, $materialId = null) {
+        $stmt = $this->db->prepare("
+            SELECT id FROM user_purchases
+            WHERE user_id = ?
+              AND hotmart_transaction = ?
+              AND hotmart_product_id = ?
+              AND item_type = ?
+              AND ((? IS NULL AND material_id IS NULL) OR material_id = ?)
+            LIMIT 1
+        ");
+        $stmt->execute([$userId, $transaction, $hotmartProductId, $itemType, $materialId, $materialId]);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Marca compras como reembolsadas por transação
+     */
+    public function markRefundedByTransaction($transaction, $reason = null) {
+        $stmt = $this->db->prepare("
+            UPDATE user_purchases
+               SET status = 'refunded', refund_reason = ?, refund_date = NOW()
+             WHERE hotmart_transaction = ? AND status = 'active'
+        ");
+        return $stmt->execute([$reason, $transaction]);
+    }
+
+    /**
+     * Marca compras como canceladas por transação (revoga acesso)
+     */
+    public function markCancelledByTransaction($transaction, $reason = null) {
+        $stmt = $this->db->prepare("
+            UPDATE user_purchases
+               SET status = 'cancelled', refund_reason = COALESCE(?, refund_reason), refund_date = COALESCE(refund_date, NOW())
+             WHERE hotmart_transaction = ? AND status = 'active'
+        ");
+        return $stmt->execute([$reason, $transaction]);
     }
 }
 ?>
