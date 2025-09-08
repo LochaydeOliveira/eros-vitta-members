@@ -6,7 +6,8 @@ class AccessControl {
     private $db;
     
     public function __construct() {
-        $this->db = new Database();
+        // Usar a conexão PDO diretamente para permitir ->prepare()
+        $this->db = Database::getInstance()->getConnection();
     }
     
     /**
