@@ -2,6 +2,12 @@
 $pageTitle = $material['titulo'] . ' - ErosVitta';
 $currentPage = 'ebook';
 $currentMaterialId = $material['id'];
+// Se o material for PDF, redireciona para o viewer PDF.js
+$ext = strtolower(pathinfo($material['caminho'], PATHINFO_EXTENSION));
+if ($ext === 'pdf') {
+    header('Location: ' . BASE_URL . '/pdfjs/viewer.php?id=' . $currentMaterialId);
+    exit;
+}
 include 'header.php';
 include 'sidebar.php';
 ?>

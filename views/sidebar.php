@@ -11,7 +11,13 @@
             <?php if (!empty($materials)): ?>
                 <?php foreach ($materials as $material): ?>
                     <li class="nav-item">
-                        <a href="<?php echo BASE_URL; ?>/<?php echo $material['tipo']; ?>/<?php echo $material['id']; ?>" 
+                        <?php
+                        $href = BASE_URL . '/' . $material['tipo'] . '/' . $material['id'];
+                        if ($material['tipo'] === 'ebook' && isset($material['caminho']) && str_ends_with(strtolower($material['caminho']), '.pdf')) {
+                            $href = BASE_URL . '/pdfjs/viewer.php?id=' . $material['id'];
+                        }
+                        ?>
+                        <a href="<?php echo $href; ?>" 
                            class="nav-link <?php echo ($currentPage === $material['tipo'] && $currentMaterialId == $material['id']) ? 'active' : ''; ?>">
                             <i class="fas fa-<?php echo getMaterialIcon($material['tipo']); ?>"></i>
                             <span><?php echo htmlspecialchars($material['titulo']); ?></span>

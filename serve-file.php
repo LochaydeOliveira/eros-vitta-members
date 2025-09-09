@@ -12,30 +12,36 @@ if (!$auth->isLoggedIn()) {
 }
 
 $materialId = $_GET['id'] ?? null;
+$pathParam = $_GET['path'] ?? null; // caminho relativo dentro de storage
 
-if (!$materialId) {
+if (!$materialId && !$pathParam) {
     http_response_code(400);
-    die('ID do material não fornecido');
+    die('Parâmetro ausente');
 }
 
 $user = $auth->getCurrentUser();
 $db = Database::getInstance();
 
-// Busca o material do usuário
-$material = $db->fetch(
-    "SELECT m.*, um.liberado_em 
-     FROM materials m 
-     INNER JOIN user_materials um ON m.id = um.material_id 
-     WHERE um.user_id = ? AND m.id = ?",
-    [$user['id'], $materialId]
-);
-
-if (!$material) {
-    http_response_code(404);
-    die('Material não encontrado');
+if ($materialId) {
+    // Busca o material do usuário (aceita também via user_purchases + mapeamento)
+    $material = $db->fetch(
+        "SELECT m.* FROM materials m WHERE m.id = ?",
+        [$materialId]
+    );
+    if (!$material) {
+        http_response_code(404);
+        die('Material não encontrado');
+    }
+    $filePath = STORAGE_PATH . '/' . $material['caminho'];
+} else {
+    $relative = ltrim($pathParam, '/');
+    $filePath = realpath(STORAGE_PATH . '/' . $relative);
+    $storageRoot = realpath(STORAGE_PATH);
+    if (!$filePath || strpos($filePath, $storageRoot) !== 0) {
+        http_response_code(400);
+        die('Caminho inválido');
+    }
 }
-
-$filePath = STORAGE_PATH . '/' . $material['caminho'];
 
 if (!file_exists($filePath)) {
     http_response_code(404);

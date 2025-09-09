@@ -500,7 +500,13 @@ function getItemTypeName($itemType) {
                             
                             <div class="material-actions">
                                 <!-- Visualização sempre liberada -->
-                                <a href="<?= BASE_URL ?>/<?= $material['tipo'] ?>/<?= $material['id'] ?>" 
+                                <?php
+                                $viewHref = BASE_URL . '/' . $material['tipo'] . '/' . $material['id'];
+                                if ($material['tipo'] === 'ebook' && isset($material['caminho']) && str_ends_with(strtolower($material['caminho']), '.pdf')) {
+                                    $viewHref = BASE_URL . '/pdfjs/viewer.php?id=' . $material['id'];
+                                }
+                                ?>
+                                <a href="<?= $viewHref ?>" 
                                    class="btn btn-primary">
                                     <i class="fas fa-eye"></i>
                                     Visualizar

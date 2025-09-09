@@ -1,5 +1,5 @@
 /* Importar fontes do Google */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Reset e configurações básicas */
 * {
@@ -9,8 +9,8 @@
 }
 
 :root {
-    --font-serif: 'Poppins', sans-serif;
-    --font-sans: 'Poppins', sans-serif;
+    --font-serif: 'Inter', sans-serif;
+    --font-sans: 'Inter', sans-serif;
     --brand: #c67b54;
     --brand-dark: #8a573c;
     --bg: #f8f2ed;
@@ -340,6 +340,21 @@ body {
     margin-bottom: 1rem;
     color: #dc3545;
 }
+
+/* PDF viewer container */
+.pdf-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+.pdf-toolbar .btn { padding: 0.4rem 0.75rem; font-size: .9rem; }
+.pdf-canvas { width: 100% !important; height: auto; border: 1px solid var(--border); border-radius: 6px; }
+.pdf-container { width: 100%; overflow: auto; background: #fff; padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; }
 
 .error-message {
     text-align: center;
