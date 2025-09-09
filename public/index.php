@@ -62,5 +62,6 @@ $router->post('/api/hotmart/webhook', [WebhookController::class, 'handle']);
 
 // Diag temporário (remover após uso)
 $router->post('/api/diag/db', [DiagController::class, 'db']);
+$router->post('/api/diag/hash', [DiagController::class, 'hash']);
 
 $router->dispatch();

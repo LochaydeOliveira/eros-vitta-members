@@ -78,14 +78,13 @@ Eros Vitta Members - Progresso do Projeto
 - Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.
 
 
-
 curl -sS -X POST 'https://erosvitta.com.br/api/admin/login' \
   -H 'Content-Type: application/json' \
-  -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde041023"}'
+  -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde@041023"}'
 
-  curl -sS -X POST 'https://erosvitta.com.br/api/admin/login' \
+
+  SENHA='Lochayde@041023'
+APP_KEY='45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9'
+curl -sS -X POST 'https://erosvitta.com.br/api/diag/hash' \
   -H 'Content-Type: application/json' \
-  -d '{"email":"SEU_ADMIN@DOMINIO.COM","senha":"SUA_SENHA"}'
-
-
-
+  -d "{\"key\":\"$APP_KEY\",\"senha\":\"$SENHA\"}"

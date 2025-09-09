@@ -10,6 +10,22 @@ use PDOException;
 
 final class DiagController
 {
+    public static function hash(array $body): void
+    {
+        $key = (string)($body['key'] ?? '');
+        if ($key === '' || $key !== Config::appKey()) {
+            JsonResponse::error('Não autorizado', 403);
+            return;
+        }
+        $senha = (string)($body['senha'] ?? '');
+        if ($senha === '') {
+            JsonResponse::error('Senha é obrigatória', 422);
+            return;
+        }
+        $hash = password_hash($senha, PASSWORD_BCRYPT);
+        JsonResponse::ok(['bcrypt' => $hash]);
+    }
+
     public static function db(array $body): void
     {
         $key = (string)($body['key'] ?? '');
