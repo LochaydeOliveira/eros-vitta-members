@@ -76,3 +76,16 @@ Eros Vitta Members - Progresso do Projeto
 - Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.
 - Ao trocar APP_KEY, os JWTs antigos expiram na prática (usuários logam novamente).
 - Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.
+
+
+
+curl -sS -X POST 'https://erosvitta.com.br/api/admin/login' \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde041023"}'
+
+  curl -sS -X POST 'https://erosvitta.com.br/api/admin/login' \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"SEU_ADMIN@DOMINIO.COM","senha":"SUA_SENHA"}'
+
+
+

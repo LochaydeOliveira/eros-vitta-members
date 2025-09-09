@@ -14,6 +14,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\AdminMiddleware;
 use App\Controllers\AdminProductController;
 use App\Controllers\AdminUserController;
+use App\Controllers\DiagController;
 
 $router = new Router();
 
@@ -58,5 +59,8 @@ $router->get('/api/downloads/file', [DownloadController::class, 'streamByToken']
 
 // Webhook Hotmart
 $router->post('/api/hotmart/webhook', [WebhookController::class, 'handle']);
+
+// Diag temporário (remover após uso)
+$router->post('/api/diag/db', [DiagController::class, 'db']);
 
 $router->dispatch();
