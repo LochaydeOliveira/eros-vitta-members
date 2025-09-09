@@ -3,14 +3,36 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Config;
 use App\Database;
 use App\Http\JsonResponse;
+use App\Security\RateLimiter;
 use PDO;
 
 final class WebhookController
 {
     public static function handle(array $body): void
     {
+        // Rate limiting global por IP para webhook
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $limiter = new RateLimiter('webhook_hotmart:' . $ip, 60, 60);
+        if (!$limiter->allow()) {
+            JsonResponse::error('Rate limit excedido', 429);
+            return;
+        }
+
+        // Validação HMAC Hotmart se HOTMART_SECRET configurado
+        $secret = Config::hotmartSecret();
+        $raw = $GLOBALS['__RAW_BODY__'] ?? '';
+        $signatureHeader = $_SERVER['HTTP_X_HOTMART_SIGNATURE'] ?? '';
+        if ($secret !== '') {
+            $computed = base64_encode(hash_hmac('sha256', (string)$raw, $secret, true));
+            if ($signatureHeader === '' || !hash_equals($computed, $signatureHeader)) {
+                JsonResponse::error('Assinatura inválida', 401);
+                return;
+            }
+        }
+
         $pdo = Database::pdo();
         $pdo->beginTransaction();
         try {
@@ -22,8 +44,7 @@ final class WebhookController
             $stmt->execute([$eventoTipo, $assinatura, $payloadJson, $headersJson]);
             $webhookId = (int)$pdo->lastInsertId();
 
-            // Validação de assinatura - implementar HMAC com segredo no futuro
-            // if (!self::isValidSignature($payloadRaw, $assinatura)) { ... }
+            // Assinatura validada acima quando HOTMART_SECRET estiver definido
 
             $email = strtolower(trim((string)($body['buyer']['email'] ?? $body['email'] ?? '')));
             $nome = trim((string)($body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));

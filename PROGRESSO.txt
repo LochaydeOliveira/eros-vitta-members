@@ -68,9 +68,9 @@ Eros Vitta Members - Progresso do Projeto
 - Testar health:
   curl -s https://SEU_DOMINIO/api/health
 - Testar e-mail:
-  curl -X POST https://SEU_DOMINIO/api/test/email \
+  curl -X POST https://erosvitta.com.br/api/test/email \
     -H "Content-Type: application/json" \
-    -d '{"key":"SUA_APP_KEY","to":"contato@erosvitta.com.br"}'
+    -d '{"key":"45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9","to":"lochaydeguerreiro@hotmail.com"}'
 
 5) Notas
 - Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.

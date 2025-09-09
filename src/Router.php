@@ -35,7 +35,10 @@ class Router
         }
 
         try {
-            $result = $handler($this->requestBody(), $_REQUEST);
+            $raw = file_get_contents('php://input') ?: '';
+            // Armazena o corpo bruto para uso em validações (ex.: HMAC do webhook)
+            $GLOBALS['__RAW_BODY__'] = $raw;
+            $result = $handler($this->decodeBody($raw), $_REQUEST);
             if ($result !== null) {
                 JsonResponse::ok($result);
             }
@@ -49,10 +52,9 @@ class Router
     /**
      * @return array<string,mixed>
      */
-    private function requestBody(): array
+    private function decodeBody(string $raw): array
     {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-        $raw = file_get_contents('php://input') ?: '';
         if (stripos($contentType, 'application/json') !== false) {
             $data = json_decode($raw, true);
             return is_array($data) ? $data : [];

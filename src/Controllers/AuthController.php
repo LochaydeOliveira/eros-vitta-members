@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Database;
 use App\Http\JsonResponse;
 use App\Security\Jwt;
+use App\Security\RateLimiter;
 use App\Mail\Mailer;
 use PDO;
 
@@ -40,6 +41,14 @@ final class AuthController
 
     public static function login(array $body): void
     {
+        // Rate limiting por IP + email
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $emailForKey = strtolower(trim((string)($body['email'] ?? '')));
+        $limiter = new RateLimiter('login:' . $ip . ':' . $emailForKey, 10, 60);
+        if (!$limiter->allow()) {
+            JsonResponse::error('Muitas tentativas. Tente novamente em instantes.', 429);
+            return;
+        }
         $email = strtolower(trim((string)($body['email'] ?? '')));
         $senha = (string)($body['senha'] ?? '');
         if ($email === '' || $senha === '') {

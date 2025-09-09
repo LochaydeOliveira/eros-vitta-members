@@ -44,4 +44,10 @@ final class Config
     public static function smtpSecure(): string { return strtolower(getenv('SMTP_SECURE') ?: 'ssl'); }
     public static function smtpFrom(): string { return getenv('SMTP_FROM') ?: 'contato@erosvitta.com.br'; }
     public static function smtpFromName(): string { return getenv('SMTP_FROM_NAME') ?: 'Eros Vitta'; }
+
+    // Webhooks / Integrações
+    public static function hotmartSecret(): string
+    {
+        return getenv('HOTMART_SECRET') ?: '';
+    }
 }
