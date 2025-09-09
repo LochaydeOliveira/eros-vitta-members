@@ -83,6 +83,7 @@ $purchasedCount = count($userAccessIds);
 
         /* Main content */
         .main-content { margin-left: 0; margin-top: 80px; padding: 2rem; min-height: calc(100vh - 80px); }
+        .container { max-width: 1000px; margin: 0 auto; }
 
         .dashboard-header { margin-bottom: 2rem; }
         .dashboard-header h2 { font-size: 2rem; margin-bottom: 0.5rem; color: var(--text); }
@@ -91,6 +92,8 @@ $purchasedCount = count($userAccessIds);
         /* Grid */
         .materials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
         .material-card { position: relative; background: var(--white); border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid var(--border); display: flex; flex-direction: column; gap: .75rem; }
+        .material-cover { width: 100%; height: 160px; background: #fafafa; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .material-cover img { width: 100%; height: 100%; object-fit: cover; }
         .material-card h3 { font-size: 1.1rem; color: var(--text); }
         .material-meta { color: var(--text-secondary); font-size: .9rem; }
         .material-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
@@ -122,6 +125,7 @@ $purchasedCount = count($userAccessIds);
 
     <!-- Main Content -->
     <main class="main-content">
+        <div class="container">
         <div class="dashboard-header">
             <h2>Eros Vitta Members</h2>
             <p class="sans">Bem-vindo, <?= htmlspecialchars($_SESSION['user']['nome']) ?>!</p>
@@ -136,21 +140,93 @@ $purchasedCount = count($userAccessIds);
                     <?php
                     $hasAccess = isset($userAccessIds[(int)$material['id']]);
                     $isPdf = isset($material['caminho']) && str_ends_with(strtolower($material['caminho']), '.pdf');
-                    $viewHref = $hasAccess ? ($isPdf ? BASE_URL . '/pdfjs/viewer.php?id=' . $material['id'] : BASE_URL . '/ebook/' . $material['id']) : '#';
+
+                    // Resolver PDF correspondente quando o caminho for HTML (usa correspondência por nome na pasta storage/pdfs)
+                    $pdfFileRel = null;
+                    if (!$isPdf && isset($material['caminho'])) {
+                        $base = strtolower(pathinfo($material['caminho'], PATHINFO_FILENAME));
+                        $pdfDir = STORAGE_PATH . '/pdfs';
+                        if (is_dir($pdfDir)) {
+                            foreach (glob($pdfDir . '/*.pdf') as $file) {
+                                $name = strtolower(pathinfo($file, PATHINFO_FILENAME));
+                                if (strpos($name, $base) !== false) {
+                                    $pdfFileRel = 'pdfs/' . basename($file);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Link de visualização: sempre usar viewer PDF.js quando houver PDF disponível
+                    if ($hasAccess) {
+                        if ($isPdf) {
+                            $viewHref = BASE_URL . '/pdfjs/viewer.php?id=' . $material['id'];
+                        } elseif ($pdfFileRel) {
+                            $viewHref = BASE_URL . '/pdfjs/viewer.php?file=' . urlencode($pdfFileRel);
+                        } else {
+                            $viewHref = '#';
+                        }
+                    } else {
+                        $viewHref = '#';
+                    }
+
                     $checkoutHref = !empty($material['hotmart_product_id']) ? ('https://pay.hotmart.com/' . $material['hotmart_product_id'] . '?checkoutMode=10') : '#';
+
+                    // Capa por código Hotmart
+                    $cover = null;
+                    $code = isset($material['hotmart_product_id']) ? $material['hotmart_product_id'] : null;
+                    if ($code) {
+                        $exts = ['jpg','jpeg','png','webp'];
+                        foreach ($exts as $ext) {
+                            foreach (glob(ROOT_PATH . '/assets/img/*' . $code . '.' . $ext) as $match) {
+                                $cover = BASE_URL . '/assets/img/' . basename($match);
+                                break 2;
+                            }
+                        }
+                    }
+                    if (!$cover) { $cover = BASE_URL . '/assets/img/thumbnail-vsl-libido-renovada.jpg'; }
+
+                    // Data de referência para download (apenas se PDF nativo do material)
+                    $refDate = null; $canDownload = false; $daysLeft = 7;
+                    if ($hasAccess && ($isPdf)) {
+                        $refRow = $db->fetch("SELECT up.purchase_date AS d FROM user_purchases up LEFT JOIN product_material_mapping pmm ON up.hotmart_product_id = pmm.hotmart_product_id WHERE up.user_id = ? AND pmm.material_id = ? ORDER BY up.purchase_date DESC LIMIT 1", [$userId, $material['id']]);
+                        if ($refRow && !empty($refRow['d'])) { $refDate = $refRow['d']; }
+                        if (!$refDate) {
+                            $refRow = $db->fetch("SELECT liberado_em AS d FROM user_materials WHERE user_id = ? AND material_id = ? ORDER BY liberado_em DESC LIMIT 1", [$userId, $material['id']]);
+                            if ($refRow && !empty($refRow['d'])) { $refDate = $refRow['d']; }
+                        }
+                        if ($refDate) {
+                            $dataRef = new DateTime($refDate); $agora = new DateTime(); $diff = $agora->diff($dataRef);
+                            $canDownload = ($diff->days >= 7);
+                            $daysLeft = max(0, 7 - $diff->days);
+                        }
+                    }
                     ?>
                     <div class="material-card">
+                        <div class="material-cover">
+                            <img src="<?= $cover ?>" alt="Capa do e‑book">
+                        </div>
                         <div>
                             <h3><?= htmlspecialchars($material['titulo']) ?></h3>
                             <p class="material-meta sans">E‑book • ID #<?= (int)$material['id'] ?></p>
                         </div>
                         <div class="material-actions">
-                            <?php if ($hasAccess): ?>
+                            <?php if ($hasAccess && $viewHref !== '#'): ?>
                                 <a href="<?= $viewHref ?>" class="btn btn-primary"><i class="fas fa-eye"></i> Visualizar</a>
+                            <?php elseif ($hasAccess): ?>
+                                <button class="btn btn-disabled" disabled><i class="fas fa-eye-slash"></i> PDF indisponível</button>
                             <?php else: ?>
                                 <button class="btn btn-disabled" disabled><i class="fas fa-lock"></i> Bloqueado</button>
                                 <?php if ($checkoutHref !== '#'): ?>
                                     <a href="<?= $checkoutHref ?>" class="locked-cta sans">Liberar acesso</a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php if ($hasAccess && $isPdf): ?>
+                                <?php if ($canDownload): ?>
+                                    <a href="<?= BASE_URL ?>/download/<?= $material['id'] ?>" class="btn btn-secondary"><i class="fas fa-download"></i> Baixar PDF</a>
+                                <?php else: ?>
+                                    <button class="btn btn-disabled" disabled><i class="fas fa-clock"></i> Download em <?= $daysLeft ?> dias</button>
                                 <?php endif; ?>
                             <?php endif; ?>
                         </div>
@@ -167,6 +243,7 @@ $purchasedCount = count($userAccessIds);
                     </div>
                 <?php endforeach; ?>
             </div>
+        </div>
         </div>
     </main>
 </body>
