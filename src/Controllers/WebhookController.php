@@ -21,30 +21,31 @@ final class WebhookController
             return;
         }
 
-        // Validação HMAC Hotmart se HOTMART_SECRET configurado
-        $secret = Config::hotmartSecret();
-        $raw = $GLOBALS['__RAW_BODY__'] ?? '';
-        $signatureHeader = $_SERVER['HTTP_X_HOTMART_SIGNATURE'] ?? '';
-        if ($secret !== '') {
-            $computed = base64_encode(hash_hmac('sha256', (string)$raw, $secret, true));
-            if ($signatureHeader === '' || !hash_equals($computed, $signatureHeader)) {
-                JsonResponse::error('Assinatura inválida', 401);
+        // Validação oficial Hotmart via Hottok
+        $hottok = Config::hotmartHottok();
+        $tokenHeader = $_SERVER['HTTP_X_HOTMART_HOTTOK']
+            ?? ($_SERVER['HTTP_HOTTOK'] ?? ''); // fallback se a plataforma enviar somente Hottok
+        if ($hottok !== '') {
+            if ($tokenHeader === '' || !hash_equals($hottok, $tokenHeader)) {
+                JsonResponse::error('Hottok inválido', 401);
                 return;
             }
         }
 
         $pdo = Database::pdo();
-        $pdo->beginTransaction();
         try {
+            // Registra o evento ANTES da transação de negócio, para sempre ter trilha
             $headersJson = json_encode(self::collectHeaders());
             $payloadJson = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $stmt = $pdo->prepare('INSERT INTO webhook_eventos (evento_tipo, assinatura, payload, headers, criado_em) VALUES (?, ?, ?, ?, NOW())');
             $eventoTipo = (string)($body['event'] ?? $body['event_type'] ?? 'hotmart');
-            $assinatura = $_SERVER['HTTP_X_HOTMART_SIGNATURE'] ?? null;
+            // Armazena o Hottok recebido para auditoria
+            $assinatura = $tokenHeader ?: null;
             $stmt->execute([$eventoTipo, $assinatura, $payloadJson, $headersJson]);
             $webhookId = (int)$pdo->lastInsertId();
 
-            // Assinatura validada acima quando HOTMART_SECRET estiver definido
+            // Daqui em diante, faz a escrita de negócio dentro de transação
+            $pdo->beginTransaction();
 
             $email = strtolower(trim((string)($body['buyer']['email'] ?? $body['email'] ?? '')));
             $nome = trim((string)($body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
@@ -126,9 +127,14 @@ final class WebhookController
             $pdo->commit();
             JsonResponse::ok(['processed' => true]);
         } catch (\Throwable $e) {
-            $pdo->rollBack();
-            $pdo->prepare('UPDATE webhook_eventos SET processado_em = NOW(), resultado_status = "falha", erro_mensagem = ? WHERE id = (SELECT MAX(id) FROM webhook_eventos)')
-                ->execute([$e->getMessage()]);
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            // Atualiza o evento registrado no início com a falha
+            if (isset($webhookId) && $webhookId > 0) {
+                $pdo->prepare('UPDATE webhook_eventos SET processado_em = NOW(), resultado_status = "falha", erro_mensagem = ? WHERE id = ?')
+                    ->execute([$e->getMessage(), (int)$webhookId]);
+            }
             JsonResponse::error('Falha ao processar webhook', 400, ['detail' => $e->getMessage()]);
         }
     }

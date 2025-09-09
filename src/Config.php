@@ -50,4 +50,9 @@ final class Config
     {
         return getenv('HOTMART_SECRET') ?: '';
     }
+
+    public static function hotmartHottok(): string
+    {
+        return getenv('HOTMART_HOTTOK') ?: '';
+    }
 }

@@ -360,4 +360,6 @@ curl -sS -X POST "https://erosvitta.com.br/api/downloads/token" \
   -d "{\"produto_id\":1}"
 
 
+
+
 curl -L -o ebook.pdf "https://erosvitta.com.br/api/downloads/file?token=0cb7484f6d8cf6c455ab843303f0ab6858d50a7220beb1ebb3c9c588fbfefbbc"
