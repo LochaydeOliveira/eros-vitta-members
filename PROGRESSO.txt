@@ -29,21 +29,19 @@ Eros Vitta Members - Progresso do Projeto
   - Subpasta antiga eros-vitta/ removida
 
 2) Onde paramos
-- Aguardando deploy no servidor/CPANEL para validar:
-  - Document Root apontando para public/
-  - .htaccess lendo APP_KEY e SMTP_* (Zoho)
-  - Teste do endpoint POST /api/test/email (envio Zoho)
-- Ajustes de ambiente a fazer no servidor:
-  - APP_KEY: chave hex de 64 caracteres
-  - SMTP_USER: contato@erosvitta.com.br
-  - SMTP_PASS: senha do Zoho (não versionar)
-  - (opcional) DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS, se necessário ajustar
+- Deploy realizado e API online (ex.: https://erosvitta.com.br)
+- Conexão com DB validada via POST /api/diag/db (ok)
+- Login admin VALIDADO com sucesso em produção (POST /api/admin/login): OK
+- Admin usado: lochaydeguerreiro@hotmail.com (ativo=1, senha atualizada com Bcrypt)
 
 3) O que falta para continuar
-- Deploy e smoke test:
+- Operacional imediato:
+  - Remover/ocultar endpoints de diagnóstico (/api/diag/*) após fim dos testes
+  - Criar um segundo admin de backup e guardar senhas com gerenciador
+  - Testar rotas admin com JWT (ex.: GET /api/admin/users)
+- Deploy e smoke test (contínuo):
   - Health: GET /api/health
-  - E-mail: POST /api/test/email
-  - Após sucesso, remover o endpoint /api/test/email por segurança
+  - (opcional) E-mail: POST /api/test/email; após sucesso, remover por segurança
 - Painel Admin (backoffice):
   - Rotas para CRUD de produtos (upload, editar, deletar)
   - CRUD de clientes (listar/editar/bloquear/desbloquear, resetar senha)
@@ -65,12 +63,24 @@ Eros Vitta Members - Progresso do Projeto
 
 4) Como testar depois do deploy
 - Confirmar apontamento de domínio/subdomínio -> public/
-- Testar health:
+- Health:
   curl -s https://SEU_DOMINIO/api/health
-- Testar e-mail:
-  curl -X POST https://erosvitta.com.br/api/test/email \
-    -H "Content-Type: application/json" \
-    -d '{"key":"45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9","to":"lochaydeguerreiro@hotmail.com"}'
+- DB (diag):
+  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/db' \
+    -H 'Content-Type: application/json' \
+    -d '{"key":"APP_KEY_AQUI"}'
+- Gerar hash Bcrypt (diag):
+  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/hash' \
+    -H 'Content-Type: application/json' \
+    -d '{"key":"APP_KEY_AQUI","senha":"SENHA_DESEJADA"}'
+- Validar admin no DB (diag):
+  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/admin-auth' \
+    -H 'Content-Type: application/json' \
+    -d '{"key":"APP_KEY_AQUI","email":"EMAIL_ADMIN","senha":"SENHA_DESEJADA"}'
+- Login admin (produção):
+  curl -sS -X POST 'https://SEU_DOMINIO/api/admin/login' \
+    -H 'Content-Type: application/json' \
+    -d '{"email":"EMAIL_ADMIN","senha":"SENHA_DESEJADA"}'
 
 5) Notas
 - Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.
@@ -78,13 +88,13 @@ Eros Vitta Members - Progresso do Projeto
 - Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.
 
 
-curl -sS -X POST 'https://erosvitta.com.br/api/admin/login' \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde@041023"}'
 
 
-  SENHA='Lochayde@041023'
-APP_KEY='45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9'
-curl -sS -X POST 'https://erosvitta.com.br/api/diag/hash' \
-  -H 'Content-Type: application/json' \
-  -d "{\"key\":\"$APP_KEY\",\"senha\":\"$SENHA\"}"
+Token
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
+xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA
+
+
+curl -sS 'https://erosvitta.com.br/api/admin/users' \
+  -H 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
+xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA'
