@@ -27,18 +27,20 @@ Eros Vitta Members - Progresso do Projeto
 - Organização de projeto corrigida:
   - Código movido para a raiz (public/, src/, README.md)
   - Subpasta antiga eros-vitta/ removida
+- Rotas de diagnóstico removidas do ambiente (segurança): /api/diag/*
 
 2) Onde paramos
 - Deploy realizado e API online (ex.: https://erosvitta.com.br)
-- Conexão com DB validada via POST /api/diag/db (ok)
-- Login admin VALIDADO com sucesso em produção (POST /api/admin/login): OK
+- Conexão com DB validada (ok)
+- Login admin VALIDADO com sucesso (POST /api/admin/login)
+- Rotas admin protegidas testadas (ex.: GET /api/admin/users) — acesso ok; lista vazia
 - Admin usado: lochaydeguerreiro@hotmail.com (ativo=1, senha atualizada com Bcrypt)
+- Rotas de diagnóstico removidas do roteador público
 
 3) O que falta para continuar
 - Operacional imediato:
-  - Remover/ocultar endpoints de diagnóstico (/api/diag/*) após fim dos testes
-  - Criar um segundo admin de backup e guardar senhas com gerenciador
-  - Testar rotas admin com JWT (ex.: GET /api/admin/users)
+  - Criar um admin de backup e guardar as credenciais com gerenciador
+  - Manter endpoints de diagnóstico fora de produção (já removidos)
 - Deploy e smoke test (contínuo):
   - Health: GET /api/health
   - (opcional) E-mail: POST /api/test/email; após sucesso, remover por segurança
@@ -55,7 +57,7 @@ Eros Vitta Members - Progresso do Projeto
   - Validação HMAC real do webhook Hotmart
   - Rate limiting em login e webhook
   - Logs/observabilidade (falhas de e-mail/webhook)
-  - Proteção da mídia (armazenamento fora do public/, streaming autenticado)
+  - Proteção da mídia (armazenamento fora da public/, streaming autenticado)
   - Watermark opcional para PDFs
 - Operacional:
   - CRON diário para snapshots (se EVENT_SCHEDULER indisponível)
@@ -65,36 +67,17 @@ Eros Vitta Members - Progresso do Projeto
 - Confirmar apontamento de domínio/subdomínio -> public/
 - Health:
   curl -s https://SEU_DOMINIO/api/health
-- DB (diag):
-  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/db' \
-    -H 'Content-Type: application/json' \
-    -d '{"key":"APP_KEY_AQUI"}'
-- Gerar hash Bcrypt (diag):
-  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/hash' \
-    -H 'Content-Type: application/json' \
-    -d '{"key":"APP_KEY_AQUI","senha":"SENHA_DESEJADA"}'
-- Validar admin no DB (diag):
-  curl -sS -X POST 'https://SEU_DOMINIO/api/diag/admin-auth' \
-    -H 'Content-Type: application/json' \
-    -d '{"key":"APP_KEY_AQUI","email":"EMAIL_ADMIN","senha":"SENHA_DESEJADA"}'
 - Login admin (produção):
   curl -sS -X POST 'https://SEU_DOMINIO/api/admin/login' \
     -H 'Content-Type: application/json' \
     -d '{"email":"EMAIL_ADMIN","senha":"SENHA_DESEJADA"}'
+- Rota admin protegida (substituir TOKEN):
+  curl -sS 'https://SEU_DOMINIO/api/admin/users' \
+    -H 'Authorization: Bearer TOKEN_AQUI'
 
 5) Notas
 - Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.
 - Ao trocar APP_KEY, os JWTs antigos expiram na prática (usuários logam novamente).
 - Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.
-
-
-
-
-Token
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
-xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA
-
-
-curl -sS 'https://erosvitta.com.br/api/admin/users' \
-  -H 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
-xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA'
+- Não versionar tokens JWT em arquivos do repositório.
+- Endpoints de diagnóstico devem ficar desativados em produção.

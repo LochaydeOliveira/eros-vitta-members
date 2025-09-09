@@ -41,6 +41,7 @@ $router->post('/api/admin/login', [AdminAuthController::class, 'login']);
 $router->get('/api/admin/products', AdminMiddleware::requireAdmin([AdminProductController::class, 'list']));
 $router->post('/api/admin/products', AdminMiddleware::requireAdmin([AdminProductController::class, 'create']));
 $router->put('/api/admin/products', AdminMiddleware::requireAdmin([AdminProductController::class, 'update'])) ;
+$router->post('/api/admin/products/update', AdminMiddleware::requireAdmin([AdminProductController::class, 'update'])) ;
 $router->post('/api/admin/products/deactivate', AdminMiddleware::requireAdmin([AdminProductController::class, 'deactivate'])) ;
 
 // Admin - usuários

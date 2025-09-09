@@ -1,0 +1,349 @@
+
+# PROMPT COMPLETO PARA O CURSOR AI — Eros Vitta Members (com Fluxograma, SQL, Etapas e UI/UX)
+
+## Título do Projeto
+Desenvolvimento da Plataforma **Eros Vitta Members**
+
+## Objetivo
+Criar uma plataforma de membros completa e responsiva (mobile-first) para entrega de **ebooks e áudio-books** vendidos pela Hotmart, com:
+- Área do cliente (catálogo, visualização, downloads, CTA de compra);
+- Área administrativa (gestão de clientes, produtos e acessos, liberação manual);
+- Integração via **Webhook da Hotmart**;
+- Bloqueio de downloads até **7 dias após compra confirmada**;
+- Hospedagem: HostGator — domínio **erosvitta.com.br**;
+- Arquitetura segura, escalável e performática.
+
+---
+
+## Funcionalidades Principais
+
+### 1) Funil de Vendas Integrado
+- Página de Vendas → Checkout Hotmart → Upsell/Downsell/Popup → Compra Confirmada → Webhook → Área de Membros.
+- Webhook registra cliente, compra, status e **data de liberação (+7 dias)**.
+
+### 2) Área de Membros (Cliente)
+- **Login/Registro**:
+  - Login por email/senha (recuperação e alteração de senha).
+  - Cadastro automático via Webhook Hotmart após compra confirmada.
+- **Layout**:
+  - Cabeçalho: Logo, Nome do Cliente (saudação), Botão “Sair”.
+  - Sidebar/Menu: “Ebooks”, “Áudio-books”, “Perfil” (dados do cliente e troca de senha).
+  - Main: Catálogo estilo e-commerce (grid de cards):
+    - Produtos comprados: “Visualizar” (PDF.js) ou “Ouvir” (Wavesurfer.js); “Download” liberado após 7 dias (mostrar contagem regressiva de dias restantes).
+    - Produtos não comprados: mostrar **CTA** com link Hotmart (“Comprar agora”).
+- **Segurança**:
+  - Conteúdo protegido (sem links diretos de arquivos).
+  - Links temporários e verificação de sessão/JWT em toda requisição.
+
+### 3) Área Administrativa
+- Login Admin separado.
+- **Gestão de Clientes**: listar, criar, editar, remover; resetar senha; bloquear/desbloquear acesso.
+- **Gestão de Produtos**: criar/editar/remover ebooks e áudios; upload de arquivos; definir status (ativo/inativo) e link Hotmart.
+- **Gestão de Acessos**: atribuir/remover produtos manualmente para clientes; ajustar data de liberação.
+- **Dashboard**: estatísticas (usuários ativos, produtos ativos, compras confirmadas, downloads liberados hoje/semana).
+
+### 4) Integração Hotmart
+- Endpoint (webhook) que valida assinatura e atualiza:
+  - Usuário (criar/atualizar);
+  - Compra (status, data_compra, data_liberacao = data_compra + 7 dias).
+
+### 5) Tecnologias Recomendadas
+- **Frontend**: React.js + TailwindCSS + shadcn/ui (ou Alpine.js se preferir ultra leve).
+- **Backend**: Laravel (PHP 8+) **ou** Node.js/Express (escolher o que melhor se encaixa no deploy HostGator; PHP tende a ser mais simples).
+- **Banco**: MySQL/MariaDB (HostGator).
+- **Autenticação**: Sessões PHP **ou** JWT (Bearer).
+- **PDF Viewer**: Mozilla **PDF.js** (responsivo).
+- **Áudio**: **Wavesurfer.js** (playlist para capítulos) ou **Plyr.js**.
+- **Emails**: SMTP (Zoho/Gmail) via PHPMailer (PHP) ou Nodemailer (Node).
+
+---
+
+## FLUXOGRAMA DO SISTEMA
+
+```
+                      ┌────────────────────┐
+                      │   Anúncios/Mídias  │
+                      └──────────┬─────────┘
+                                 │
+                                 ▼
+                        Página de Vendas
+                                 │
+                                 ▼
+                          Checkout Hotmart
+                                 │
+                ┌────────────────┴────────────────┐
+                │                                 │
+                ▼                                 ▼
+         Compra Confirmada                 Compra Não Feita
+                │                                 │
+                ▼                                 ▼
+          Webhook Hotmart                     Popup Oferta
+                │
+                ▼
+    ┌─────────────────────────────┐
+    │ Backend recebe notificação │
+    │ - Valida Assinatura        │
+    │ - Cria/atualiza cliente    │
+    │ - Registra compra          │
+    │ - Define data de liberação │
+    └──────────────┬─────────────┘
+                   │
+                   ▼
+          Banco de Dados MySQL
+ ┌────────────────────────────────────┐
+ │ usuarios (dados do cliente)       │
+ │ produtos (ebooks/áudios)          │
+ │ compras (status, data liberação)  │
+ └────────────────────────────────────┘
+                   │
+         ┌─────────┴─────────┐
+         │                   │
+         ▼                   ▼
+Área de Membros (Cliente)    Painel Admin
+         │                   │
+┌────────┴────────┐   ┌─────┴────────────────┐
+│ Cabeçalho       │   │ Login Admin          │
+│ - Logo          │   │ Dashboard com stats  │
+│ - Nome Cliente  │   │ Gestão de Clientes   │
+│ - Logout        │   │ Gestão de Produtos   │
+└──────┬──────────┘   │ Controle de Acessos │
+       │              └─────────────────────┘
+       ▼
+Sidebar com Links
+- Ebooks
+- Áudio-books
+- Perfil
+
+       │
+       ▼
+Catálogo de Produtos (Cards)
+┌─────────────────────────────────────────┐
+│ Produto Liberado:                       │
+│ - Visualizar PDF (PDF.js)               │
+│ - Ouvir Áudio (Wavesurfer.js)           │
+│ - Download (após 7 dias)                │
+│                                         │
+│ Produto Bloqueado:                      │
+│ - CTA com link Hotmart                  │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Estrutura de Banco de Dados (SQL)
+
+```sql
+-- Banco de Dados: erosvitta_members
+CREATE DATABASE IF NOT EXISTS erosvitta_members CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE erosvitta_members;
+
+-- Tabela de Usuários
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha_hash VARCHAR(255) NOT NULL,
+    status ENUM('ativo', 'bloqueado') DEFAULT 'ativo',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Tabela de Produtos (Ebooks/Áudios)
+CREATE TABLE produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    tipo ENUM('ebook', 'audio') NOT NULL,
+    descricao TEXT,
+    capa VARCHAR(255),
+    arquivo VARCHAR(255),
+    link_hotmart VARCHAR(255),
+    status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Compras
+CREATE TABLE compras (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    produto_id INT NOT NULL,
+    status ENUM('pendente', 'confirmado', 'reembolsado') DEFAULT 'pendente',
+    data_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_liberacao DATETIME,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Administradores
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha_hash VARCHAR(255) NOT NULL,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Inserir um admin inicial (trocar o hash por um gerado com password_hash)
+INSERT INTO admins (nome, email, senha_hash)
+VALUES ('Admin Principal', 'admin@erosvitta.com.br', '$2y$10$SENHA_HASH_AQUI');
+```
+
+**Observações**:
+- Gerar hash seguro com `password_hash("SENHA_FORTE", PASSWORD_BCRYPT)` no PHP.
+- `ON DELETE CASCADE` garante limpeza de registros dependentes.
+
+---
+
+## Estrutura de Pastas (Sugerida)
+
+```
+erosvitta-members/
+│
+├── backend/
+│   ├── config/          # env, conexão DB
+│   ├── controllers/     # lógica de negócio
+│   ├── models/          # ORM ou queries
+│   ├── routes/          # rotas API
+│   ├── middlewares/     # auth, logs, rate-limit
+│   ├── services/        # webhook, email, storage
+│   ├── public/          # index.php, assets públicos (se PHP)
+│   └── app.php / index.js
+│
+├── frontend/
+│   ├── public/          # assets estáticos
+│   ├── components/      # React components
+│   ├── pages/           # Login, Dashboard, Ebooks, Audios, Perfil
+│   ├── hooks/           # auth/useApi/usePlayer
+│   └── App.js
+│
+├── admin/
+│   ├── components/      # tabelas, formulários
+│   └── pages/           # Clientes, Produtos, Acessos, Dashboard
+│
+└── uploads/
+    ├── ebooks/          # PDFs (fora da raiz pública, servir via endpoint)
+    └── audios/          # MP3s (idem)
+```
+
+---
+
+## Etapas de Implementação (Passo a Passo)
+
+1) **Setup & Configuração**
+- Criar repositório (monorepo ou repos separados para front/back).
+- Backend: configurar Laravel (ou Express), variáveis de ambiente (.env), conexão DB.
+- Rodar migrations com base no SQL acima (ou usar diretamente o script).
+
+2) **Autenticação**
+- Implementar sessões PHP (ou JWT) com rotas de login/logout/refresh.
+- Recuperação de senha via email (token de reset, expira em 30 min).
+
+3) **Webhook Hotmart**
+- Criar endpoint `/webhook/hotmart`.
+- Validar assinatura/segurança.
+- Mapear payload → criar/atualizar usuário e registrar/atualizar compra.
+- Definir `data_liberacao = data_compra + INTERVAL 7 DAY` para cada compra confirmada.
+
+4) **Área de Membros — Frontend**
+- Layout (Cabeçalho + Sidebar + Main) responsivo (TailwindCSS).
+- Página “Ebooks” e “Áudio-books”: grid de cards com estados (liberado/bloqueado).
+- Integração:
+  - **PDF.js** para visualização inline (responsivo, zoom, páginas).
+  - **Wavesurfer.js** para player com playlist (álbuns/capítulos).
+- Lógica do botão **Download**: só habilitar se `now >= data_liberacao`.
+- Exibir contagem regressiva “Disponível em X dias” quando bloqueado.
+
+5) **Painel Admin**
+- Login Admin separado.
+- CRUDs:
+  - Clientes: criar/editar/remover, resetar senha, bloquear/desbloquear.
+  - Produtos: criar/editar/remover, upload de capa e arquivo, status, link Hotmart.
+  - Acessos: atribuir/remover produto por usuário, editar data_liberacao manualmente.
+- Dashboard com cards de métricas (totais e últimas atividades).
+
+6) **Segurança e Arquivos**
+- Guardar PDFs/MP3s **fora** da pasta pública e servir via endpoint autenticado (stream).
+- Assinar URLs temporárias ou verificar permissão a cada requisição de mídia.
+- Rate-limit para endpoints sensíveis (login, webhook, downloads).
+- HTTPS obrigatório (redirect 301).
+
+7) **Emails & Notificações**
+- SMTP configurado (Zoho/Gmail).
+- Templates: boas-vindas (login/senha), confirmação de liberação de download (D+7), reset de senha.
+
+8) **Testes & Deploy**
+- Testar webhook com payloads reais (Hotmart sandbox) e todos os estados (pendente/confirmado/reembolsado).
+- Testar UX mobile (breakpoints, telas pequenas, 1 mão).
+- Deploy no HostGator (PHP): enviar backend, apontar DocumentRoot, configurar `.htaccess`, `.env` e cron (se necessário).
+
+---
+
+## Diretrizes de UI/UX (Mobile-First)
+
+### Paleta (sugestão — ajustar à marca Eros Vitta)
+- Primária: `#7C3AED` (violeta) — ações principais (CTA).
+- Secundária: `#06B6D4` (ciano) — destaque/links.
+- Neutros: 
+  - Texto primário: `#0F172A` (slate-900)
+  - Texto secundário: `#475569` (slate-600)
+  - Fundo: `#F8FAFC` (slate-50)
+  - Cartões: `#FFFFFF` com sombra suave.
+
+### Tipografia
+- Fonte sem serifa moderna (ex.: Inter, Poppins).
+- Hierarquia:
+  - Títulos: 20–24px (semibold/bold).
+  - Texto base: 14–16px (regular).
+  - Botões: 16px (semibold).
+- Espaçamento generoso (line-height 1.4–1.6).
+
+### Componentes
+- **Cards de Produto**:
+  - Capa (img) com `aspect-[3/4]`, título em 1–2 linhas, descrição curta (opcional).
+  - Botões: “Visualizar/Ouvir” (primário), “Download” (secundário — desabilitado até D+7), CTA “Comprar agora” (para bloqueados).
+  - Badge de status: “Liberado”, “Bloqueado”, “Disponível em X dias”.
+- **Header**: logo menor à esquerda, nome do cliente e avatar/ícone, botão “Sair” à direita.
+- **Sidebar (Mobile)**: drawer lateral (hamburger) com links grandes e ícones (lucide-react).
+- **Grid Responsivo**:
+  - Mobile: 1 coluna
+  - ≥640px: 2 colunas
+  - ≥768px: 3 colunas
+  - ≥1024px: 4 colunas
+- **Estados**:
+  - Loading: skeleton loaders (cards cinzas).
+  - Vazio: mensagem amigável + CTA (ex.: “Nenhum conteúdo liberado ainda.”).
+  - Erro: alerta claro com ação de tentar novamente.
+- **Acessibilidade**:
+  - Contraste AA, tamanhos de toque ≥44px, foco visível.
+  - Teclado navegável, labels e ARIA em players e modais.
+- **Feedback**:
+  - Toasts para ações (salvo, atualizado, erro).
+  - Confirmação para ações destrutivas (remover cliente/produto).
+- **Players**:
+  - PDF.js: toolbar de zoom, navegação por páginas, fullscreen.
+  - Áudio: controles básicos, barra de progresso, velocidade 0.75–1.5x, lembrar posição por usuário (localStorage).
+
+### Microinterações
+- Animações suaves (150–250ms) para hover/press/modal.
+- Skeletons ao carregar listas e players.
+
+### Conteúdo Bloqueado
+- Exibir watermark “BLOQUEADO” na capa (opcional) e CTA “Comprar agora” com link Hotmart específico.
+
+---
+
+## Critérios de Aceite (Done/Definition of Done)
+- Login/Logout/Recuperação funcionando.
+- Webhook Hotmart processando eventos confirmados e atualizando DB.
+- Catálogo lista todos os produtos; distingue liberados/bloqueados; aplica regra D+7 para downloads.
+- Visualização com PDF.js e player de áudio com Wavesurfer.js.
+- Painel Admin com CRUDs e atribuição manual de produtos.
+- Arquivos servidos de forma protegida (sem acesso público direto).
+- Layout responsivo e acessível em smartphones.
+- README com instruções de deploy (HostGator), .env de exemplo e comandos de build.
+
+
+
+
+Token
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
+xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA
