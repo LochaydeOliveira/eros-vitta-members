@@ -354,5 +354,10 @@ Token de Usuário
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg
 
 
+curl -sS -X POST "https://erosvitta.com.br/api/downloads/token" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg" \
+  -H "Content-Type: application/json" \
+  -d "{\"produto_id\":1}"
 
-curl -sS "https://erosvitta.com.br/api/admin/users" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg"
+
+curl -L -o ebook.pdf "https://erosvitta.com.br/api/downloads/file?token=0cb7484f6d8cf6c455ab843303f0ab6858d50a7220beb1ebb3c9c588fbfefbbc"
