@@ -278,6 +278,57 @@ body {
     margin-bottom: 2rem;
 }
 
+/* E-book reader: visual consistente para todos os conteúdos HTML embutidos */
+.ebook-viewer {
+    font-family: var(--font-sans);
+    line-height: 1.9;
+    color: var(--text);
+}
+.ebook-viewer h1,
+.ebook-viewer h2,
+.ebook-viewer h3,
+.ebook-viewer h4 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.25rem 0 0.75rem;
+}
+.ebook-viewer h1 { font-size: 2rem; }
+.ebook-viewer h2 { font-size: 1.6rem; }
+.ebook-viewer h3 { font-size: 1.25rem; }
+.ebook-viewer p,
+.ebook-viewer li {
+    font-size: 1.05rem;
+    color: var(--text);
+}
+.ebook-viewer ul,
+.ebook-viewer ol {
+    padding-left: 1.25rem;
+    margin: 0.75rem 0 1rem;
+}
+.ebook-viewer img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    display: block;
+    margin: 1rem auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.ebook-viewer blockquote {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    background: #fff8f4;
+    border-left: 4px solid var(--brand);
+    color: var(--text);
+    border-radius: 4px;
+}
+.ebook-viewer a {
+    color: var(--brand-dark);
+    text-decoration: none;
+}
+.ebook-viewer a:hover { text-decoration: underline; }
+.ebook-viewer hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
 .file-preview {
     text-align: center;
     padding: 3rem;
