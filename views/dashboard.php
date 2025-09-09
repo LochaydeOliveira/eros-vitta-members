@@ -4,13 +4,14 @@ $currentPage = 'dashboard';
 
 // Buscar materiais do usuário usando o sistema de compras
 $db = Database::getInstance();
-$userId = $_SESSION['user']['id'];
+$userId = $_SESSION['user_id'] ?? ($_SESSION['user']['id'] ?? null);
 
 // Query otimizada para buscar materiais do usuário
 $materials = $db->fetchAll("
     SELECT DISTINCT m.*, up.purchase_date, up.item_type, up.hotmart_product_id
     FROM user_purchases up
-    JOIN materials m ON up.material_id = m.id
+    LEFT JOIN product_material_mapping pmm ON up.hotmart_product_id = pmm.hotmart_product_id
+    LEFT JOIN materials m ON IFNULL(up.material_id, pmm.material_id) = m.id
     WHERE up.user_id = ? AND up.status = 'active' AND m.id IS NOT NULL
     ORDER BY up.purchase_date DESC
 ", [$userId]);
