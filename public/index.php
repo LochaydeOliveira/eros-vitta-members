@@ -14,6 +14,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\AdminMiddleware;
 use App\Controllers\AdminProductController;
 use App\Controllers\AdminUserController;
+use App\Controllers\AdminAccessController;
  
 
 $router = new Router();
@@ -49,6 +50,9 @@ $router->get('/api/admin/users', AdminMiddleware::requireAdmin([AdminUserControl
 $router->post('/api/admin/users/block', AdminMiddleware::requireAdmin([AdminUserController::class, 'block']));
 $router->post('/api/admin/users/unblock', AdminMiddleware::requireAdmin([AdminUserController::class, 'unblock']));
 $router->post('/api/admin/users/reset-password', AdminMiddleware::requireAdmin([AdminUserController::class, 'resetPassword']));
+
+// Admin - acessos
+$router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([AdminAccessController::class, 'assign']));
 
 // Produtos e acessos (usuário autenticado)
 $router->get('/api/products', AuthMiddleware::requireUser([ProductController::class, 'list']));
