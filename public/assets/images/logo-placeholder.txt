@@ -1,3 +1,0 @@
-Coloque aqui o arquivo logo.png da ErosVitta
-Dimensões recomendadas: 150x60 pixels
-Formato: PNG com fundo transparente

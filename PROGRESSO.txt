@@ -1,0 +1,78 @@
+Eros Vitta Members - Progresso do Projeto
+
+1) O que já foi feito
+- Backend PHP puro estruturado (compatível HostGator):
+  - public/index.php (roteador), public/.htaccess (rewrite + vars de ambiente)
+  - src/* (Router, bootstrap, Config, Database, Http/JsonResponse, Security/Jwt, Middleware/AuthMiddleware)
+  - Controllers: AuthController, AdminAuthController, ProductController, AccessController, DownloadController, WebhookController, TestEmailController
+  - Mail: SMTP Zoho implementado em src/Mail/Mailer.php (SSL 465 / TLS 587) com fallback para mail()
+- Banco de dados (externo ao código):
+  - Script SQL enviado anteriormente: schema completo, índices, views para dashboard e snapshots materializados com procedures e EVENT/CRON
+- Endpoints disponíveis:
+  - GET  /api/health
+  - POST /api/test/email (temporário, protegido por APP_KEY)
+  - POST /api/auth/register
+  - POST /api/auth/login
+  - POST /api/auth/password/forgot
+  - POST /api/auth/password/reset
+  - GET  /api/auth/me (JWT)
+  - POST /api/admin/login
+  - GET  /api/products (JWT)
+  - GET  /api/accesses (JWT)
+  - POST /api/downloads/token (JWT)
+  - GET  /api/downloads/file?token=...
+  - POST /api/hotmart/webhook
+- Documentação:
+  - README.md na raiz com instruções de configuração, rotas e SMTP Zoho
+- Organização de projeto corrigida:
+  - Código movido para a raiz (public/, src/, README.md)
+  - Subpasta antiga eros-vitta/ removida
+
+2) Onde paramos
+- Aguardando deploy no servidor/CPANEL para validar:
+  - Document Root apontando para public/
+  - .htaccess lendo APP_KEY e SMTP_* (Zoho)
+  - Teste do endpoint POST /api/test/email (envio Zoho)
+- Ajustes de ambiente a fazer no servidor:
+  - APP_KEY: chave hex de 64 caracteres
+  - SMTP_USER: contato@erosvitta.com.br
+  - SMTP_PASS: senha do Zoho (não versionar)
+  - (opcional) DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS, se necessário ajustar
+
+3) O que falta para continuar
+- Deploy e smoke test:
+  - Health: GET /api/health
+  - E-mail: POST /api/test/email
+  - Após sucesso, remover o endpoint /api/test/email por segurança
+- Painel Admin (backoffice):
+  - Rotas para CRUD de produtos (upload, editar, deletar)
+  - CRUD de clientes (listar/editar/bloquear/desbloquear, resetar senha)
+  - Atribuir produtos manualmente a clientes
+  - Dashboard usando as views e snapshots (resumo, faturamento diário/mensal, top produtos)
+- Front-end Área do Membro (React + Tailwind + shadcn/ui):
+  - Login, catálogo (Ebooks/Áudios), Perfil
+  - Visualização de PDFs (PDF.js) e player de áudio (Wavesurfer.js)
+  - Estados: comprado, bloqueado, CTA comprar
+- Segurança e robustez:
+  - Validação HMAC real do webhook Hotmart
+  - Rate limiting em login e webhook
+  - Logs/observabilidade (falhas de e-mail/webhook)
+  - Proteção da mídia (armazenamento fora do public/, streaming autenticado)
+  - Watermark opcional para PDFs
+- Operacional:
+  - CRON diário para snapshots (se EVENT_SCHEDULER indisponível)
+  - Backups do banco e retenção
+
+4) Como testar depois do deploy
+- Confirmar apontamento de domínio/subdomínio -> public/
+- Testar health:
+  curl -s https://SEU_DOMINIO/api/health
+- Testar e-mail:
+  curl -X POST https://SEU_DOMINIO/api/test/email \
+    -H "Content-Type: application/json" \
+    -d '{"key":"SUA_APP_KEY","to":"contato@erosvitta.com.br"}'
+
+5) Notas
+- Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.
+- Ao trocar APP_KEY, os JWTs antigos expiram na prática (usuários logam novamente).
+- Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.

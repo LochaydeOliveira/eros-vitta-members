@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Variáveis de ambiente (ajuste os valores)
+SetEnv APP_KEY "TROQUE_PELA_SUA_APP_KEY"
+SetEnv SMTP_HOST "smtp.zoho.com"
+SetEnv SMTP_PORT "465"
+SetEnv SMTP_SECURE "ssl"
+SetEnv SMTP_USER "contato@erosvitta.com.br"
+SetEnv SMTP_PASS "TROQUE_PELA_SENHA_DO_ZOHO"
+SetEnv SMTP_FROM "contato@erosvitta.com.br"
+SetEnv SMTP_FROM_NAME "Eros Vitta"
+
+# Serve arquivos existentes diretamente
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redireciona tudo para index.php
+RewriteRule ^ index.php [L]

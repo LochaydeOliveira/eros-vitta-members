@@ -1,6 +1,0 @@
-RewriteEngine On
-
-# Redireciona tudo para index.php, exceto arquivos existentes
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
