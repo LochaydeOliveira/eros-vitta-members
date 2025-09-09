@@ -1,5 +1,5 @@
 /* Importar fontes do Google */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* Reset e configurações básicas */
 * {
@@ -9,8 +9,8 @@
 }
 
 :root {
-    --font-serif: 'Cormorant Garamond', serif;
-    --font-sans: 'Mulish', sans-serif;
+    --font-serif: 'Poppins', sans-serif;
+    --font-sans: 'Poppins', sans-serif;
     --brand: #c67b54;
     --brand-dark: #8a573c;
     --bg: #f8f2ed;
