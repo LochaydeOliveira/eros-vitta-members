@@ -95,6 +95,29 @@ final class ViewController
 
         readfile($path);
     }
+
+    /**
+     * Retorna o PDF completo (view-only) para uso no PDF.js do front-end.
+     * Query: produto_id (int)
+     */
+    public static function pdfFile(array $_body, array $req): void
+    {
+        $produtoId = (int)($_GET['produto_id'] ?? 0);
+        if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
+        $userId = (int)($req['user_id'] ?? 0);
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT COALESCE(p.storage_view_pdf, p.storage_path_pdf) AS storage_path_pdf FROM acessos a JOIN produtos p ON p.id = a.produto_id WHERE a.usuario_id = ? AND a.produto_id = ? AND a.status = "ativo" LIMIT 1');
+        $stmt->execute([$userId, $produtoId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || empty($row['storage_path_pdf'])) { JsonResponse::error('Sem acesso ou PDF não configurado', 403); return; }
+        $path = (string)$row['storage_path_pdf'];
+        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="' . basename($path) . '"');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        readfile($path);
+    }
 }
 
 
