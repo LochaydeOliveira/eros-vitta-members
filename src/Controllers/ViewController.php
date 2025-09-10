@@ -28,7 +28,7 @@ final class ViewController
         $userId = (int)($req['user_id'] ?? 0);
         $pdo = Database::pdo();
         // Verifica se há acesso (independe de D+7 para visualização)
-        $stmt = $pdo->prepare('SELECT p.storage_path_pdf, u.email FROM acessos a JOIN produtos p ON p.id = a.produto_id JOIN usuarios u ON u.id = a.usuario_id WHERE a.usuario_id = ? AND a.produto_id = ? AND a.status = "ativo" LIMIT 1');
+        $stmt = $pdo->prepare('SELECT COALESCE(p.storage_view_pdf, p.storage_path_pdf) AS storage_path_pdf, u.email FROM acessos a JOIN produtos p ON p.id = a.produto_id JOIN usuarios u ON u.id = a.usuario_id WHERE a.usuario_id = ? AND a.produto_id = ? AND a.status = "ativo" LIMIT 1');
         $stmt->execute([$userId, $produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_path_pdf'])) {
@@ -76,7 +76,7 @@ final class ViewController
         if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
         $userId = (int)($req['user_id'] ?? 0);
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT p.storage_path_audio FROM acessos a JOIN produtos p ON p.id = a.produto_id WHERE a.usuario_id = ? AND a.produto_id = ? AND a.status = "ativo" LIMIT 1');
+        $stmt = $pdo->prepare('SELECT COALESCE(p.storage_view_audio, p.storage_path_audio) AS storage_path_audio FROM acessos a JOIN produtos p ON p.id = a.produto_id WHERE a.usuario_id = ? AND a.produto_id = ? AND a.status = "ativo" LIMIT 1');
         $stmt->execute([$userId, $produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_path_audio'])) {

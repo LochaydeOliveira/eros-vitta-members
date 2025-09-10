@@ -44,7 +44,10 @@ final class DownloadController
             return;
         }
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT dt.usuario_id, dt.produto_id, dt.usado_em, dt.expira_em, p.tipo, p.storage_path_pdf, p.storage_path_audio FROM download_tokens dt JOIN produtos p ON p.id = dt.produto_id WHERE dt.token = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT dt.usuario_id, dt.produto_id, dt.usado_em, dt.expira_em, p.tipo,
+            COALESCE(p.storage_dl_pdf, p.storage_path_pdf) AS storage_path_pdf,
+            COALESCE(p.storage_dl_audio, p.storage_path_audio) AS storage_path_audio
+            FROM download_tokens dt JOIN produtos p ON p.id = dt.produto_id WHERE dt.token = ? LIMIT 1');
         $stmt->execute([$token]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
