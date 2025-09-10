@@ -29,9 +29,16 @@ Eros Vitta Members - Progresso do Projeto
   - Subpasta antiga eros-vitta/ removida
 - Rotas de diagnóstico removidas do ambiente (segurança): /api/diag/*
 - Storage seguro implementado (paths fora de public/ via storage_path_* e streaming autenticado)
-- PDF inline habilitado no streaming
+- View-only protegido (sem URL pública):
+  - GET /api/view/pdf?produto_id=&page=&width= (renderização por página com marca d’água)
+  - GET /api/view/audio?produto_id= (stream inline)
+- Download por token sempre attachment (usar apenas após D+7)
 - Webhook Hotmart validado via Hottok (X-HOTMART-HOTTOK)
 - Envio de e-mail automático no webhook (boas-vindas com login/senha provisória)
+ - Logs básicos em logs/api_YYYY-MM-DD.log
+ - Colunas separadas view vs download em produtos (storage_view_* e storage_dl_*)
+ - Front-end MVP simples em public/members/index.html (login + catálogo + visualizar/ouvir + download pós D+7)
+ - DocumentRoot apontando para public/; .htaccess com APP_KEY, DB_*, SMTP_*, HOTMART_HOTTOK
 
 2) Onde paramos
 - Deploy realizado e API online (ex.: https://erosvitta.com.br)
@@ -54,18 +61,20 @@ Eros Vitta Members - Progresso do Projeto
   - CRUD de clientes (listar/editar/bloquear/desbloquear, resetar senha)
   - Atribuir produtos manualmente a clientes
   - Dashboard usando as views e snapshots (resumo, faturamento diário/mensal, top produtos)
-- Front-end Área do Membro (React + Tailwind + shadcn/ui):
-  - Login, catálogo (Ebooks/Áudios), Perfil
-  - Visualização de PDFs (PDF.js) e player de áudio (Wavesurfer.js)
-  - Estados: comprado, bloqueado, CTA comprar
+- Front-end Área do Membro (evolução do MVP para React/Tailwind):
+  - Paginação de PDF (próx/ant), viewer completo (ou integração PDF.js)
+  - Player de áudio com barra/pausa/lembrar posição
+  - Perfil e troca de senha
+  - Estados/CTAs (comprado, bloqueado, comprar)
 - Segurança e robustez:
   - Webhook: manter validação Hottok
   - Rate limiting em login e webhook
-  - Logs/observabilidade (falhas de e-mail/webhook)
+  - Logs/observabilidade (falhas de e-mail/webhook) – log básico já ativo
   - Proteção da mídia (armazenamento fora da public/, streaming autenticado)
   - Watermark opcional para PDFs
 - Operacional:
   - CRON diário para snapshots (se EVENT_SCHEDULER indisponível)
+  - CRON D+7: e-mail de liberação com senha/link da cópia de download
   - Backups do banco e retenção
 
 4) Como testar depois do deploy
