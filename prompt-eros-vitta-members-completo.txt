@@ -358,3 +358,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZSt
 curl -sS "https://erosvitta.com.br/api/view/pdf?produto_id=1&page=1&width=1200" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg
 " --output page1.jpg
+
+
+
+curl -sS -X POST 'https://erosvitta.com.br/api/auth/login' -H 'Content-Type: application/json' -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde@100423"}'
