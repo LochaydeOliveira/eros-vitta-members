@@ -42,6 +42,7 @@
   </style>
   <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Wavesurfer.js (opcional futuramente) -->
   <script>
     // Configura worker do PDF.js
     if (window['pdfjsLib']) {
@@ -113,13 +114,10 @@
         const btnPdf = button('Ler agora', async ()=>{ openPdfReader(it.id); });
         actions.appendChild(btnPdf);
       } else {
-        const btnPlay = button('Ouvir', async ()=>{ await playAudio(it.id); });
+        const btnPlay = button('Ouvir álbum', async ()=>{ await playAudio(it.id); });
         actions.appendChild(btnPlay);
       }
-      const canDownload = Number(it.download_liberado) === 1;
-      const btnDl = button('Download', async ()=>{ await doDownload(it.id); });
-      if(!canDownload){ btnDl.classList.add('muted'); btnDl.disabled = true; btnDl.textContent = 'Download (bloqueado até D+7)'; }
-      actions.appendChild(btnDl);
+      // Download removido da área de membros (entrega pós D+7 por e-mail)
       return el;
     }
 
@@ -268,30 +266,85 @@
     }
 
     async function playAudio(produtoId){
+      // Busca playlist
       const token = getToken();
-      const url = apiBase + `/api/view/audio?produto_id=${encodeURIComponent(produtoId)}`;
-      const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-      if(!res.ok){ alert('Erro ao carregar áudio'); return; }
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
+      let playlist;
+      try {
+        const j = await api(`/api/view/audio/playlist?produto_id=${encodeURIComponent(produtoId)}`);
+        playlist = (j.items || j.data?.items || []);
+      } catch(e){ alert('Erro ao carregar playlist: ' + e.message); return; }
       const media = document.querySelector(`#media-${produtoId}`);
       media.innerHTML = '';
+      const container = document.createElement('div');
       const audio = document.createElement('audio');
       audio.controls = true;
-      audio.src = audioUrl;
-      media.appendChild(audio);
-      try {
-        const key = `ev_audio_pos_${currentUserEmail}_${produtoId}`;
-        const saved = parseFloat(localStorage.getItem(key) || '0');
+      audio.style.width = '100%';
+      const list = document.createElement('div');
+      list.className = 'small';
+      container.appendChild(audio);
+      container.appendChild(list);
+      media.appendChild(container);
+
+      let idx = 0;
+      function keyFor(trackId){ return `ev_audio_pos_${currentUserEmail}_${produtoId}_${trackId}`; }
+
+      async function loadTrack(i){
+        if(i < 0 || i >= playlist.length){ return; }
+        idx = i;
+        const tr = playlist[idx];
+        // carrega stream da faixa
+        const url = `/api/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(tr.id)}`;
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if(!res.ok){ alert('Falha ao carregar faixa'); return; }
+        const blob = await res.blob();
+        const obj = URL.createObjectURL(blob);
+        audio.src = obj;
+        // restaurar posição
+        const saved = parseFloat(localStorage.getItem(keyFor(tr.id)) || '0');
         if(!isNaN(saved) && saved > 0){ audio.currentTime = saved; }
-        audio.addEventListener('timeupdate', ()=>{
-          try { localStorage.setItem(key, String(audio.currentTime||0)); } catch {}
-        });
-        audio.addEventListener('ended', ()=>{
-          try { localStorage.removeItem(key); } catch {}
-        });
         audio.play().catch(()=>{});
-      } catch {}
+        renderList();
+      }
+
+      function renderList(){
+        list.innerHTML = '';
+        const toolbar = document.createElement('div');
+        toolbar.className = 'actions';
+        const prev = button('Anterior', ()=> loadTrack(idx-1));
+        const next = button('Próxima', ()=> loadTrack(idx+1));
+        toolbar.appendChild(prev); toolbar.appendChild(next);
+        list.appendChild(toolbar);
+        const ul = document.createElement('div');
+        for(let i=0;i<playlist.length;i++){
+          const tr = playlist[i];
+          const item = document.createElement('div');
+          item.style.padding = '6px 8px';
+          item.style.border = '1px solid #e2e8f0';
+          item.style.borderRadius = '6px';
+          item.style.marginTop = '6px';
+          item.style.cursor = 'pointer';
+          item.textContent = `${String(tr.ordem||i+1).padStart(2,'0')} — ${tr.titulo}`;
+          if(i === idx){ item.style.background = '#f1f5f9'; }
+          item.onclick = ()=> loadTrack(i);
+          ul.appendChild(item);
+        }
+        list.appendChild(ul);
+      }
+
+      audio.addEventListener('timeupdate', ()=>{
+        const tr = playlist[idx]; if(!tr) return;
+        try { localStorage.setItem(keyFor(tr.id), String(audio.currentTime||0)); } catch {}
+      });
+      audio.addEventListener('ended', ()=>{
+        const tr = playlist[idx]; if(!tr) return;
+        try { localStorage.removeItem(keyFor(tr.id)); } catch {}
+        // auto-avanço
+        loadTrack(idx+1);
+      });
+
+      if(playlist.length > 0){ loadTrack(0); } else {
+        list.textContent = 'Nenhuma faixa disponível.';
+      }
     }
 
     async function doDownload(produtoId){
@@ -367,7 +420,7 @@
         .then(r => { if(!r.ok) throw new Error('Falha ao carregar PDF'); return r.blob(); })
         .then(b => {
           const url = URL.createObjectURL(b);
-          iframe.src = url; // navegador abrirá o PDF com suas ferramentas (zoom, páginas, imprimir)
+          iframe.src = url; // abre como blob (sem URL do arquivo)
           document.getElementById('pdfjs-modal').classList.add('show');
         })
         .catch(e => alert(e.message));

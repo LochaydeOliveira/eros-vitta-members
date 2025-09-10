@@ -62,6 +62,8 @@ $router->get('/api/accesses', AuthMiddleware::requireUser([AccessController::cla
 $router->get('/api/view/pdf', AuthMiddleware::requireUser([ViewController::class, 'pdfPage']));
 $router->get('/api/view/audio', AuthMiddleware::requireUser([ViewController::class, 'audio']));
 $router->get('/api/view/pdf-file', AuthMiddleware::requireUser([ViewController::class, 'pdfFile']));
+$router->get('/api/view/audio/playlist', AuthMiddleware::requireUser([ViewController::class, 'playlist']));
+$router->get('/api/view/audio/track', AuthMiddleware::requireUser([ViewController::class, 'audioTrack']));
 
 // Downloads protegidos
 $router->post('/api/downloads/token', AuthMiddleware::requireUser([DownloadController::class, 'createToken']));

@@ -118,6 +118,100 @@ final class ViewController
         header('Pragma: no-cache');
         readfile($path);
     }
+
+    /**
+     * Playlist de faixas do produto (view-only). Requer acesso ativo.
+     * Query: produto_id (int)
+     */
+    public static function playlist(array $_body, array $req): void
+    {
+        $produtoId = (int)($_GET['produto_id'] ?? 0);
+        if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
+        $userId = (int)($req['user_id'] ?? 0);
+        $pdo = Database::pdo();
+        // Verifica acesso
+        $stmt = $pdo->prepare('SELECT 1 FROM acessos WHERE usuario_id = ? AND produto_id = ? AND status = "ativo" LIMIT 1');
+        $stmt->execute([$userId, $produtoId]);
+        if (!$stmt->fetch()) { JsonResponse::error('Sem acesso ao produto', 403); return; }
+        // Tenta playlist por pasta (diretório configurado no produto)
+        $dirStmt = $pdo->prepare('SELECT storage_view_audio_dir FROM produtos WHERE id = ? LIMIT 1');
+        $dirStmt->execute([$produtoId]);
+        $dirRow = $dirStmt->fetch(PDO::FETCH_ASSOC);
+        $items = [];
+        $madeFromDir = false;
+        if ($dirRow && !empty($dirRow['storage_view_audio_dir'])) {
+            $dir = (string)$dirRow['storage_view_audio_dir'];
+            if (is_dir($dir)) {
+                $files = glob(rtrim($dir, '/\\') . '/*.mp3');
+                if (is_array($files) && count($files) > 0) {
+                    natsort($files);
+                    $index = 1;
+                    foreach ($files as $filePath) {
+                        $base = basename($filePath, '.mp3');
+                        $title = trim(str_replace(['_', '-'], ' ', $base));
+                        $items[] = [
+                            'id' => $index, // índice 1-based para modo pasta
+                            'titulo' => $title !== '' ? $title : ('Faixa ' . $index),
+                            'ordem' => $index,
+                            'duracao_segundos' => null,
+                        ];
+                        $index++;
+                    }
+                    $madeFromDir = true;
+                }
+            }
+        }
+        if (!$madeFromDir) {
+            JsonResponse::ok(['items' => []]);
+            return;
+        }
+        JsonResponse::ok(['items' => $items]);
+    }
+
+    /**
+     * Stream de uma faixa específica (view-only)
+     * Query: produto_id (int), track_id (int)
+     */
+    public static function audioTrack(array $_body, array $req): void
+    {
+        $produtoId = (int)($_GET['produto_id'] ?? 0);
+        $trackId = (int)($_GET['track_id'] ?? 0); // pode ser ID da faixa (DB) ou índice 1-based (pasta)
+        if ($produtoId <= 0 || $trackId <= 0) { JsonResponse::error('produto_id e track_id são obrigatórios', 422); return; }
+        $userId = (int)($req['user_id'] ?? 0);
+        $pdo = Database::pdo();
+        // Verifica acesso
+        $stmt = $pdo->prepare('SELECT 1 FROM acessos WHERE usuario_id = ? AND produto_id = ? AND status = "ativo" LIMIT 1');
+        $stmt->execute([$userId, $produtoId]);
+        if (!$stmt->fetch()) { JsonResponse::error('Sem acesso ao produto', 403); return; }
+        // Modo pasta: `trackId` é o índice 1-based da faixa dentro do diretório
+        $path = '';
+        {
+            $dirStmt = $pdo->prepare('SELECT storage_view_audio_dir FROM produtos WHERE id = ? LIMIT 1');
+            $dirStmt->execute([$produtoId]);
+            $dirRow = $dirStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dirRow && !empty($dirRow['storage_view_audio_dir'])) {
+                $dir = (string)$dirRow['storage_view_audio_dir'];
+                if (is_dir($dir)) {
+                    $files = glob(rtrim($dir, '/\\') . '/*.mp3');
+                    if (is_array($files) && count($files) > 0) {
+                        natsort($files);
+                        $files = array_values($files); // reindexa após sort
+                        $index = $trackId - 1; // 1-based → 0-based
+                        if ($index >= 0 && $index < count($files)) {
+                            $path = $files[$index];
+                        }
+                    }
+                }
+            }
+        }
+        if ($path === '' || !is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        header('Content-Type: audio/mpeg');
+        header('Content-Disposition: inline; filename="' . basename($path) . '"');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Accept-Ranges: none');
+        readfile($path);
+    }
 }
 
 

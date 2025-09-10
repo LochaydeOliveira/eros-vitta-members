@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Tempo de geração: 09/09/2025 às 15:41
+-- Tempo de geração: 10/09/2025 às 19:10
 -- Versão do servidor: 5.7.23-23
 -- Versão do PHP: 8.1.33
 
@@ -113,8 +113,21 @@ CREATE TABLE `acessos` (
   `data_bloqueio` datetime DEFAULT NULL,
   `motivo_bloqueio` varchar(255) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `liberacao_email_enviado_em` datetime DEFAULT NULL,
+  `liberacao_email_status` enum('pendente','sucesso','falha') NOT NULL DEFAULT 'pendente',
+  `liberacao_email_tentativas` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  `liberacao_email_ultima_tentativa_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Despejando dados para a tabela `acessos`
+--
+
+INSERT INTO `acessos` (`id`, `usuario_id`, `produto_id`, `compra_id`, `origem`, `status`, `data_liberacao`, `data_bloqueio`, `motivo_bloqueio`, `criado_em`, `atualizado_em`, `liberacao_email_enviado_em`, `liberacao_email_status`, `liberacao_email_tentativas`, `liberacao_email_ultima_tentativa_em`) VALUES
+(1, 1, 1, 1, 'manual', 'ativo', '2025-09-16 20:30:00', NULL, NULL, '2025-09-09 19:24:39', '2025-09-09 20:54:01', NULL, 'pendente', 0, NULL),
+(2, 2, 1, 1, 'hotmart', 'ativo', '2025-09-16 20:30:00', NULL, NULL, '2025-09-09 20:55:18', '2025-09-09 20:55:18', NULL, 'pendente', 0, NULL),
+(3, 2, 2, NULL, 'manual', 'ativo', '2025-09-10 11:03:35', NULL, NULL, '2025-09-10 11:03:35', '2025-09-10 11:03:35', NULL, 'pendente', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -138,7 +151,8 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `nome`, `email`, `senha_hash`, `is_superadmin`, `ativo`, `criado_em`, `atualizado_em`) VALUES
-(2, 'Administrador', 'lochaydeguerreiro@hotmail.com', '$2y$10$SE5MFD/8fj1i7go.Pa8/S.hegrANJIEX4JX5ctkxkFTvEvtdljfLq', 1, 1, '2025-09-09 14:08:25', '2025-09-09 15:05:00');
+(2, 'Administrador', 'lochaydeguerreiro@hotmail.com', '$2y$10$5p1diCc328fd4bGYEk/pMOeGzyW5AHHRDhvL3tTrEXRiN9iFePvre', 1, 1, '2025-09-09 14:08:25', '2025-09-09 17:30:38'),
+(3, 'Admin Backup', 'admin.backup@erosvitta.com.br', '$2y$10$UlRSUIcRcYlX1GDrorgoLOeVJdU52H5BgTPM4sJYQjrskrTCTo7rO', 1, 1, '2025-09-09 17:43:11', '2025-09-09 17:43:11');
 
 -- --------------------------------------------------------
 
@@ -178,6 +192,13 @@ CREATE TABLE `compras` (
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Despejando dados para a tabela `compras`
+--
+
+INSERT INTO `compras` (`id`, `usuario_id`, `produto_id`, `origem`, `status`, `hotmart_transaction_id`, `valor_pago`, `moeda`, `data_compra`, `data_confirmacao`, `data_liberacao`, `observacoes`, `criado_em`, `atualizado_em`) VALUES
+(1, 2, 1, 'hotmart', 'aprovada', 'TX1', 99.90, 'BRL', '2025-09-09 20:30:00', '2025-09-09 20:30:00', '2025-09-16 20:30:00', NULL, '2025-09-09 20:54:01', '2025-09-09 20:55:18');
+
 -- --------------------------------------------------------
 
 --
@@ -194,6 +215,16 @@ CREATE TABLE `download_tokens` (
   `ip_geracao` varchar(45) DEFAULT NULL,
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Despejando dados para a tabela `download_tokens`
+--
+
+INSERT INTO `download_tokens` (`id`, `usuario_id`, `produto_id`, `token`, `expira_em`, `usado_em`, `ip_geracao`, `criado_em`) VALUES
+(1, 1, 1, '0cb7484f6d8cf6c455ab843303f0ab6858d50a7220beb1ebb3c9c588fbfefbbc', '2025-09-09 20:18:00', '2025-09-09 20:03:55', NULL, '2025-09-09 20:03:00'),
+(2, 1, 1, '196f1b7654003f4eb45f7b285538e61b77e9a06eee135f6f13a2292094b81e22', '2025-09-09 20:25:01', NULL, NULL, '2025-09-09 20:10:01'),
+(3, 1, 1, '1a74c7118cf28b9a4ae0d3f7f2c871d012059f90e3e8930580b6313ac5a12fa8', '2025-09-09 20:26:46', '2025-09-09 20:12:07', NULL, '2025-09-09 20:11:46'),
+(4, 2, 2, 'b0fc350565353aa53b629d55a5f74515a57acf2744cd125449400a2f6388295a', '2025-09-10 11:54:23', '2025-09-10 11:39:23', NULL, '2025-09-10 11:39:23');
 
 -- --------------------------------------------------------
 
@@ -234,8 +265,17 @@ CREATE TABLE `produtos` (
   `hotmart_product_id` varchar(100) DEFAULT NULL,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `storage_view_audio_dir` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Despejando dados para a tabela `produtos`
+--
+
+INSERT INTO `produtos` (`id`, `tipo`, `titulo`, `slug`, `descricao`, `capa_url`, `storage_path_pdf`, `storage_path_audio`, `storage_view_pdf`, `storage_dl_pdf`, `storage_view_audio`, `storage_dl_audio`, `duracao_segundos`, `aplicar_watermark`, `hotmart_product_id`, `ativo`, `criado_em`, `atualizado_em`, `storage_view_audio_dir`) VALUES
+(1, 'ebook', 'Ebook Exemplo 1', 'ebook-exemplo-1', 'Descrição atualizada', '', '/home1/paymen58/storage/ebooks/o-segredo-da-resistencia-o-guia-pratico-para-urar-mais-tempo-na-cama.pdf', NULL, '/home1/paymen58/storage/ebooks/view/o-segredo-da-resistencia.pdf', '/home1/paymen58/storage/ebooks/download/o-segredo-da-resistencia-protegido001.pdf', NULL, NULL, NULL, 0, '6157971', 1, '2025-09-09 18:13:17', '2025-09-09 23:21:22', NULL),
+(2, 'audio', 'Libido Renovada (Versão em Áudio)', 'versao-em-audio-libido-renovada', 'Versão em áudio do conteúdo Libido Renovada.', NULL, NULL, NULL, NULL, NULL, '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada.mp3', '/home1/paymen58/storage/audios/download/versao-em-audi-libido-renovada-protegido001.zip', NULL, 0, NULL, 1, '2025-09-09 23:24:57', '2025-09-10 19:04:30', '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada');
 
 -- --------------------------------------------------------
 
@@ -300,6 +340,14 @@ CREATE TABLE `usuarios` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `atualizado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Despejando dados para a tabela `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha_hash`, `status`, `email_verificado_em`, `hotmart_user_id`, `ultimo_login_em`, `criado_em`, `atualizado_em`) VALUES
+(1, 'Cliente Teste', 'usuario.teste+evm@exemplo.com', '$2y$10$19toMuLB3Pk5YSYWL1OB5.EZ3xrNN8oPgz9EOn6MScTK9aL.t9j5e', 'ativo', NULL, 'U123', NULL, '2025-09-09 18:46:30', '2025-09-09 20:54:01'),
+(2, 'Cliente Teste', 'lochaydeguerreiro@hotmail.com', '$2y$10$5p1diCc328fd4bGYEk/pMOeGzyW5AHHRDhvL3tTrEXRiN9iFePvre', 'ativo', NULL, 'U123', '2025-09-10 12:05:06', '2025-09-09 20:55:18', '2025-09-10 12:05:06');
 
 -- --------------------------------------------------------
 
@@ -467,6 +515,16 @@ CREATE TABLE `webhook_eventos` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Despejando dados para a tabela `webhook_eventos`
+--
+
+INSERT INTO `webhook_eventos` (`id`, `origem`, `evento_tipo`, `assinatura`, `payload`, `headers`, `processado_em`, `resultado_status`, `erro_mensagem`, `criado_em`) VALUES
+(2, 'hotmart', 'approved', 'JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873', '{\"event\":\"approved\",\"buyer\":{\"email\":\"usuario.teste+evm@exemplo.com\",\"name\":\"Cliente Teste\",\"ucode\":\"U123\"},\"product\":{\"id\":\"P001\"},\"purchase\":{\"transaction\":\"TX1\",\"status\":\"approved\",\"price\":99.900000000000005684341886080801486968994140625,\"currency\":\"BRL\",\"approved_date\":\"2025-09-09T20:30:00-03:00\"}}', '{\"accept\":\"*\\/*\",\"host\":\"erosvitta.com.br\",\"user-agent\":\"curl\\/8.10.1\",\"x-hotmart-hottok\":\"JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873\",\"x-https\":\"1\"}', '2025-09-09 20:49:42', 'falha', 'Produto não cadastrado para hotmart_product_id=P001', '2025-09-09 20:49:42'),
+(3, 'hotmart', 'approved', 'JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873', '{\"event\":\"approved\",\"buyer\":{\"email\":\"usuario.teste+evm@exemplo.com\",\"name\":\"Cliente Teste\",\"ucode\":\"U123\"},\"product\":{\"id\":\"P001\"},\"purchase\":{\"transaction\":\"TX1\",\"status\":\"approved\",\"price\":99.900000000000005684341886080801486968994140625,\"currency\":\"BRL\",\"approved_date\":\"2025-09-09T20:30:00-03:00\"}}', '{\"accept\":\"*\\/*\",\"host\":\"erosvitta.com.br\",\"user-agent\":\"curl\\/8.10.1\",\"x-hotmart-hottok\":\"JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873\",\"x-https\":\"1\"}', '2025-09-09 20:50:03', 'falha', 'Produto não cadastrado para hotmart_product_id=P001', '2025-09-09 20:50:03'),
+(4, 'hotmart', 'approved', 'JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873', '{\"event\":\"approved\",\"buyer\":{\"email\":\"usuario.teste+evm@exemplo.com\",\"name\":\"Cliente Teste\",\"ucode\":\"U123\"},\"product\":{\"id\":\"6157971\"},\"purchase\":{\"transaction\":\"TX1\",\"status\":\"approved\",\"price\":99.900000000000005684341886080801486968994140625,\"currency\":\"BRL\",\"approved_date\":\"2025-09-09T20:30:00-03:00\"}}', '{\"accept\":\"*\\/*\",\"host\":\"erosvitta.com.br\",\"user-agent\":\"curl\\/8.10.1\",\"x-hotmart-hottok\":\"JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873\",\"x-https\":\"1\"}', '2025-09-09 20:54:01', 'sucesso', NULL, '2025-09-09 20:54:01'),
+(5, 'hotmart', 'approved', 'JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873', '{\"event\":\"approved\",\"buyer\":{\"email\":\"lochaydeguerreiro@hotmail.com\",\"name\":\"Cliente Teste\",\"ucode\":\"U123\"},\"product\":{\"id\":\"6157971\"},\"purchase\":{\"transaction\":\"TX1\",\"status\":\"approved\",\"price\":99.900000000000005684341886080801486968994140625,\"currency\":\"BRL\",\"approved_date\":\"2025-09-09T20:30:00-03:00\"}}', '{\"accept\":\"*\\/*\",\"host\":\"erosvitta.com.br\",\"user-agent\":\"curl\\/8.10.1\",\"x-hotmart-hottok\":\"JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873\",\"x-https\":\"1\"}', '2025-09-09 20:55:18', 'sucesso', NULL, '2025-09-09 20:55:18');
+
 -- --------------------------------------------------------
 
 --
@@ -563,7 +621,8 @@ ALTER TABLE `acessos`
   ADD KEY `fk_acessos_compra` (`compra_id`),
   ADD KEY `idx_acessos_usuario_status` (`usuario_id`,`status`),
   ADD KEY `idx_acessos_produto_status` (`produto_id`,`status`),
-  ADD KEY `idx_acessos_liberacao_status` (`data_liberacao`,`status`);
+  ADD KEY `idx_acessos_liberacao_status` (`data_liberacao`,`status`),
+  ADD KEY `idx_acessos_d7_email` (`data_liberacao`,`liberacao_email_status`);
 
 --
 -- Índices de tabela `admins`
@@ -675,13 +734,13 @@ ALTER TABLE `webhook_eventos`
 -- AUTO_INCREMENT de tabela `acessos`
 --
 ALTER TABLE `acessos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `admin_password_resets`
@@ -693,13 +752,13 @@ ALTER TABLE `admin_password_resets`
 -- AUTO_INCREMENT de tabela `compras`
 --
 ALTER TABLE `compras`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `download_tokens`
 --
 ALTER TABLE `download_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `password_resets`
@@ -711,19 +770,19 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT de tabela `produtos`
 --
 ALTER TABLE `produtos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `webhook_eventos`
 --
 ALTER TABLE `webhook_eventos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restrições para tabelas despejadas
