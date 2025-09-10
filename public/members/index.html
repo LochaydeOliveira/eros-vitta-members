@@ -39,6 +39,10 @@
     .overlay-canvas { overflow:auto; display:flex; align-items:center; justify-content:center; padding: 12px; }
     .overlay img { max-width: 100%; height: auto; border-radius: 6px; background:#fff; }
     canvas.pdfpage { background:#fff; border-radius:6px; box-shadow: 0 0 0 1px #e2e8f0; }
+    /* Player progresso */
+    .progress { height: 8px; background:#e2e8f0; border-radius:999px; position:relative; cursor:pointer; margin-top:8px; }
+    .progress .bar { height:100%; background:#7c3aed; width:0%; border-radius:999px; }
+    .time { margin-top:6px; color:#475569; }
   </style>
   <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -122,6 +126,13 @@
     }
 
     function button(text, onClick){ const b = document.createElement('button'); b.className='btn'; b.textContent = text; b.onclick = onClick; return b; }
+    function formatDuration(seconds){
+      const s = parseInt(seconds, 10);
+      if (isNaN(s) || s <= 0) return '';
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${String(r).padStart(2,'0')}`;
+    }
 
     function renderPager(produtoId, actionsEl){
       let pager = actionsEl.querySelector('.pager');
@@ -281,7 +292,12 @@
       audio.style.width = '100%';
       const list = document.createElement('div');
       list.className = 'small';
+      const progress = document.createElement('div'); progress.className = 'progress';
+      const bar = document.createElement('div'); bar.className = 'bar'; progress.appendChild(bar);
+      const time = document.createElement('div'); time.className = 'time'; time.textContent = '';
       container.appendChild(audio);
+      container.appendChild(progress);
+      container.appendChild(time);
       container.appendChild(list);
       media.appendChild(container);
 
@@ -323,7 +339,8 @@
           item.style.borderRadius = '6px';
           item.style.marginTop = '6px';
           item.style.cursor = 'pointer';
-          item.textContent = `${String(tr.ordem||i+1).padStart(2,'0')} — ${tr.titulo}`;
+          const dur = (typeof tr.duracao_segundos === 'number' && tr.duracao_segundos > 0) ? ` (${formatDuration(tr.duracao_segundos)})` : '';
+          item.textContent = `${String(tr.ordem||i+1).padStart(2,'0')} — ${tr.titulo}${dur}`;
           if(i === idx){ item.style.background = '#f1f5f9'; }
           item.onclick = ()=> loadTrack(i);
           ul.appendChild(item);
@@ -331,9 +348,29 @@
         list.appendChild(ul);
       }
 
+      function updateProgress(){
+        const dur = audio.duration || 0;
+        const cur = audio.currentTime || 0;
+        const pct = dur > 0 ? (cur / dur * 100) : 0;
+        bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        const left = dur > 0 ? Math.max(0, Math.round(dur - cur)) : 0;
+        const fmt = (s)=>{
+          const m = Math.floor(s/60), r = s%60; return `${m}:${String(r).padStart(2,'0')}`;
+        };
+        time.textContent = (dur>0) ? `${fmt(Math.round(cur))} / ${fmt(Math.round(dur))}  (restante: ${fmt(left)})` : '';
+      }
+
+      let seeking = false;
+      progress.addEventListener('click', (e)=>{
+        const rect = progress.getBoundingClientRect();
+        const ratio = (e.clientX - rect.left) / rect.width;
+        if (audio.duration && ratio>=0 && ratio<=1){ audio.currentTime = ratio * audio.duration; }
+      });
+
       audio.addEventListener('timeupdate', ()=>{
         const tr = playlist[idx]; if(!tr) return;
         try { localStorage.setItem(keyFor(tr.id), String(audio.currentTime||0)); } catch {}
+        updateProgress();
       });
       audio.addEventListener('ended', ()=>{
         const tr = playlist[idx]; if(!tr) return;
@@ -341,6 +378,8 @@
         // auto-avanço
         loadTrack(idx+1);
       });
+      audio.addEventListener('loadedmetadata', updateProgress);
+      audio.addEventListener('seeked', updateProgress);
 
       if(playlist.length > 0){ loadTrack(0); } else {
         list.textContent = 'Nenhuma faixa disponível.';

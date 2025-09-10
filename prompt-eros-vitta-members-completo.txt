@@ -344,18 +344,20 @@ erosvitta-members/
 
 
 
-Token
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
-xlIjoiYWRtaW4iLCJpYXQiOjE3NTc0NDk4ODUsImV4cCI6MTc1NzUzNjI4NX0.je67Qx2KSWyySa3ezDrzEDjKzH2aREQi_ysHcrtWVxA
+curl -sS 'https://erosvitta.com.br/api/admin/users' \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2
+xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NDM1MTMsImV4cCI6MTc1NzYyOTkxM30.b1fmfOAWYPXqs6lXtnKdg0vnn6g1P8gg8NV1FsgKEOI"
 
 
 
-Token de Usuário
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg
+$adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NDM1MTMsImV4cCI6MTc1NzYyOTkxM30.b1fmfOAWYPXqs6lXtnKdg0vnn6g1P8gg8NV1FsgKEOI'
+Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/admin/users' -Headers @{ Authorization = "Bearer $adminToken" } | ConvertTo-Json -Depth 6
 
 
-curl -sS -X POST "https://erosvitta.com.br/api/admin/accesses/assign" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1MTI4NzMsImV4cCI6MTc1NzU5OTI3M30.iW96zKJ6IwSzkuahzBxWPLC5g76AwGkN4u2
-Og1Qc6i" \
-  -H "Content-Type: application/json" \
-  -d '{"usuario_id":2,"produto_id":2}'
+$login = @{ email = 'lochaydeguerreiro@hotmail.com'; senha = 'Lochayde@100423' } | ConvertTo-Json -Compress
+$loginRes = Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/auth/login' -ContentType 'application/json' -Body $login
+$userToken = $loginRes.data.token
+$userToken
+
+
+Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/accesses' -Headers @{ Authorization = "Bearer $userToken" } | ConvertTo-Json -Depth 6
