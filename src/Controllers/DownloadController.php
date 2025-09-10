@@ -73,8 +73,7 @@ final class DownloadController
         // Stream simples
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . (string)filesize($path));
-        $disposition = ($row['tipo'] === 'ebook') ? 'inline' : 'attachment';
-        header('Content-Disposition: ' . $disposition . '; filename="' . basename($path) . '"');
+        header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         readfile($path);
     }
 }

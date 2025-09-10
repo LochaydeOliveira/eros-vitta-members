@@ -15,6 +15,7 @@ use App\Middleware\AdminMiddleware;
 use App\Controllers\AdminProductController;
 use App\Controllers\AdminUserController;
 use App\Controllers\AdminAccessController;
+use App\Controllers\ViewController;
  
 
 $router = new Router();
@@ -57,6 +58,9 @@ $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([Admin
 // Produtos e acessos (usuário autenticado)
 $router->get('/api/products', AuthMiddleware::requireUser([ProductController::class, 'list']));
 $router->get('/api/accesses', AuthMiddleware::requireUser([AccessController::class, 'list']));
+// Visualização (view-only)
+$router->get('/api/view/pdf', AuthMiddleware::requireUser([ViewController::class, 'pdfPage']));
+$router->get('/api/view/audio', AuthMiddleware::requireUser([ViewController::class, 'audio']));
 
 // Downloads protegidos
 $router->post('/api/downloads/token', AuthMiddleware::requireUser([DownloadController::class, 'createToken']));
