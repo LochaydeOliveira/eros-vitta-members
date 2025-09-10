@@ -28,6 +28,10 @@ Eros Vitta Members - Progresso do Projeto
   - Código movido para a raiz (public/, src/, README.md)
   - Subpasta antiga eros-vitta/ removida
 - Rotas de diagnóstico removidas do ambiente (segurança): /api/diag/*
+- Storage seguro implementado (paths fora de public/ via storage_path_* e streaming autenticado)
+- PDF inline habilitado no streaming
+- Webhook Hotmart validado via Hottok (X-HOTMART-HOTTOK)
+- Envio de e-mail automático no webhook (boas-vindas com login/senha provisória)
 
 2) Onde paramos
 - Deploy realizado e API online (ex.: https://erosvitta.com.br)
@@ -36,6 +40,7 @@ Eros Vitta Members - Progresso do Projeto
 - Rotas admin protegidas testadas (ex.: GET /api/admin/users) — acesso ok; lista vazia
 - Admin usado: lochaydeguerreiro@hotmail.com (ativo=1, senha atualizada com Bcrypt)
 - Rotas de diagnóstico removidas do roteador público
+- Webhook processando evento approved -> cria/atualiza usuário, registra compra, calcula data_liberacao (D+7), cria/ativa acesso, envia e-mail
 
 3) O que falta para continuar
 - Operacional imediato:
@@ -54,7 +59,7 @@ Eros Vitta Members - Progresso do Projeto
   - Visualização de PDFs (PDF.js) e player de áudio (Wavesurfer.js)
   - Estados: comprado, bloqueado, CTA comprar
 - Segurança e robustez:
-  - Validação HMAC real do webhook Hotmart
+  - Webhook: manter validação Hottok
   - Rate limiting em login e webhook
   - Logs/observabilidade (falhas de e-mail/webhook)
   - Proteção da mídia (armazenamento fora da public/, streaming autenticado)

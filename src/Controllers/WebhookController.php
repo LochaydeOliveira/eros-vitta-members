@@ -7,6 +7,7 @@ use App\Config;
 use App\Database;
 use App\Http\JsonResponse;
 use App\Security\RateLimiter;
+use App\Mail\Mailer;
 use PDO;
 
 final class WebhookController
@@ -62,7 +63,7 @@ final class WebhookController
                 throw new \RuntimeException('Payload inválido: falta email ou product_id');
             }
 
-            // Upsert usuário
+            // Upsert usuário (gera senha se novo)
             $stmt = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? LIMIT 1');
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -71,9 +72,18 @@ final class WebhookController
                 $pdo->prepare('UPDATE usuarios SET nome = COALESCE(NULLIF(?, ""), nome), hotmart_user_id = COALESCE(?, hotmart_user_id), atualizado_em = NOW() WHERE id = ?')
                     ->execute([$nome, $hotmartUserId ?: null, $userId]);
             } else {
-                $pdo->prepare('INSERT INTO usuarios (nome, email, status, hotmart_user_id, criado_em, atualizado_em) VALUES (?, ?, "ativo", ?, NOW(), NOW())')
-                    ->execute([$nome ?: 'Cliente', $email, $hotmartUserId ?: null]);
+                $senhaPlain = bin2hex(random_bytes(4)); // 8 hex chars (~4 bytes)
+                $senhaHash = password_hash($senhaPlain, PASSWORD_BCRYPT);
+                $pdo->prepare('INSERT INTO usuarios (nome, email, senha_hash, status, hotmart_user_id, criado_em, atualizado_em) VALUES (?, ?, ?, "ativo", ?, NOW(), NOW())')
+                    ->execute([$nome ?: 'Cliente', $email, $senhaHash, $hotmartUserId ?: null]);
                 $userId = (int)$pdo->lastInsertId();
+                // Email de boas-vindas com credenciais
+                $loginUrl = rtrim(Config::appUrl(), '/') . '/login';
+                $html = '<p>Olá ' . htmlspecialchars($nome ?: 'Cliente') . ',</p>' .
+                        '<p>Bem-vindo à área de membros Eros Vitta. Sua compra foi confirmada e sua conta foi criada automaticamente.</p>' .
+                        '<p><strong>Login:</strong> ' . htmlspecialchars($email) . '<br><strong>Senha provisória:</strong> ' . htmlspecialchars($senhaPlain) . '</p>' .
+                        '<p>Acesse: <a href="' . $loginUrl . '">' . $loginUrl . '</a></p>';
+                Mailer::send($email, 'Bem-vindo | Eros Vitta Members', $html);
             }
 
             // Buscar produto por hotmart_product_id
