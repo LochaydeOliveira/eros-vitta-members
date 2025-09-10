@@ -25,6 +25,16 @@
     .pager { display: inline-flex; gap: 6px; align-items: center; }
     .small { font-size: 12px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
+    /* Fullscreen modal */
+    .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.86); display: none; z-index: 1000; }
+    .overlay.show { display: block; }
+    .overlay-inner { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; }
+    .overlay-toolbar { display:flex; gap:8px; align-items:center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.08); color: #fff; }
+    .overlay-actions { display:flex; gap:8px; align-items:center; }
+    .overlay-btn { appearance:none; border:1px solid #cbd5e1; background:#7c3aed; color:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
+    .overlay-btn.ghost { background: transparent; border-color: #64748b; }
+    .overlay-canvas { overflow:auto; display:flex; align-items:center; justify-content:center; padding: 12px; }
+    .overlay img { max-width: 100%; height: auto; border-radius: 6px; background:#fff; }
   </style>
   <script>
     const apiBase = location.origin;
@@ -35,6 +45,7 @@
 
     let currentUserEmail = '';
     const pdfPageByProduct = {}; // produto_id -> página atual (int)
+    const pdfZoomByProduct = {}; // produto_id -> largura solicitada
 
     async function api(path, opts={}){
       const token = getToken();
@@ -90,7 +101,9 @@
       const actions = el.querySelector('.actions');
       if(it.tipo === 'ebook'){
         const btnView = button('Visualizar (página 1)', async ()=>{ pdfPageByProduct[it.id]=1; await showPdfPage(it.id, 1); renderPager(it.id, actions); });
+        const btnFs = button('Tela cheia', async ()=>{ await openFullscreenPdf(it.id); });
         actions.appendChild(btnView);
+        actions.appendChild(btnFs);
       } else {
         const btnPlay = button('Ouvir', async ()=>{ await playAudio(it.id); });
         actions.appendChild(btnPlay);
@@ -132,7 +145,8 @@
 
     async function showPdfPage(produtoId, page, opts={silent404:true, dir:0}){
       const token = getToken();
-      const url = apiBase + `/api/view/pdf?produto_id=${encodeURIComponent(produtoId)}&page=${encodeURIComponent(page)}&width=1200`;
+      const width = pdfZoomByProduct[produtoId] || 1200;
+      const url = apiBase + `/api/view/pdf?produto_id=${encodeURIComponent(produtoId)}&page=${encodeURIComponent(page)}&width=${encodeURIComponent(width)}`;
       const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
       if(!res.ok){
         if(res.status === 404 && opts.silent404 && opts.dir === -1){
@@ -160,6 +174,66 @@
       pdfPageByProduct[produtoId] = page;
       const label = document.querySelector(`#pager-label-${produtoId}`);
       if(label) label.textContent = `Página ${page}`;
+    }
+
+    // Fullscreen viewer
+    function ensureOverlay(){
+      let ov = document.querySelector('#pdf-overlay');
+      if(ov) return ov;
+      ov = document.createElement('div');
+      ov.className = 'overlay';
+      ov.id = 'pdf-overlay';
+      ov.innerHTML = `
+        <div class="overlay-inner">
+          <div class="overlay-toolbar">
+            <div class="overlay-actions">
+              <button class="overlay-btn ghost" id="ov-close">Fechar</button>
+              <button class="overlay-btn ghost" id="ov-fs">Tela cheia</button>
+            </div>
+            <div class="overlay-actions">
+              <button class="overlay-btn" id="ov-prev">Anterior</button>
+              <button class="overlay-btn" id="ov-next">Próxima</button>
+              <button class="overlay-btn ghost" id="ov-zoom-out">-</button>
+              <span id="ov-zoom-label" class="small">100%</span>
+              <button class="overlay-btn ghost" id="ov-zoom-in">+</button>
+            </div>
+          </div>
+          <div class="overlay-canvas"><img id="ov-img" alt="Página" /></div>
+          <div class="overlay-toolbar" style="justify-content:center"><span id="ov-page" class="small">Página 1</span></div>
+        </div>`;
+      document.body.appendChild(ov);
+      ov.querySelector('#ov-close').addEventListener('click', ()=> ov.classList.remove('show'));
+      ov.querySelector('#ov-fs').addEventListener('click', async ()=>{
+        const el = document.documentElement;
+        try { await (el.requestFullscreen ? el.requestFullscreen() : (el.webkitRequestFullscreen&&el.webkitRequestFullscreen())); } catch {}
+      });
+      return ov;
+    }
+
+    async function openFullscreenPdf(produtoId){
+      const ov = ensureOverlay();
+      ov.classList.add('show');
+      if(!pdfPageByProduct[produtoId]) pdfPageByProduct[produtoId]=1;
+      if(!pdfZoomByProduct[produtoId]) pdfZoomByProduct[produtoId]=Math.min(2400, Math.max(1200, Math.floor(window.innerWidth*1.5)));
+      const render = async ()=>{
+        const page = pdfPageByProduct[produtoId];
+        const width = pdfZoomByProduct[produtoId];
+        const token = getToken();
+        const url = apiBase + `/api/view/pdf?produto_id=${encodeURIComponent(produtoId)}&page=${encodeURIComponent(page)}&width=${encodeURIComponent(width)}`;
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if(!res.ok){ alert('Erro ao carregar página'); return; }
+        const blob = await res.blob();
+        const imgUrl = URL.createObjectURL(blob);
+        const img = ov.querySelector('#ov-img');
+        img.src = imgUrl;
+        ov.querySelector('#ov-page').textContent = `Página ${page}`;
+        ov.querySelector('#ov-zoom-label').textContent = Math.round((width/1200)*100) + '%';
+      };
+      ov.querySelector('#ov-prev').onclick = async ()=>{ pdfPageByProduct[produtoId] = Math.max(1, (pdfPageByProduct[produtoId]||1)-1); await render(); };
+      ov.querySelector('#ov-next').onclick = async ()=>{ pdfPageByProduct[produtoId] = (pdfPageByProduct[produtoId]||1)+1; await render(); };
+      ov.querySelector('#ov-zoom-in').onclick = async ()=>{ pdfZoomByProduct[produtoId] = Math.min(3200, (pdfZoomByProduct[produtoId]||1200)+200); await render(); };
+      ov.querySelector('#ov-zoom-out').onclick = async ()=>{ pdfZoomByProduct[produtoId] = Math.max(800, (pdfZoomByProduct[produtoId]||1200)-200); await render(); };
+      await render();
     }
 
     async function playAudio(produtoId){
