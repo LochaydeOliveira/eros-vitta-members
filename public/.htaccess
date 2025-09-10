@@ -1,14 +1,28 @@
 RewriteEngine On
 
-# Variáveis de ambiente (ajuste os valores)
-SetEnv APP_KEY "TROQUE_PELA_SUA_APP_KEY"
-SetEnv SMTP_HOST "smtp.zoho.com"
-SetEnv SMTP_PORT "465"
-SetEnv SMTP_SECURE "ssl"
-SetEnv SMTP_USER "contato@erosvitta.com.br"
-SetEnv SMTP_PASS "TROQUE_PELA_SENHA_DO_ZOHO"
-SetEnv SMTP_FROM "contato@erosvitta.com.br"
-SetEnv SMTP_FROM_NAME "Eros Vitta"
+# Variáveis de ambiente
+# IMPORTANTE: não use aspas nos valores
+SetEnv APP_KEY 45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9
+
+# DB
+SetEnv DB_HOST localhost
+SetEnv DB_PORT 3306
+SetEnv DB_NAME paymen58_eros_vitta_members
+SetEnv DB_USER paymen58_app
+SetEnv DB_PASS Lochayde@100423
+
+
+# SMTP (Zoho)
+SetEnv SMTP_HOST smtp.zoho.com
+SetEnv SMTP_PORT 465
+SetEnv SMTP_SECURE ssl
+SetEnv SMTP_USER contato@erosvitta.com.br
+SetEnv SMTP_PASS VwYAkYcxK2PdQ.7
+SetEnv SMTP_FROM contato@erosvitta.com.br
+SetEnv SMTP_FROM_NAME Eros Vitta
+
+# Hotmart
+SetEnv HOTMART_HOTTOK JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873
 
 # Serve arquivos existentes diretamente
 RewriteCond %{REQUEST_FILENAME} -f [OR]
