@@ -21,7 +21,9 @@
     .media { margin-top: 12px; }
     img.page { width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
     audio { width: 100%; margin-top: 8px; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+    .pager { display: inline-flex; gap: 6px; align-items: center; }
+    .small { font-size: 12px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
   </style>
   <script>
@@ -30,6 +32,9 @@
     function setToken(token){ localStorage.setItem('ev_token', token); }
     function getToken(){ return localStorage.getItem('ev_token') || ''; }
     function clearToken(){ localStorage.removeItem('ev_token'); }
+
+    let currentUserEmail = '';
+    const pdfPageByProduct = {}; // produto_id -> página atual (int)
 
     async function api(path, opts={}){
       const token = getToken();
@@ -54,6 +59,7 @@
         document.querySelector('#login').style.display='none';
         document.querySelector('#app').style.display='block';
         document.querySelector('#userEmail').textContent = email;
+        currentUserEmail = email;
         await loadCatalog();
       } catch(e){ alert('Falha no login: ' + e.message); }
     }
@@ -83,7 +89,7 @@
       `;
       const actions = el.querySelector('.actions');
       if(it.tipo === 'ebook'){
-        const btnView = button('Visualizar (página 1)', async ()=>{ await showPdfPage(it.id, 1); });
+        const btnView = button('Visualizar (página 1)', async ()=>{ pdfPageByProduct[it.id]=1; await showPdfPage(it.id, 1); renderPager(it.id, actions); });
         actions.appendChild(btnView);
       } else {
         const btnPlay = button('Ouvir', async ()=>{ await playAudio(it.id); });
@@ -98,11 +104,51 @@
 
     function button(text, onClick){ const b = document.createElement('button'); b.className='btn'; b.textContent = text; b.onclick = onClick; return b; }
 
-    async function showPdfPage(produtoId, page){
+    function renderPager(produtoId, actionsEl){
+      let pager = actionsEl.querySelector('.pager');
+      if(!pager){
+        pager = document.createElement('div');
+        pager.className = 'pager';
+        const prev = button('Anterior', async ()=>{
+          const p = Math.max(1, (pdfPageByProduct[produtoId]||1) - 1);
+          pdfPageByProduct[produtoId] = p;
+          await showPdfPage(produtoId, p, {silent404:false, dir:-1});
+        });
+        const next = button('Próxima', async ()=>{
+          const p = (pdfPageByProduct[produtoId]||1) + 1;
+          pdfPageByProduct[produtoId] = p;
+          await showPdfPage(produtoId, p, {silent404:false, dir:+1});
+        });
+        const label = document.createElement('span');
+        label.className = 'small';
+        label.id = `pager-label-${produtoId}`;
+        label.textContent = 'Página 1';
+        pager.appendChild(prev);
+        pager.appendChild(next);
+        pager.appendChild(label);
+        actionsEl.appendChild(pager);
+      }
+    }
+
+    async function showPdfPage(produtoId, page, opts={silent404:true, dir:0}){
       const token = getToken();
       const url = apiBase + `/api/view/pdf?produto_id=${encodeURIComponent(produtoId)}&page=${encodeURIComponent(page)}&width=1200`;
       const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-      if(!res.ok){ alert('Erro ao carregar página'); return; }
+      if(!res.ok){
+        if(res.status === 404 && opts.silent404 && opts.dir === -1){
+          // tentou página anterior inexistente: trava em 1
+          pdfPageByProduct[produtoId] = 1;
+          return;
+        }
+        if(res.status === 404 && !opts.silent404 && opts.dir === +1){
+          // última página atingida: volta uma
+          pdfPageByProduct[produtoId] = Math.max(1, page-1);
+          alert('Última página alcançada.');
+          return;
+        }
+        alert('Erro ao carregar página');
+        return;
+      }
       const blob = await res.blob();
       const imgUrl = URL.createObjectURL(blob);
       const media = document.querySelector(`#media-${produtoId}`);
@@ -111,6 +157,9 @@
       img.className = 'page';
       img.src = imgUrl;
       media.appendChild(img);
+      pdfPageByProduct[produtoId] = page;
+      const label = document.querySelector(`#pager-label-${produtoId}`);
+      if(label) label.textContent = `Página ${page}`;
     }
 
     async function playAudio(produtoId){
@@ -126,7 +175,18 @@
       audio.controls = true;
       audio.src = audioUrl;
       media.appendChild(audio);
-      audio.play().catch(()=>{});
+      try {
+        const key = `ev_audio_pos_${currentUserEmail}_${produtoId}`;
+        const saved = parseFloat(localStorage.getItem(key) || '0');
+        if(!isNaN(saved) && saved > 0){ audio.currentTime = saved; }
+        audio.addEventListener('timeupdate', ()=>{
+          try { localStorage.setItem(key, String(audio.currentTime||0)); } catch {}
+        });
+        audio.addEventListener('ended', ()=>{
+          try { localStorage.removeItem(key); } catch {}
+        });
+        audio.play().catch(()=>{});
+      } catch {}
     }
 
     async function doDownload(produtoId){

@@ -354,11 +354,8 @@ Token de Usuário
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg
 
 
-
-curl -sS "https://erosvitta.com.br/api/view/pdf?produto_id=1&page=1&width=1200" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidXN1YXJpby50ZXN0ZStldm1AZXhlbXBsby5jb20iLCJpYXQiOjE3NTc0NTQzOTAsImV4cCI6MTc1NzU0MDc5MH0.MBpke2P-kkNBJs8EvxUnZbNhRPZp7zn7kD7Ux0Th-eg
-" --output page1.jpg
-
-
-
-curl -sS -X POST 'https://erosvitta.com.br/api/auth/login' -H 'Content-Type: application/json' -d '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde@100423"}'
+curl -sS -X POST "https://erosvitta.com.br/api/admin/accesses/assign" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1MTI4NzMsImV4cCI6MTc1NzU5OTI3M30.iW96zKJ6IwSzkuahzBxWPLC5g76AwGkN4u2
+Og1Qc6i" \
+  -H "Content-Type: application/json" \
+  -d '{"usuario_id":2,"produto_id":2}'
