@@ -24,6 +24,7 @@ final class ProductController
               p.ativo,
               p.hotmart_product_id,
               a.status AS acesso_status,
+              CASE WHEN a.status = 'ativo' THEN 1 ELSE 0 END AS tem_acesso,
               a.data_liberacao,
               CASE 
                 WHEN a.data_liberacao IS NOT NULL AND NOW() >= a.data_liberacao THEN 1
