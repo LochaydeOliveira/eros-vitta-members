@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Área de Membros - Eros Vitta</title>
+  <title>Eros Vitta - Área de Membros</title>
   <style>
     :root { --bg:#f8fafc; --surface:#ffffff; --border:#e5e7eb; --text:#0f172a; --muted:#64748b; --radius:2px; --radius-lg:2px; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--text); background: var(--bg); font-size: 15px; }
@@ -85,9 +85,9 @@
     .progress .bar { height:100%; background:#111827; width:0%; border-radius:999px; }
     .time { margin-top:6px; color:#475569; }
   </style>
-  <!-- PDF.js -->
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <!-- Wavesurfer.js (opcional futuramente) -->
+
   <script>
     function openForgot(){
       let modal = document.getElementById('forgot-modal');
@@ -745,41 +745,42 @@
   </header>
 
   <div class="layout">
-    <!-- Sidebar removida a pedido -->
-    <aside id="sidebar" style="display:none"></aside>
-    <main class="container">
-    <section id="login" class="card auth-card" style="display:none">
-      <div style="text-align:center; margin-bottom:12px;"><strong style="font-size:20px">Eros Vitta</strong></div>
-      <div class="auth-title">Identifique-se</div>
-      <div class="auth-subtitle">Digite seu e-mail e senha</div>
-      <form onsubmit="login(event)">
-        <div class="row">
-          <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" required /></div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label class="muted">Senha</label>
-              <a class="link" href="#" onclick="openForgot(); return false;">Esqueci minha senha</a>
-            </div>
-            <input id="senha" class="input" type="password" placeholder="sua senha" required />
-          </div>
-        </div>
-        <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
-        <div class="muted" style="text-align:center; margin-top:14px">Primeira vez aqui? <a class="link" href="#" onclick="openRegister(); return false;">Criar conta</a></div>
-      </form>
-    </section>
 
-    <section id="app" style="display:none">
-      <h2>Catálogo</h2>
-      <div id="catalog" class="grid"></div>
-    </section>
+    <main class="container">
+      <section id="login" class="card auth-card" style="display:none">
+        <div style="text-align:center; margin-bottom:12px;"><strong style="font-size:20px">Eros Vitta</strong></div>
+        <div class="auth-title">Identifique-se</div>
+        <div class="auth-subtitle">Digite seu e-mail e senha</div>
+          <form onsubmit="login(event)">
+            <div class="row">
+              <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" required /></div>
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <label class="muted">Senha</label>
+                  <a class="link" href="#" onclick="openForgot(); return false;">Esqueci minha senha</a>
+                </div>
+                <input id="senha" class="input" type="password" placeholder="sua senha" required />
+              </div>
+            </div>
+            <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
+          </form>
+      </section>
+
+      <section id="app" style="display:none">
+        <h2>Catálogo</h2>
+        <div id="catalog" class="grid"></div>
+      </section>
     </main>
   </div>
-  <!-- PDF.js iframe modal simples -->
-  <div id="pdfjs-modal" class="overlay"><div class="overlay-inner">
-    <div class="overlay-toolbar"><div></div><div class="overlay-actions"><button class="overlay-btn ghost" onclick="document.getElementById('pdfjs-modal').classList.remove('show')">Fechar</button></div></div>
-    <div class="overlay-canvas"><iframe id="pdfjs-frame" style="width:100%;height:100%;border:0;background:#fff"></iframe></div>
-    <div class="overlay-toolbar" style="justify-content:center"><span class="small">Visualização PDF</span></div>
-  </div></div>
+
+  <div id="pdfjs-modal" class="overlay">
+    <div class="overlay-inner">
+      <div class="overlay-toolbar"><div></div><div class="overlay-actions"><button class="overlay-btn ghost" onclick="document.getElementById('pdfjs-modal').classList.remove('show')">Fechar</button></div></div>
+      <div class="overlay-canvas"><iframe id="pdfjs-frame" style="width:100%;height:100%;border:0;background:#fff"></iframe></div>
+      <div class="overlay-toolbar" style="justify-content:center"><span class="small">Visualização PDF</span></div>
+    </div>
+  </div>
+
   <script>
     function openProfile(){
       let modal = document.getElementById('profile-modal');

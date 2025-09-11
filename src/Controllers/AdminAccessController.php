@@ -60,9 +60,17 @@ final class AdminAccessController
         $sql = "
             SELECT a.id AS acesso_id, a.produto_id, a.status, a.data_liberacao, a.data_bloqueio, a.motivo_bloqueio,
                    p.titulo, p.tipo
-            FROM acessos a
+            FROM (
+              SELECT a1.*
+              FROM acessos a1
+              JOIN (
+                SELECT produto_id, MAX(id) AS max_id
+                FROM acessos
+                WHERE usuario_id = ?
+                GROUP BY produto_id
+              ) mx ON mx.max_id = a1.id
+            ) a
             JOIN produtos p ON p.id = a.produto_id
-            WHERE a.usuario_id = ?
             ORDER BY p.titulo ASC
         ";
         $stmt = $pdo->prepare($sql);
