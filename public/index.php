@@ -16,6 +16,7 @@ use App\Controllers\AdminProductController;
 use App\Controllers\AdminUserController;
 use App\Controllers\AdminAccessController;
 use App\Controllers\ViewController;
+use App\Controllers\AdminViewController;
 use App\Controllers\AdminCronController;
  
 
@@ -69,6 +70,11 @@ $router->get('/api/view/audio', AuthMiddleware::requireUser([ViewController::cla
 $router->get('/api/view/pdf-file', AuthMiddleware::requireUser([ViewController::class, 'pdfFile']));
 $router->get('/api/view/audio/playlist', AuthMiddleware::requireUser([ViewController::class, 'playlist']));
 $router->get('/api/view/audio/track', AuthMiddleware::requireUser([ViewController::class, 'audioTrack']));
+
+// Admin - pré-visualização (sem vínculo ao usuário, mas protegido por admin)
+$router->get('/api/admin/view/pdf-file', AdminMiddleware::requireAdmin([AdminViewController::class, 'pdfFile']));
+$router->get('/api/admin/view/audio/playlist', AdminMiddleware::requireAdmin([AdminViewController::class, 'playlist']));
+$router->get('/api/admin/view/audio/track', AdminMiddleware::requireAdmin([AdminViewController::class, 'audioTrack']));
 
 // Downloads protegidos
 $router->post('/api/downloads/token', AuthMiddleware::requireUser([DownloadController::class, 'createToken']));
