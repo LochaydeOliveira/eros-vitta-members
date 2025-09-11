@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Tempo de geração: 10/09/2025 às 19:10
+-- Tempo de geração: 11/09/2025 às 10:26
 -- Versão do servidor: 5.7.23-23
 -- Versão do PHP: 8.1.33
 
@@ -127,7 +127,7 @@ CREATE TABLE `acessos` (
 INSERT INTO `acessos` (`id`, `usuario_id`, `produto_id`, `compra_id`, `origem`, `status`, `data_liberacao`, `data_bloqueio`, `motivo_bloqueio`, `criado_em`, `atualizado_em`, `liberacao_email_enviado_em`, `liberacao_email_status`, `liberacao_email_tentativas`, `liberacao_email_ultima_tentativa_em`) VALUES
 (1, 1, 1, 1, 'manual', 'ativo', '2025-09-16 20:30:00', NULL, NULL, '2025-09-09 19:24:39', '2025-09-09 20:54:01', NULL, 'pendente', 0, NULL),
 (2, 2, 1, 1, 'hotmart', 'ativo', '2025-09-16 20:30:00', NULL, NULL, '2025-09-09 20:55:18', '2025-09-09 20:55:18', NULL, 'pendente', 0, NULL),
-(3, 2, 2, NULL, 'manual', 'ativo', '2025-09-10 11:03:35', NULL, NULL, '2025-09-10 11:03:35', '2025-09-10 11:03:35', NULL, 'pendente', 0, NULL);
+(3, 2, 2, NULL, 'manual', 'ativo', '2025-09-10 20:00:39', NULL, NULL, '2025-09-10 11:03:35', '2025-09-10 23:39:05', '2025-09-10 23:39:05', 'sucesso', 1, '2025-09-10 23:39:05');
 
 -- --------------------------------------------------------
 
@@ -241,6 +241,15 @@ CREATE TABLE `password_resets` (
   `criado_em` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Despejando dados para a tabela `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `usuario_id`, `token`, `expira_em`, `usado_em`, `criado_em`) VALUES
+(1, 2, '66dc7cf864524c47181b487cb15fa82e17a38713bd450b59352cd7e440dad32d', '2025-09-11 02:06:56', NULL, '2025-09-11 01:06:56'),
+(2, 2, '727b2aa970fb329f5e73fc96793f271e70ed335c167d0befeb4ec437ce332579', '2025-09-11 02:11:49', NULL, '2025-09-11 01:11:49'),
+(3, 2, 'ef7936295501c9047648fb17bd466bba3cb35191a5364def4bbf4f1fe02d6b65', '2025-09-11 02:16:36', '2025-09-11 01:17:28', '2025-09-11 01:16:36');
+
 -- --------------------------------------------------------
 
 --
@@ -274,8 +283,8 @@ CREATE TABLE `produtos` (
 --
 
 INSERT INTO `produtos` (`id`, `tipo`, `titulo`, `slug`, `descricao`, `capa_url`, `storage_path_pdf`, `storage_path_audio`, `storage_view_pdf`, `storage_dl_pdf`, `storage_view_audio`, `storage_dl_audio`, `duracao_segundos`, `aplicar_watermark`, `hotmart_product_id`, `ativo`, `criado_em`, `atualizado_em`, `storage_view_audio_dir`) VALUES
-(1, 'ebook', 'Ebook Exemplo 1', 'ebook-exemplo-1', 'Descrição atualizada', '', '/home1/paymen58/storage/ebooks/o-segredo-da-resistencia-o-guia-pratico-para-urar-mais-tempo-na-cama.pdf', NULL, '/home1/paymen58/storage/ebooks/view/o-segredo-da-resistencia.pdf', '/home1/paymen58/storage/ebooks/download/o-segredo-da-resistencia-protegido001.pdf', NULL, NULL, NULL, 0, '6157971', 1, '2025-09-09 18:13:17', '2025-09-09 23:21:22', NULL),
-(2, 'audio', 'Libido Renovada (Versão em Áudio)', 'versao-em-audio-libido-renovada', 'Versão em áudio do conteúdo Libido Renovada.', NULL, NULL, NULL, NULL, NULL, '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada.mp3', '/home1/paymen58/storage/audios/download/versao-em-audi-libido-renovada-protegido001.zip', NULL, 0, NULL, 1, '2025-09-09 23:24:57', '2025-09-10 19:04:30', '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada');
+(1, 'ebook', 'O Segredo da Resistência - O Guia Prático Para Ele Durar Mais na Cama', 'o-segredo-da-resistencia-o-guia-pratico-para-ele-durar-mais-na-cama', NULL, NULL, '/home1/paymen58/storage/ebooks/o-segredo-da-resistencia-o-guia-pratico-para-urar-mais-tempo-na-cama.pdf', NULL, NULL, '/home1/paymen58/storage/ebooks/download/o-segredo-da-resistencia-protegido001.pdf', NULL, NULL, NULL, 0, NULL, 1, '2025-09-09 18:13:17', '2025-09-11 10:14:51', NULL),
+(2, 'audio', 'Libido Renovada (Versão em Áudio)', 'versao-em-audio-libido-renovada', NULL, NULL, NULL, NULL, NULL, NULL, 'storage/audios/view/versao-em-audio-libido-renovada/', NULL, NULL, 0, NULL, 1, '2025-09-09 23:24:57', '2025-09-11 10:17:57', 'storage/audios/view/versao-em-audio-libido-renovada/');
 
 -- --------------------------------------------------------
 
@@ -347,7 +356,7 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha_hash`, `status`, `email_verificado_em`, `hotmart_user_id`, `ultimo_login_em`, `criado_em`, `atualizado_em`) VALUES
 (1, 'Cliente Teste', 'usuario.teste+evm@exemplo.com', '$2y$10$19toMuLB3Pk5YSYWL1OB5.EZ3xrNN8oPgz9EOn6MScTK9aL.t9j5e', 'ativo', NULL, 'U123', NULL, '2025-09-09 18:46:30', '2025-09-09 20:54:01'),
-(2, 'Cliente Teste', 'lochaydeguerreiro@hotmail.com', '$2y$10$5p1diCc328fd4bGYEk/pMOeGzyW5AHHRDhvL3tTrEXRiN9iFePvre', 'ativo', NULL, 'U123', '2025-09-10 12:05:06', '2025-09-09 20:55:18', '2025-09-10 12:05:06');
+(2, 'Cliente Teste', 'lochaydeguerreiro@hotmail.com', '$2y$10$64qSmnHhK1YnD5LeIp0mvueMNJQAxhyAJqq23rYp9RMquY4/LDMK.', 'ativo', NULL, 'U123', '2025-09-11 01:17:50', '2025-09-09 20:55:18', '2025-09-11 01:17:50');
 
 -- --------------------------------------------------------
 
@@ -734,7 +743,7 @@ ALTER TABLE `webhook_eventos`
 -- AUTO_INCREMENT de tabela `acessos`
 --
 ALTER TABLE `acessos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `admins`
@@ -764,7 +773,7 @@ ALTER TABLE `download_tokens`
 -- AUTO_INCREMENT de tabela `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `produtos`

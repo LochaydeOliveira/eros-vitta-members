@@ -86,7 +86,8 @@ final class AdminProductController
         foreach ($fields as $f) {
             if (array_key_exists($f, $body)) {
                 $set[] = $f . ' = ?';
-                $values[] = $body[$f] === '' ? null : $body[$f];
+                // Preserva valores string, inclusive caminhos absolutos; converte '' para NULL
+                $values[] = ($body[$f] === '' ? null : (is_string($body[$f]) ? trim((string)$body[$f]) : $body[$f]));
             }
         }
         if (!$set) {

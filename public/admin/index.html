@@ -223,7 +223,7 @@
         formMsg: document.getElementById('formMsg'),
       };
 
-      const state = { token: localStorage.getItem('adminToken') || '', limit: 20, offset: 0, totalKnown: 0 };
+      const state = { token: localStorage.getItem('adminToken') || '', limit: 20, offset: 0, totalKnown: 0, itemsById: {} };
 
       function setAuth(token){ state.token = token; if(token){ localStorage.setItem('adminToken', token); } else { localStorage.removeItem('adminToken'); } }
       function hdr(){ return state.token ? { 'Authorization': 'Bearer ' + state.token, 'Content-Type':'application/json' } : { 'Content-Type':'application/json' }; }
@@ -273,6 +273,8 @@
           const j = await r.json();
           if(!r.ok){ throw new Error((j && j.error) || 'Erro ao listar'); }
           const items = (j && j.data && Array.isArray(j.data.items)) ? j.data.items : (j.items || []);
+          state.itemsById = {};
+          for (const it of items) { if (it && typeof it.id !== 'undefined') { state.itemsById[it.id] = it; } }
           const playlistUrl = (id) => `/api/admin/view/audio/playlist?produto_id=${encodeURIComponent(id)}`;
           const trackUrl = (id, trackId) => `/api/admin/view/audio/track?produto_id=${encodeURIComponent(id)}&track_id=${encodeURIComponent(trackId)}`;
           els.tbody.innerHTML = items.map(row => {
@@ -308,8 +310,8 @@
         els.f.ativo.value = String(row?.ativo ?? 1);
         els.f.hotmart.value = row?.hotmart_product_id||'';
         els.f.desc.value = row?.descricao||'';
-        els.f.pdf_view.value = row?.storage_view_pdf||'';
-        els.f.audio_dir.value = row?.storage_view_audio_dir||'';
+        els.f.pdf_view.value = row?.storage_view_pdf||row?.storage_path_pdf||'';
+        els.f.audio_dir.value = row?.storage_view_audio_dir||row?.storage_path_audio||'';
         show(els.formCard, true);
         els.deactBtn.classList.toggle('hidden', !(row && row.id));
       }
@@ -369,15 +371,16 @@
         const btn = ev.target.closest('button[data-edit]');
         if(btn){
           const id = parseInt(btn.getAttribute('data-edit'),10);
-          // Busca a linha diretamente da tabela atual (simplificação)
-          const tr = btn.closest('tr');
-          const row = {
-            id,
-            titulo: tr.children[1].textContent,
-            tipo: tr.children[2].textContent,
-            slug: tr.children[3].textContent,
-            ativo: (tr.children[4].querySelector('.pill')?.classList.contains('ok')) ? 1 : 0,
-          };
+          const row = state.itemsById[id] || (function(){
+            const tr = btn.closest('tr');
+            return {
+              id,
+              titulo: tr.children[1].textContent,
+              tipo: tr.children[2].textContent,
+              slug: tr.children[3].textContent,
+              ativo: (tr.children[4].querySelector('.pill')?.classList.contains('ok')) ? 1 : 0,
+            };
+          })();
           openForm(row);
           return;
         }
