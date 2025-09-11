@@ -401,3 +401,6 @@ $body = @{
   storage_view_pdf = '/home1/paymen58/storage/ebooks/view/o-segredo-da-resistencia.pdf'
 } | ConvertTo-Json -Compress
 Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/products/update' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 6
+
+
+php -r "$p='Lochayde@2025!'; echo password_hash($p, PASSWORD_BCRYPT), PHP_EOL;"
