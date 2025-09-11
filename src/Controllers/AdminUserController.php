@@ -25,6 +25,11 @@ final class AdminUserController
             $like = '%' . $q . '%';
             $params[] = $like; $params[] = $like;
         }
+        $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+        if ($status !== '' && in_array($status, ['ativo','bloqueado'], true)) {
+            $where[] = 'status = ?';
+            $params[] = $status;
+        }
         $sql = 'SELECT id, nome, email, status, criado_em, atualizado_em, ultimo_login_em FROM usuarios';
         if ($where) { $sql .= ' WHERE ' . implode(' AND ', $where); }
         // Ordenação

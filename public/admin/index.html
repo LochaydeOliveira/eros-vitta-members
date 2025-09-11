@@ -94,6 +94,17 @@
                 <option value="1">Ativo</option>
                 <option value="0">Inativo</option>
               </select>
+              <select id="orderProd" class="w-160">
+                <option value="id:desc">Mais recentes</option>
+                <option value="titulo:asc">Título (A→Z)</option>
+                <option value="titulo:desc">Título (Z→A)</option>
+                <option value="tipo:asc">Tipo</option>
+              </select>
+              <select id="limitProd" class="w-160">
+                <option value="20">20 por página</option>
+                <option value="50">50 por página</option>
+                <option value="100">100 por página</option>
+              </select>
               <button id="reloadBtn">Atualizar</button>
               <button id="newBtn" class="primary">Novo produto</button>
             </div>
@@ -267,6 +278,8 @@
         q: document.getElementById('q'),
         tipoFilter: document.getElementById('tipoFilter'),
         ativoFilter: document.getElementById('ativoFilter'),
+        orderProd: document.getElementById('orderProd'),
+        limitProd: document.getElementById('limitProd'),
         reloadBtn: document.getElementById('reloadBtn'),
         newBtn: document.getElementById('newBtn'),
         tbody: document.getElementById('tbody'),
@@ -364,6 +377,11 @@
           const qs = new URLSearchParams();
           const q = (els.u.q.value||'').trim();
           if(q) qs.set('q', q);
+          const usp = new URLSearchParams(location.hash.replace(/^#/,''));
+          const uOrder = usp.get('u_order') || 'id:desc';
+          const parts = uOrder.split(':');
+          qs.set('order', parts[0]||'id');
+          qs.set('dir', parts[1]||'desc');
           qs.set('limit', '20');
           qs.set('offset', String(state.offset||0));
           const r = await fetch('/api/admin/users?' + qs.toString(), { headers: hdr() });
@@ -388,8 +406,14 @@
           pager.innerHTML = '';
           const prev = document.createElement('button'); prev.textContent = 'Anterior'; prev.onclick = ()=>{ state.offset=Math.max(0,(state.offset||0)-20); loadUsers(); };
           const next = document.createElement('button'); next.textContent = 'Próxima'; next.onclick = ()=>{ state.offset=(state.offset||0)+20; loadUsers(); };
+          const orderSel = document.createElement('select');
+          orderSel.innerHTML = '<option value="id:desc">Mais recentes</option><option value="nome:asc">Nome (A→Z)</option><option value="email:asc">Email (A→Z)</option><option value="status:asc">Status</option>';
+          orderSel.value = (qs.get('order')+':'+qs.get('dir')) || 'id:desc';
+          orderSel.addEventListener('change', ()=>{
+            const v = orderSel.value; const usp2 = new URLSearchParams(location.hash.replace(/^#/,'')); usp2.set('u_order', v); location.hash = usp2.toString(); state.offset=0; loadUsers();
+          });
           const info = document.createElement('span'); info.className='code'; info.textContent = `offset ${state.offset||0} • carregados ${items.length}`;
-          pager.appendChild(prev); pager.appendChild(next); pager.appendChild(info);
+          pager.appendChild(orderSel); pager.appendChild(prev); pager.appendChild(next); pager.appendChild(info);
         }catch(e){ els.u.tbody.innerHTML = `<tr><td colspan="5" class="muted">Erro: ${e.message}</td></tr>`; }
       }
 
@@ -443,6 +467,10 @@
         if(els.q.value.trim()) p.set('q', els.q.value.trim());
         if(els.tipoFilter.value) p.set('tipo', els.tipoFilter.value);
         if(els.ativoFilter.value !== '') p.set('ativo', els.ativoFilter.value);
+        const ord = (els.orderProd.value||'id:desc').split(':');
+        p.set('order', ord[0]||'id');
+        p.set('dir', (ord[1]||'desc'));
+        const lim = parseInt(els.limitProd.value||'20',10); state.limit = lim>0?lim:20;
         p.set('limit', String(state.limit));
         p.set('offset', String(state.offset));
         p.set('_ts', String(Date.now()));
@@ -618,6 +646,8 @@
       els.tabProducts.addEventListener('click', ()=> switchTab('products'));
       els.tabUsers.addEventListener('click', ()=> switchTab('users'));
       els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
+      els.orderProd.addEventListener('change', () => { state.offset = 0; loadList(); });
+      els.limitProd.addEventListener('change', () => { state.offset = 0; loadList(); });
       els.newBtn.addEventListener('click', () => openForm(null));
       els.tbody.addEventListener('click', onTableClick);
       els.u.reload.addEventListener('click', ()=>{ state.offset=0; loadUsers(); });
