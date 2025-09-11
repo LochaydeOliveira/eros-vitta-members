@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Área de Membros - Eros Vitta</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: #0f172a; background: #f8fafc; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: #0f172a; background: #f8fafc; font-size: 15px; }
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
     .layout { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
     @media(max-width: 900px){ .layout { grid-template-columns: 1fr; } }
@@ -17,22 +17,26 @@
     .container { padding: 0; }
     .card { background: #fff; border: 0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px; }
-    .btn { appearance: none; border: 0; background: #7c3aed; color: #fff; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn { appearance: none; border: 0; background: #111827; color: #fff; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .btn.secondary { background: #0ea5e9; }
     .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
     .input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; }
     .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
     @media(min-width: 640px){ .row { grid-template-columns: 1fr 1fr; } }
-    .title { font-size: 18px; font-weight: 700; margin: 8px 0; }
-    .muted { color: #475569; font-size: 14px; }
+    .title { font-size: 17px; font-weight: 700; margin: 8px 0; }
+    .muted { color: #475569; font-size: 13px; }
     .media { margin-top: 12px; }
     img.page { width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
     audio { width: 100%; margin-top: 8px; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
     .pager { display: inline-flex; gap: 6px; align-items: center; }
-    .small { font-size: 12px; }
+    .small { font-size: 11px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
     .thumb { width: 100%; height: auto; border: 0; border-radius: 10px; background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
+    /* Ícones SVG */
+    .icon { width:16px; height:16px; vertical-align:-3px; }
+    .muted .icon { color:#475569; }
+    .btn svg.icon { color:#fff; margin-right:6px; }
     /* Bloqueio de seleção global (inputs continuam permitidos) */
     body { -webkit-user-select: none; user-select: none; }
     input, textarea { -webkit-user-select: text; user-select: text; }
@@ -42,14 +46,14 @@
     .overlay-inner { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; }
     .overlay-toolbar { display:flex; gap:8px; align-items:center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.08); color: #fff; }
     .overlay-actions { display:flex; gap:8px; align-items:center; }
-    .overlay-btn { appearance:none; border:1px solid #cbd5e1; background:#7c3aed; color:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
+    .overlay-btn { appearance:none; border:1px solid #cbd5e1; background:#111827; color:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
     .overlay-btn.ghost { background: transparent; border-color: #64748b; }
     .overlay-canvas { overflow:auto; display:flex; align-items:center; justify-content:center; padding: 12px; }
     .overlay img { max-width: 100%; height: auto; border-radius: 6px; background:#fff; }
     canvas.pdfpage { background:#fff; border-radius:6px; box-shadow: 0 0 0 1px #e2e8f0; }
     /* Player progresso */
     .progress { height: 8px; background:#e2e8f0; border-radius:999px; position:relative; cursor:pointer; margin-top:8px; }
-    .progress .bar { height:100%; background:#7c3aed; width:0%; border-radius:999px; }
+    .progress .bar { height:100%; background:#111827; width:0%; border-radius:999px; }
     .time { margin-top:6px; color:#475569; }
   </style>
   <!-- PDF.js -->
@@ -147,10 +151,16 @@
       `;
       const actions = el.querySelector('.actions');
       if(it.tipo === 'ebook'){
-        const btnPdf = button('Ler agora', async ()=>{ openPdfReader(it.id); });
+        const btnPdf = document.createElement('button');
+        btnPdf.className = 'btn';
+        btnPdf.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1v4h4"/></svg> Ler agora';
+        btnPdf.onclick = async ()=>{ openPdfReader(it.id); };
         actions.appendChild(btnPdf);
       } else {
-        const btnPlay = button('Ouvir álbum', async ()=>{ await playAudio(it.id); });
+        const btnPlay = document.createElement('button');
+        btnPlay.className = 'btn';
+        btnPlay.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> Ouvir álbum';
+        btnPlay.onclick = async ()=>{ await playAudio(it.id); };
         actions.appendChild(btnPlay);
       }
       // Download removido da área de membros (entrega pós D+7 por e-mail)
@@ -319,6 +329,7 @@
       const media = document.querySelector(`#media-${produtoId}`);
       media.innerHTML = '';
       const container = document.createElement('div');
+      container.className = 'card';
       const audio = document.createElement('audio');
       audio.controls = true;
       audio.style.width = '100%';
@@ -432,10 +443,7 @@
       const has = !!getToken();
       document.querySelector('#login').style.display = has ? 'none' : 'block';
       document.querySelector('#app').style.display = has ? 'block' : 'none';
-      if(has){
-        const sb = document.getElementById('sidebar'); if (sb) sb.style.display = 'block';
-        loadCatalog();
-      }
+      if(has){ loadCatalog(); }
       // Bloqueios básicos (não infalíveis): clique direito e atalhos comuns
       window.addEventListener('contextmenu', e => {
         if (!e.target.closest('input, textarea')) e.preventDefault();
@@ -461,23 +469,9 @@
   </header>
 
   <div class="layout">
-    <aside class="sidebar" id="sidebar" style="display:none">
-      <h3>Navegação</h3>
-      <a class="side-link" href="#" onclick="loadCatalog(); return false;">
-        <span class="icon">📚</span> <span>Catálogo</span>
-      </a>
-      <a class="side-link" href="#" onclick="loadAccesses(); return false;">
-        <span class="icon">🔑</span> <span>Meus acessos</span>
-      </a>
-      <a class="side-link" href="#" onclick="openHelp(); return false;">
-        <span class="icon">❓</span> <span>Ajuda</span>
-      </a>
-    </aside>
+    <!-- Sidebar removida a pedido -->
+    <aside id="sidebar" style="display:none"></aside>
     <main class="container">
-    <div class="card" id="sectionHeader" style="margin-bottom:16px; display:none">
-      <div class="muted" id="breadcrumbs">Início</div>
-      <h2 id="sectionTitle" style="margin:6px 0 0">Catálogo</h2>
-    </div>
     <section id="login" class="card" style="display:none">
       <h2>Entrar</h2>
       <form onsubmit="login(event)">
