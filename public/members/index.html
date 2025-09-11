@@ -429,7 +429,7 @@
       let idx = 0;
       function keyFor(trackId){ return `ev_audio_pos_${currentUserEmail}_${produtoId}_${trackId}`; }
 
-      async function loadTrack(i){
+      async function loadTrack(i, resume=false){
         if(i < 0 || i >= playlist.length){ return; }
         idx = i;
         const tr = playlist[idx];
@@ -438,10 +438,14 @@
         if(!res.ok){ alert('Falha ao carregar faixa'); return; }
         const blob = await res.blob();
         const obj = URL.createObjectURL(blob);
+        audio.pause();
         audio.src = obj;
-        const saved = parseFloat(localStorage.getItem(keyFor(tr.id)) || '0');
-        if(!isNaN(saved) && saved > 0){ audio.currentTime = saved; }
-        audio.play().catch(()=>{});
+        audio.currentTime = 0; // garante início no zero por padrão
+        const saved = resume ? parseFloat(localStorage.getItem(keyFor(tr.id)) || '0') : 0;
+        audio.addEventListener('loadedmetadata', ()=>{
+          if(!isNaN(saved) && saved > 0){ try { audio.currentTime = saved; } catch {} }
+          audio.play().catch(()=>{});
+        }, { once: true });
         renderList();
       }
 
@@ -449,8 +453,8 @@
         list.innerHTML = '';
         const toolbar = document.createElement('div');
         toolbar.className = 'actions';
-        const prev = button('Anterior', ()=> loadTrack(idx-1));
-        const next = button('Próxima', ()=> loadTrack(idx+1));
+        const prev = button('Anterior', ()=> loadTrack(idx-1, false));
+        const next = button('Próxima', ()=> loadTrack(idx+1, false));
         toolbar.appendChild(prev); toolbar.appendChild(next);
         list.appendChild(toolbar);
         const ul = document.createElement('div');
@@ -465,7 +469,7 @@
           const dur = (typeof tr.duracao_segundos === 'number' && tr.duracao_segundos > 0) ? ` (${formatDuration(tr.duracao_segundos)})` : '';
           item.textContent = `${String(tr.ordem||i+1).padStart(2,'0')} — ${tr.titulo}${dur}`;
           if(i === idx){ item.style.background = '#f1f5f9'; }
-          item.onclick = ()=> loadTrack(i);
+          item.onclick = ()=> loadTrack(i, true);
           ul.appendChild(item);
         }
         list.appendChild(ul);
@@ -493,11 +497,11 @@
         try { localStorage.setItem(keyFor(tr.id), String(audio.currentTime||0)); } catch {}
         updateProgress();
       });
-      audio.addEventListener('ended', ()=>{ const tr = playlist[idx]; if(!tr) return; try { localStorage.removeItem(keyFor(tr.id)); } catch {}; loadTrack(idx+1); });
+      audio.addEventListener('ended', ()=>{ const tr = playlist[idx]; if(!tr) return; try { localStorage.removeItem(keyFor(tr.id)); } catch {}; loadTrack(idx+1, false); });
       audio.addEventListener('loadedmetadata', updateProgress);
       audio.addEventListener('seeked', updateProgress);
 
-      if(playlist.length > 0){ loadTrack(0); } else { list.textContent = 'Nenhuma faixa disponível.'; }
+      if(playlist.length > 0){ loadTrack(0, true); } else { list.textContent = 'Nenhuma faixa disponível.'; }
     }
 
     async function doDownload(produtoId){
