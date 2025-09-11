@@ -111,14 +111,25 @@ final class AdminAccessController
             return;
         }
         $pdo = Database::pdo();
-        if ($status === 'ativo') {
-            $sql = 'UPDATE acessos SET status = "ativo", data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$usuarioId, $produtoId]);
+        // Garante que existe registro de acesso; se não houver, cria um e define o status
+        $check = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? ORDER BY id DESC LIMIT 1');
+        $check->execute([$usuarioId, $produtoId]);
+        $row = $check->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            if ($status === 'ativo') {
+                $sql = 'UPDATE acessos SET status = "ativo", data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$usuarioId, $produtoId]);
+            } else {
+                $sql = 'UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = ?, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$motivo !== '' ? $motivo : 'manual', $usuarioId, $produtoId]);
+            }
         } else {
-            $sql = 'UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = ?, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
+            // cria novo registro quando não existir acesso anterior
+            $sql = 'INSERT INTO acessos (usuario_id, produto_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?,?,?,?,NOW(), NOW(), NOW())';
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$motivo !== '' ? $motivo : 'manual', $usuarioId, $produtoId]);
+            $stmt->execute([$usuarioId, $produtoId, 'manual', $status === 'ativo' ? 'ativo' : 'bloqueado']);
         }
         // normaliza duplicatas antigas: mantém apenas o último registro por usuario/produto
         $pdo->prepare('DELETE a FROM acessos a JOIN acessos b ON a.usuario_id=b.usuario_id AND a.produto_id=b.produto_id AND a.id < b.id')->execute();
