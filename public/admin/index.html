@@ -372,7 +372,7 @@
             titulo: tr.children[1].textContent,
             tipo: tr.children[2].textContent,
             slug: tr.children[3].textContent,
-            ativo: tr.children[4].textContent.includes('ativo') ? 1 : 0,
+            ativo: (tr.children[4].querySelector('.pill')?.classList.contains('ok')) ? 1 : 0,
           };
           openForm(row);
           return;
