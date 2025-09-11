@@ -16,7 +16,9 @@
     .side-link:hover { background:#f1f5f9; }
     .icon { width:18px; height:18px; display:inline-block; color:#475569; }
     .container { padding: 0; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 6px 24px rgba(15,23,42,0.06); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 6px 24px rgba(15,23,42,0.06); position:relative; }
+    .card.blocked { opacity: .75; filter: grayscale(20%); }
+    .badge-lock { position:absolute; top:10px; right:10px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:999px; padding:2px 8px; font-size:11px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .btn { appearance: none; border: 0; background: #111827; color: #fff; padding: 10px 12px; border-radius: var(--radius); cursor: pointer; font-weight: 600; }
     .btn.secondary { background: #0ea5e9; }
@@ -291,10 +293,11 @@
 
     function renderItem(it){
       const el = document.createElement('div');
-      el.className = 'card';
+      const hasAccess = (it.acesso_status === 'ativo');
+      el.className = 'card' + (hasAccess ? '' : ' blocked');
       const cover = (typeof it.capa_url === 'string' && it.capa_url.trim() !== '') ? it.capa_url : '';
       const coverHtml = cover ? `<img class="thumb" src="${cover}" alt="${escapeHtml(it.titulo)}" loading="lazy" />` : '';
-      const hasAccess = (it.acesso_status === 'ativo');
+      
       el.innerHTML = `
         ${coverHtml}
         <div class="title">${escapeHtml(it.titulo)}</div>
@@ -327,6 +330,7 @@
         btnBuy.rel = 'noopener';
         btnBuy.textContent = 'Comprar e liberar';
         actions.appendChild(btnBuy);
+        const lock = document.createElement('div'); lock.className='badge-lock'; lock.textContent='Bloqueado'; el.appendChild(lock);
       }
       // Download removido da área de membros (entrega pós D+7 por e-mail)
       return el;
@@ -384,6 +388,7 @@
           alert('Última página alcançada.');
           return;
         }
+        if(res.status === 403){ alert('Acesso bloqueado para este conteúdo.'); return; }
         alert('Erro ao carregar página');
         return;
       }
@@ -440,7 +445,7 @@
       const token = getToken();
       // carrega o PDF como ArrayBuffer
       const res = await fetch(`/api/view/pdf-file?produto_id=${encodeURIComponent(produtoId)}`, { headers: { 'Authorization': 'Bearer ' + token } });
-      if(!res.ok){ alert('Falha ao carregar PDF'); return; }
+      if(!res.ok){ if(res.status===403){ alert('Acesso bloqueado para este conteúdo.'); return; } alert('Falha ao carregar PDF'); return; }
       const buf = await res.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
       let pageNum = 1; let scale = 1.2;
@@ -578,7 +583,10 @@
       try {
         const j = await api(`/api/view/audio/playlist?produto_id=${encodeURIComponent(produtoId)}`);
         playlist = (j.items || j.data?.items || []);
-      } catch(e){ alert('Erro ao carregar playlist: ' + e.message); return; }
+      } catch(e){
+        if(String(e.message||'').toLowerCase().includes('bloqueado')){ alert('Acesso bloqueado para este conteúdo.'); } else { alert('Erro ao carregar playlist: ' + e.message); }
+        return;
+      }
 
       const modal = ensureAudioModal();
       modal.classList.add('show');
@@ -600,7 +608,7 @@
         const tr = playlist[idx];
         const url = `/api/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(tr.id)}`;
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-        if(!res.ok){ alert('Falha ao carregar faixa'); return; }
+        if(!res.ok){ if(res.status===403){ alert('Acesso bloqueado para este conteúdo.'); return; } alert('Falha ao carregar faixa'); return; }
         const blob = await res.blob();
         const obj = URL.createObjectURL(blob);
         audio.pause();
