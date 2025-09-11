@@ -12,9 +12,30 @@ final class AdminProductController
     public static function list(): void
     {
         $pdo = Database::pdo();
-        $stmt = $pdo->query('SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir FROM produtos ORDER BY id DESC');
+        // Filtros opcionais via query string
+        $where = [];
+        $params = [];
+        $tipo = isset($_GET['tipo']) ? (string)$_GET['tipo'] : '';
+        if ($tipo !== '' && in_array($tipo, ['ebook','audio'], true)) { $where[] = 'tipo = ?'; $params[] = $tipo; }
+        if (isset($_GET['ativo'])) { $where[] = 'ativo = ?'; $params[] = (int)$_GET['ativo'] === 1 ? 1 : 0; }
+        $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+        if ($q !== '') { $where[] = '(titulo LIKE ? OR slug LIKE ?)'; $like = '%' . $q . '%'; $params[] = $like; $params[] = $like; }
+        $sql = 'SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir FROM produtos';
+        if ($where) { $sql .= ' WHERE ' . implode(' AND ', $where); }
+        // Ordenação
+        $allowedOrder = ['id','titulo','tipo','ativo','criado_em','atualizado_em'];
+        $order = isset($_GET['order']) ? (string)$_GET['order'] : 'id';
+        if (!in_array($order, $allowedOrder, true)) { $order = 'id'; }
+        $dir = strtolower((string)($_GET['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
+        $sql .= ' ORDER BY ' . $order . ' ' . $dir;
+        // Paginação
+        $limit = (int)($_GET['limit'] ?? 50); if ($limit <= 0 || $limit > 200) { $limit = 50; }
+        $offset = (int)($_GET['offset'] ?? 0); if ($offset < 0) { $offset = 0; }
+        $sql .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        JsonResponse::ok(['items' => $items]);
+        JsonResponse::ok(['items' => $items, 'limit' => $limit, 'offset' => $offset, 'order' => $order, 'dir' => $dir]);
     }
 
     public static function create(array $body): void
