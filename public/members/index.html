@@ -37,6 +37,18 @@
     .icon { width:16px; height:16px; vertical-align:-3px; }
     .muted .icon { color:#475569; }
     .btn svg.icon { color:#fff; margin-right:6px; }
+    /* Avatar + menu */
+    .avatar { width: 36px; height: 36px; border-radius: 999px; background:#111827; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; }
+    .menu { position: relative; }
+    .menu-panel { position:absolute; right:0; top:44px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow: 0 10px 30px rgba(15,23,42,.08); min-width: 220px; display:none; }
+    .menu-panel.open { display:block; }
+    .menu-header { padding:10px 12px; border-bottom:1px solid #e2e8f0; }
+    .menu-item { display:block; width:100%; text-align:left; padding:10px 12px; background:#fff; border:0; cursor:pointer; }
+    .menu-item:hover { background:#f1f5f9; }
+    /* Forms */
+    label { display:block; margin: 4px 0 6px; font-size:13px; color:#475569; }
+    .input { height: 44px; }
+    .form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
     /* Bloqueio de seleção global (inputs continuam permitidos) */
     body { -webkit-user-select: none; user-select: none; }
     input, textarea { -webkit-user-select: text; user-select: text; }
@@ -130,7 +142,13 @@
         const nameEl = document.querySelector('#userName');
         if (me.data && me.data.user){
           const u = me.data.user;
-          nameEl.textContent = u.nome || u.email || '';
+          const nome = u.nome || u.email || '';
+          nameEl.textContent = nome;
+          const ab = document.getElementById('avatarBtn');
+          if (ab){
+            const ini = (nome||'E V').trim().split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase();
+            ab.textContent = ini || 'EV';
+          }
           if (!currentUserEmail) currentUserEmail = u.email || '';
         }
       }catch{}
@@ -549,11 +567,14 @@
 <body>
   <header>
     <div><strong>Eros Vitta Members</strong></div>
-    <div>
-      <span class="muted">Olá, <strong id="userName"></strong></span>
-      <button class="btn" onclick="loadAccesses()">Meus acessos</button>
-      <button class="btn" onclick="openProfile()">Perfil</button>
-      <button class="btn secondary" onclick="logout()">Sair</button>
+    <div class="menu">
+      <button id="avatarBtn" class="avatar" aria-haspopup="true" aria-expanded="false">EV</button>
+      <div id="userMenu" class="menu-panel" role="menu">
+        <div class="menu-header muted">Olá, <strong id="userName"></strong></div>
+        <button class="menu-item" onclick="loadAccesses(); toggleMenu(false)">Meus acessos</button>
+        <button class="menu-item" onclick="openProfile(); toggleMenu(false)">Perfil</button>
+        <button class="menu-item" onclick="logout()">Sair</button>
+      </div>
     </div>
   </header>
 
@@ -604,8 +625,8 @@
                   <div><label class="muted">Senha atual</label><input id="pf-old" class="input" type="password" required /></div>
                   <div><label class="muted">Nova senha</label><input id="pf-new" class="input" type="password" required /></div>
                 </div>
-                <div class="actions" style="margin-top:12px">
-                  <button class="btn" id="pf-save">Salvar</button>
+                <div class="form-actions">
+                  <button class="btn secondary" id="pf-save">Salvar</button>
                 </div>
                 <div class="small" id="pf-msg" style="margin-top:8px"></div>
               </div>
