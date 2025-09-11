@@ -671,6 +671,18 @@
       document.querySelector('#login').style.display = has ? 'none' : 'block';
       document.querySelector('#app').style.display = has ? 'block' : 'none';
       if(has){ loadUserProfile().finally(loadCatalog); }
+      // Deep-link: ?reset=TOKEN ou ?token=TOKEN abre o modal de redefinição
+      try{
+        const usp = new URLSearchParams(location.search);
+        const tk = usp.get('reset') || usp.get('token');
+        if (tk) {
+          openReset(tk);
+          usp.delete('reset'); usp.delete('token');
+          const newQs = usp.toString();
+          const newUrl = location.pathname + (newQs ? ('?' + newQs) : '') + location.hash;
+          history.replaceState(null, '', newUrl);
+        }
+      }catch{}
       // Bloqueios básicos (não infalíveis): clique direito e atalhos comuns
       window.addEventListener('contextmenu', e => {
         if (!e.target.closest('input, textarea')) e.preventDefault();
