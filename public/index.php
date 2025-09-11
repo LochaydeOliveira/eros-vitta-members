@@ -75,6 +75,7 @@ $router->get('/api/view/audio/track', AuthMiddleware::requireUser([ViewControlle
 $router->get('/api/admin/view/pdf-file', AdminMiddleware::requireAdmin([AdminViewController::class, 'pdfFile']));
 $router->get('/api/admin/view/audio/playlist', AdminMiddleware::requireAdmin([AdminViewController::class, 'playlist']));
 $router->get('/api/admin/view/audio/track', AdminMiddleware::requireAdmin([AdminViewController::class, 'audioTrack']));
+$router->get('/api/admin/view/audio/file', AdminMiddleware::requireAdmin([AdminViewController::class, 'audioFile']));
 
 // Downloads protegidos
 $router->post('/api/downloads/token', AuthMiddleware::requireUser([DownloadController::class, 'createToken']));

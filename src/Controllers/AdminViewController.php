@@ -100,6 +100,27 @@ final class AdminViewController
         header('Pragma: no-cache');
         readfile($path);
     }
+
+    /**
+     * Stream de um único arquivo de áudio (somente admin). Query: produto_id (int)
+     */
+    public static function audioFile(array $_body, array $_request): void
+    {
+        $produtoId = (int)($_GET['produto_id'] ?? 0);
+        if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT storage_path_audio FROM produtos WHERE id = ? LIMIT 1');
+        $stmt->execute([$produtoId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || empty($row['storage_path_audio'])) { JsonResponse::error('Áudio não configurado', 404); return; }
+        $path = (string)$row['storage_path_audio'];
+        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        header('Content-Type: audio/mpeg');
+        header('Content-Disposition: inline; filename="' . basename($path) . '"');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        readfile($path);
+    }
 }
 
 

@@ -277,9 +277,10 @@
           const trackUrl = (id, trackId) => `/api/admin/view/audio/track?produto_id=${encodeURIComponent(id)}&track_id=${encodeURIComponent(trackId)}`;
           els.tbody.innerHTML = items.map(row => {
             const hasPdf = !!(row.storage_view_pdf || row.storage_path_pdf);
-            const hasAudio = !!row.storage_view_audio_dir;
+            const hasAudioFile = !!row.storage_path_audio;
+            const hasAudioDir = !!row.storage_view_audio_dir;
             const pdf = hasPdf ? `<a href="#" data-pdf="${row.id}">ver</a>` : '';
-            const aud = hasAudio ? `<a href="#" data-audio="${row.id}">abrir</a>` : '';
+            const aud = hasAudioDir ? `<a href="#" data-audio="${row.id}">abrir</a>` : (hasAudioFile ? `<a href="#" data-audio-file="${row.id}">abrir</a>` : '');
             return `<tr>
               <td>${row.id}</td>
               <td>${row.titulo||''}</td>
@@ -405,6 +406,18 @@
             const t = await fetch(`/api/admin/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(first.id)}`, { headers: hdr() });
             if(!t.ok){ const tj=await t.json().catch(()=>({})); throw new Error(tj.error||'Falha ao abrir áudio'); }
             const blob = await t.blob();
+            openBlobInNewTab(blob, 'audio/mpeg');
+          } catch(e){ alert('Erro ao abrir áudio: ' + e.message); }
+          return;
+        }
+        const aAudioFile = ev.target.closest('a[data-audio-file]');
+        if(aAudioFile){
+          ev.preventDefault();
+          const produtoId = parseInt(aAudioFile.getAttribute('data-audio-file'),10);
+          try {
+            const r = await fetch(`/api/admin/view/audio/file?produto_id=${encodeURIComponent(produtoId)}`, { headers: hdr() });
+            if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.error||'Falha ao abrir áudio'); }
+            const blob = await r.blob();
             openBlobInNewTab(blob, 'audio/mpeg');
           } catch(e){ alert('Erro ao abrir áudio: ' + e.message); }
         }
