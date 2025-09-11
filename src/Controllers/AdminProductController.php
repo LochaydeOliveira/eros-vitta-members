@@ -12,7 +12,7 @@ final class AdminProductController
     public static function list(): void
     {
         $pdo = Database::pdo();
-        $stmt = $pdo->query('SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_path_audio FROM produtos ORDER BY id DESC');
+        $stmt = $pdo->query('SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir FROM produtos ORDER BY id DESC');
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         JsonResponse::ok(['items' => $items]);
     }
@@ -27,14 +27,16 @@ final class AdminProductController
         $ativo = (int)($body['ativo'] ?? 1);
         $hotmartId = (string)($body['hotmart_product_id'] ?? '');
         $pdfPath = (string)($body['storage_path_pdf'] ?? '');
+        $pdfView = (string)($body['storage_view_pdf'] ?? '');
         $audioPath = (string)($body['storage_path_audio'] ?? '');
+        $audioDir = (string)($body['storage_view_audio_dir'] ?? '');
         if ($titulo === '' || $slug === '' || !in_array($tipo, ['ebook','audio'], true)) {
             JsonResponse::error('Campos obrigatórios: titulo, slug, tipo[ebook|audio]', 422);
             return;
         }
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('INSERT INTO produtos (titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_path_audio, criado_em, atualizado_em) VALUES (?,?,?,?,?,?,?,?,?, NOW(), NOW())');
-        $stmt->execute([$titulo, $tipo, $slug, $descricao, $capaUrl, $ativo, $hotmartId ?: null, $pdfPath ?: null, $audioPath ?: null]);
+        $stmt = $pdo->prepare('INSERT INTO produtos (titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir, criado_em, atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW(), NOW())');
+        $stmt->execute([$titulo, $tipo, $slug, $descricao, $capaUrl, $ativo, $hotmartId ?: null, $pdfPath ?: null, $pdfView ?: null, $audioPath ?: null, $audioDir ?: null]);
         JsonResponse::ok(['id' => (int)$pdo->lastInsertId()], 201);
     }
 
@@ -45,7 +47,7 @@ final class AdminProductController
             JsonResponse::error('id obrigatório', 422);
             return;
         }
-        $fields = ['titulo','tipo','slug','descricao','capa_url','ativo','hotmart_product_id','storage_path_pdf','storage_path_audio'];
+        $fields = ['titulo','tipo','slug','descricao','capa_url','ativo','hotmart_product_id','storage_path_pdf','storage_view_pdf','storage_path_audio','storage_view_audio_dir'];
         $set = [];
         $values = [];
         foreach ($fields as $f) {

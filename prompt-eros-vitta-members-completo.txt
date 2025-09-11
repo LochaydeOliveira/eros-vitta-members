@@ -361,3 +361,43 @@ $userToken
 
 
 Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/accesses' -Headers @{ Authorization = "Bearer $userToken" } | ConvertTo-Json -Depth 6
+
+
+
+$adminToken='45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9'; $body='{"limit":5}'
+Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/cron/run-d7' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 5
+
+
+# 1) Login admin → obtenha o token (copie data.token)
+$login = '{"email":"lochaydeguerreiro@hotmail.com","senha":"Lochayde@100423"}'
+$resp = Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/login' -ContentType 'application/json' -Body $login
+$adminToken = $resp.data.token
+
+# 2) Disparar D+7 (teste)
+$body='{"limit":5}'
+Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/cron/run-d7' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 5
+
+
+$adminToken='SEU_TOKEN_ADMIN'
+$body = @{
+  titulo = 'Libido Renovada (Versão em Áudio)'
+  tipo = 'audio'
+  slug = 'versao-em-audio-libido-renovada'
+  descricao = 'Álbum completo'
+  capa_url = 'https://erosvitta.com.br/covers/versao-em-audio-libido-renovada.webp'
+  storage_view_audio_dir = '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada'
+  ativo = 1
+} | ConvertTo-Json -Compress
+Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/products' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 5
+
+
+$adminToken='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NTg4MjgsImV4cCI6MTc1NzY0NTIyOH0.Zb_qV9sOfqqNLsTbCM6DabdaB44shHupbrhxsi37JG0'
+Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/admin/products' -Headers @{ Authorization = "Bearer $adminToken" } | ConvertTo-Json -Depth 6
+
+
+$adminToken='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NTg4MjgsImV4cCI6MTc1NzY0NTIyOH0.Zb_qV9sOfqqNLsTbCM6DabdaB44shHupbrhxsi37JG0'
+$body = @{
+  id = 1
+  storage_view_pdf = '/home1/paymen58/storage/ebooks/view/o-segredo-da-resistencia.pdf'
+} | ConvertTo-Json -Compress
+Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/products/update' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 6
