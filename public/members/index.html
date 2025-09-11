@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Área de Membros - Eros Vitta</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: #0f172a; background: #f8fafc; font-size: 15px; }
+    :root { --bg:#f8fafc; --surface:#ffffff; --border:#e5e7eb; --text:#0f172a; --muted:#64748b; --radius:12px; --radius-lg:16px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--text); background: var(--bg); font-size: 15px; }
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
     .layout { max-width: 1200px; margin: 0 auto; padding: 20px; display: block; }
     @media(max-width: 900px){ .layout { padding: 16px; } }
@@ -15,14 +16,15 @@
     .side-link:hover { background:#f1f5f9; }
     .icon { width:18px; height:18px; display:inline-block; color:#475569; }
     .container { padding: 0; }
-    .card { background: #fff; border: 0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 6px 24px rgba(15,23,42,0.06); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-    .btn { appearance: none; border: 0; background: #111827; color: #fff; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn { appearance: none; border: 0; background: #111827; color: #fff; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-weight: 600; }
     .btn.secondary { background: #0ea5e9; }
     .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
-    .input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background:#fff; }
     .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    @media(min-width: 640px){ .row { grid-template-columns: 1fr 1fr; } }
+    /* Forçar uma coluna em qualquer largura */
+    @media(min-width: 640px){ .row { grid-template-columns: 1fr; } }
     .title { font-size: 17px; font-weight: 700; margin: 8px 0; }
     .muted { color: #475569; font-size: 13px; }
     .media { margin-top: 12px; }
@@ -32,23 +34,26 @@
     .pager { display: inline-flex; gap: 6px; align-items: center; }
     .small { font-size: 11px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
-    .thumb { width: 100%; height: auto; border: 0; border-radius: 10px; background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
+    .thumb { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 12px; background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
     /* Ícones SVG */
     .icon { width:16px; height:16px; vertical-align:-3px; }
     .muted .icon { color:#475569; }
     .btn svg.icon { color:#fff; margin-right:6px; }
     /* Avatar + menu */
-    .avatar { width: 36px; height: 36px; border-radius: 999px; background:#111827; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; }
+    .avatar { width: 36px; height: 36px; border-radius: 999px; background:#111827; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; cursor: pointer; }
     .menu { position: relative; }
-    .menu-panel { position:absolute; right:0; top:44px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow: 0 10px 30px rgba(15,23,42,.08); min-width: 220px; display:none; }
+    .menu-panel { position:absolute; right:0; top:44px; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow: 0 14px 34px rgba(15,23,42,.10); min-width: 220px; display:none; overflow:hidden; }
     .menu-panel.open { display:block; }
-    .menu-header { padding:10px 12px; border-bottom:1px solid #e2e8f0; }
-    .menu-item { display:block; width:100%; text-align:left; padding:10px 12px; background:#fff; border:0; cursor:pointer; }
+    .menu-header { padding:12px 14px; border-bottom:1px solid var(--border); }
+    .menu-item { display:block; width:100%; text-align:left; padding:10px 12px; background:var(--surface); border:0; cursor:pointer; }
     .menu-item:hover { background:#f1f5f9; }
     /* Forms */
     label { display:block; margin: 4px 0 6px; font-size:13px; color:#475569; }
     .input { height: 44px; }
     .form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+    .form-card { width:100%; max-width: 900px; margin: 0 auto; }
+    .form-card .row { gap: 12px; }
+    .input:focus { outline: 2px solid #0ea5e9; outline-offset: 0; }
     /* Bloqueio de seleção global (inputs continuam permitidos) */
     body { -webkit-user-select: none; user-select: none; }
     input, textarea { -webkit-user-select: text; user-select: text; }
@@ -568,7 +573,8 @@
   <header>
     <div><strong>Eros Vitta Members</strong></div>
     <div class="menu">
-      <button id="avatarBtn" class="avatar" aria-haspopup="true" aria-expanded="false">EV</button>
+      <span class="muted" style="margin-right:8px">Olá, <strong id="userName"></strong></span>
+      <button id="avatarBtn" class="avatar" aria-haspopup="true" aria-expanded="false" onclick="toggleMenu()">EV</button>
       <div id="userMenu" class="menu-panel" role="menu">
         <div class="menu-header muted">Olá, <strong id="userName"></strong></div>
         <button class="menu-item" onclick="loadAccesses(); toggleMenu(false)">Meus acessos</button>
@@ -582,14 +588,14 @@
     <!-- Sidebar removida a pedido -->
     <aside id="sidebar" style="display:none"></aside>
     <main class="container">
-    <section id="login" class="card" style="display:none">
+    <section id="login" class="card form-card" style="display:none">
       <h2>Entrar</h2>
       <form onsubmit="login(event)">
         <div class="row">
-          <div><label class="muted">E-mail</label><input id="email" class="input" type="email" required /></div>
-          <div><label class="muted">Senha</label><input id="senha" class="input" type="password" required /></div>
+          <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" required /></div>
+          <div><label class="muted">Senha</label><input id="senha" class="input" type="password" placeholder="sua senha" required /></div>
         </div>
-        <div style="margin-top:12px"><button class="btn" type="submit">Entrar</button></div>
+        <div class="form-actions"><button class="btn secondary" type="submit">Entrar</button></div>
       </form>
     </section>
 
@@ -619,7 +625,7 @@
               <div class="overlay-actions"><span class="small">Perfil</span></div>
             </div>
             <div class="overlay-canvas">
-              <div class="card" style="width:100%;max-width:520px;">
+              <div class="card form-card">
                 <h3 class="title">Trocar senha</h3>
                 <div class="row">
                   <div><label class="muted">Senha atual</label><input id="pf-old" class="input" type="password" required /></div>
