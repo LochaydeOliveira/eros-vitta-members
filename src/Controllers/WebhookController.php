@@ -58,6 +58,7 @@ final class WebhookController
             $moeda = (string)($body['purchase']['currency'] ?? $body['currency'] ?? 'BRL');
             $dataCompra = self::parseDate((string)($body['purchase']['approved_date'] ?? $body['approved_date'] ?? ''));
             $confirmada = in_array($status, ['approved','aprovada','completed','complete'], true);
+            $cancelada = in_array($status, ['refunded','chargeback','canceled','cancelled','cancelada','reembolsado'], true);
 
             if ($email === '' || $produtoHotmartId === '') {
                 throw new \RuntimeException('Payload inválido: falta email ou product_id');
@@ -104,7 +105,7 @@ final class WebhookController
                 $compra = false;
             }
 
-            $statusCompra = $confirmada ? 'aprovada' : ($status === 'cancelled' || $status === 'cancelada' ? 'cancelada' : 'pendente');
+            $statusCompra = $confirmada ? 'aprovada' : ($cancelada ? 'cancelada' : 'pendente');
             $dataConfirmacao = $confirmada ? ($dataCompra ?: date('Y-m-d H:i:s')) : null;
             $dataLiberacao = $confirmada ? date('Y-m-d H:i:s', strtotime(($dataConfirmacao ?? date('Y-m-d H:i:s')) . ' +7 days')) : null;
 
@@ -124,11 +125,24 @@ final class WebhookController
                 $stmt->execute([$userId, $produtoId]);
                 $ac = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($ac) {
-                    $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, atualizado_em = NOW() WHERE id = ?')
+                    $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
                         ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
                 } else {
                     $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
                         ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
+                }
+            } elseif ($cancelada) {
+                // Bloqueia acesso imediatamente em caso de reembolso/cancelamento
+                $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? ORDER BY criado_em DESC LIMIT 1');
+                $stmt->execute([$userId, $produtoId]);
+                $ac = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($ac) {
+                    $pdo->prepare('UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = "webhook_reembolso", atualizado_em = NOW() WHERE id = ?')
+                        ->execute([(int)$ac['id']]);
+                } else {
+                    // Cria acesso bloqueado se não existir
+                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_bloqueio, motivo_bloqueio, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "bloqueado", NOW(), "webhook_reembolso", NOW(), NOW())')
+                        ->execute([$userId, $produtoId, $compraId]);
                 }
             }
 

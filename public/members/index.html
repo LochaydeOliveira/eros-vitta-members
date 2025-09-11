@@ -757,7 +757,7 @@
         const j = await api('/api/downloads/token', { method:'POST', body: JSON.stringify({ produto_id: produtoId }) });
         const t = j.data.token;
         window.location.href = `/api/downloads/file?token=${encodeURIComponent(t)}`;
-      } catch(e){ alert('Download indisponível: ' + e.message); }
+      } catch(e){ showToast('Download indisponível: ' + e.message, 'warn'); }
     }
 
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
@@ -906,7 +906,7 @@
           iframe.src = url; // abre como blob (sem URL do arquivo)
           document.getElementById('pdfjs-modal').classList.add('show');
         })
-        .catch(e => alert(e.message));
+        .catch(e => showToast(e.message, 'warn'));
     }
   </script>
 </body>

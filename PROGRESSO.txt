@@ -90,12 +90,12 @@ Eros Vitta Members - Progresso do Projeto
   - Front-end Área do Membro (refino do MVP atual):
     - Ajuste visual fino restante (microespaçamentos e responsividade extrema)
     - Exibir duração total do álbum ao lado do título (opcional)
-    - Melhorar UX de feedbacks (toasts não intrusivos) 
+    - Melhorar UX de feedbacks (toasts não intrusivos) ✅ CONCLUÍDO
     - Tratar eventuais 404 de assets (ex.: favicon); precisa da URL específica do erro
   - Segurança e robustez:
     - Webhook: manter validação Hottok e rate limiting
     - Observabilidade (melhorar logs de falhas de e-mail/webhook)
-    - Hotmart: bloquear acesso automaticamente em reembolso/cancelamento (mapear status no webhook)
+    - Hotmart: bloquear acesso automaticamente em reembolso/cancelamento (mapear status no webhook) ✅ CONCLUÍDO
     - Proteção da mídia (armazenamento fora da public/, streaming autenticado)
     - Watermark já aplicado; avaliar densidade/posição
   - Operacional:
