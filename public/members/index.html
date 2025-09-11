@@ -35,6 +35,10 @@
     .icon { width:18px; height:18px; display:inline-block; color:#475569; }
     .container {
       padding: 0;
+    }
+
+    .container-login {
+      padding: 0;
       width: 100%;
       max-width: 400px;
     }
@@ -60,7 +64,7 @@
     .pager { display: inline-flex; gap: 6px; align-items: center; }
     .small { font-size: 11px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
-    .thumb { width: 100%; height: auto; border: 0; border-radius: var(--radius); background: #f8fafc; object-fit: cover; aspect-ratio: 3 / 4; }
+    .thumb { width: 100%; height: auto; border: 0; border-radius: var(--radius); background: #fff; object-fit: cover; aspect-ratio: 3 / 4; }
     .thumb.ph { display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700; }
     /* Ícones SVG */
     .icon { width:16px; height:16px; vertical-align:-3px; }
@@ -776,7 +780,7 @@
 
   <div class="layout">
 
-    <main class="container">
+    <div class="container-login">
       <section id="login" class="card auth-card" style="display:none">
         <div style="text-align:center; margin-bottom:12px;"><strong style="font-size:20px">Eros Vitta</strong></div>
         <div class="auth-title">Identifique-se</div>
@@ -795,7 +799,9 @@
             <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
           </form>
       </section>
+    </div>
 
+    <main class="container">
       <section id="app" style="display:none">
         <h2>Catálogo</h2>
         <div id="catalog" class="grid"></div>
