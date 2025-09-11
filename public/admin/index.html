@@ -77,6 +77,7 @@
         <div class="row" style="margin-bottom:12px">
           <button id="tabProducts" class="primary">Produtos</button>
           <button id="tabUsers" class="ghost">Usuários</button>
+          <button id="tabDashboard" class="ghost">Dashboard</button>
         </div>
         <div id="viewProducts">
         <div class="card mb16">
@@ -266,6 +267,20 @@
             <div class="small mt8" id="u_msg"></div>
           </div>
         </div>
+
+        <div id="viewDashboard" class="hidden">
+          <div class="card mb16">
+            <div class="row"><strong>Resumo</strong></div>
+          </div>
+          <div class="card">
+            <div class="row">
+              <div class="w-200"><div class="muted">Usuários</div><div id="d_users" class="title">-</div></div>
+              <div class="w-200"><div class="muted">Produtos</div><div id="d_products" class="title">-</div></div>
+              <div class="w-200"><div class="muted">Acessos ativos</div><div id="d_accesses" class="title">-</div></div>
+              <div class="w-200"><div class="muted">Vendas aprovadas</div><div id="d_sales" class="title">-</div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -293,8 +308,10 @@
         pageInfo: document.getElementById('pageInfo'),
         tabProducts: document.getElementById('tabProducts'),
         tabUsers: document.getElementById('tabUsers'),
+        tabDashboard: document.getElementById('tabDashboard'),
         viewProducts: document.getElementById('viewProducts'),
         viewUsers: document.getElementById('viewUsers'),
+        viewDashboard: document.getElementById('viewDashboard'),
         u: {
           q: document.getElementById('u_q'),
           status: document.getElementById('u_status'),
@@ -368,13 +385,31 @@
       }
       function switchTab(tab){
         const isUsers = tab === 'users';
-        show(els.viewProducts, !isUsers);
+        const isDash = tab === 'dash';
+        show(els.viewProducts, !(isUsers||isDash));
         show(els.viewUsers, isUsers);
-        els.tabProducts.classList.toggle('primary', !isUsers);
-        els.tabProducts.classList.toggle('ghost', isUsers);
+        show(els.viewDashboard, isDash);
+        els.tabProducts.classList.toggle('primary', !(isUsers||isDash));
+        els.tabProducts.classList.toggle('ghost', (isUsers||isDash));
         els.tabUsers.classList.toggle('primary', isUsers);
         els.tabUsers.classList.toggle('ghost', !isUsers);
+        els.tabDashboard.classList.toggle('primary', isDash);
+        els.tabDashboard.classList.toggle('ghost', !isDash);
         if(isUsers){ loadUsers(); }
+        if(isDash){ loadDashboard(); }
+      }
+
+      async function loadDashboard(){
+        try{
+          const r = await fetch('/api/admin/dashboard/summary?_ts=' + Date.now(), { headers: hdr(), cache: 'no-store' });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro'); }
+          const s = j.data && j.data.summary ? j.data.summary : j.summary;
+          document.getElementById('d_users').textContent = `${s.usuarios_ativos||0}/${s.usuarios_total||0}`;
+          document.getElementById('d_products').textContent = `${s.produtos_ativos||0}/${s.produtos_total||0}`;
+          document.getElementById('d_accesses').textContent = String(s.acessos_ativos||0);
+          document.getElementById('d_sales').textContent = String(s.vendas_confirmadas||0);
+        }catch(e){ alert('Erro ao carregar dashboard: ' + e.message); }
       }
 
       async function loadUsers(){
@@ -655,6 +690,7 @@
       els.logoutBtn.addEventListener('click', exitApp);
       els.tabProducts.addEventListener('click', ()=> switchTab('products'));
       els.tabUsers.addEventListener('click', ()=> switchTab('users'));
+      els.tabDashboard.addEventListener('click', ()=> switchTab('dash'));
       els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
       els.orderProd.addEventListener('change', () => { state.offset = 0; loadList(); });
       els.limitProd.addEventListener('change', () => { state.offset = 0; loadList(); });

@@ -18,6 +18,7 @@ use App\Controllers\AdminAccessController;
 use App\Controllers\ViewController;
 use App\Controllers\AdminViewController;
 use App\Controllers\AdminCronController;
+use App\Controllers\AdminDashboardController;
  
 
 $router = new Router();
@@ -57,6 +58,9 @@ $router->post('/api/admin/users/reset-password', AdminMiddleware::requireAdmin([
 
 // Admin - CRON (teste)
 $router->post('/api/admin/cron/run-d7', AdminMiddleware::requireAdmin([AdminCronController::class, 'runD7']));
+
+// Admin - dashboard
+$router->get('/api/admin/dashboard/summary', AdminMiddleware::requireAdmin([AdminDashboardController::class, 'summary']));
 
 // Admin - acessos
 $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([AdminAccessController::class, 'assign']));
