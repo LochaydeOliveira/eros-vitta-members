@@ -9,7 +9,11 @@ use PDO;
 
 final class AdminProductController
 {
-    public static function list(): void
+    /**
+     * @param array<string,mixed> $_body
+     * @param array<string,mixed> $_request
+     */
+    public static function list(array $_body = [], array $_request = []): void
     {
         $pdo = Database::pdo();
         // Filtros opcionais via query string
@@ -38,7 +42,11 @@ final class AdminProductController
         JsonResponse::ok(['items' => $items, 'limit' => $limit, 'offset' => $offset, 'order' => $order, 'dir' => $dir]);
     }
 
-    public static function create(array $body): void
+    /**
+     * @param array<string,mixed> $body
+     * @param array<string,mixed> $_request
+     */
+    public static function create(array $body, array $_request = []): void
     {
         $titulo = trim((string)($body['titulo'] ?? ''));
         $tipo = (string)($body['tipo'] ?? 'ebook'); // ebook|audio
@@ -61,7 +69,11 @@ final class AdminProductController
         JsonResponse::ok(['id' => (int)$pdo->lastInsertId()], 201);
     }
 
-    public static function update(array $body): void
+    /**
+     * @param array<string,mixed> $body
+     * @param array<string,mixed> $_request
+     */
+    public static function update(array $body, array $_request = []): void
     {
         $id = (int)($body['id'] ?? 0);
         if ($id <= 0) {
@@ -89,7 +101,11 @@ final class AdminProductController
         JsonResponse::ok(['updated' => true]);
     }
 
-    public static function deactivate(array $body): void
+    /**
+     * @param array<string,mixed> $body
+     * @param array<string,mixed> $_request
+     */
+    public static function deactivate(array $body, array $_request = []): void
     {
         $id = (int)($body['id'] ?? 0);
         if ($id <= 0) {

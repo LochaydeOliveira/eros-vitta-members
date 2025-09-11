@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Eros Vitta Members</title>
+    <style>
+      :root { color-scheme: light dark; --bg:#0b0b0c; --fg:#e9eaed; --muted:#9aa0a6; --card:#151517; --acc:#4f46e5; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; }
+      * { box-sizing: border-box; }
+      body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); }
+      header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background: var(--card); position: sticky; top:0; z-index:10; }
+      header h1 { margin:0; font-size:16px; letter-spacing:.3px; }
+      .container { padding: 16px; max-width: 1200px; margin: 0 auto; }
+      .card { background: var(--card); border:1px solid #2a2b2f; border-radius: 10px; padding:16px; }
+      .grid { display: grid; gap:12px; }
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      input, select, textarea { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #2a2b2f; background:#0e0f12; color:var(--fg); }
+      textarea { min-height: 96px; resize: vertical; }
+      label { font-size:12px; color: var(--muted); display:block; margin-bottom:6px; }
+      button { padding:10px 14px; border-radius:8px; border:1px solid #2a2b2f; background:#16181d; color:var(--fg); cursor:pointer; }
+      button.primary { background: var(--acc); border-color: var(--acc); }
+      button.ghost { background: transparent; }
+      button.danger { background: #211314; border-color:#3a1b1e; color:#ffb4b4; }
+      table { width:100%; border-collapse: collapse; }
+      th, td { border-bottom:1px solid #2a2b2f; padding:10px; text-align:left; vertical-align: top; }
+      th { font-weight:600; font-size:12px; color: var(--muted); }
+      .pill { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #2a2b2f; }
+      .pill.ok { background:#0f2a21; color:#8be0c2; border-color:#173f31; }
+      .pill.off { background:#2a1a1a; color:#ffc3c3; border-color:#3a1b1e; }
+      .hidden { display:none !important; }
+      .right { margin-left:auto; }
+      .mt8 { margin-top: 8px; }
+      .mt12 { margin-top: 12px; }
+      .mt16 { margin-top: 16px; }
+      .mt24 { margin-top: 24px; }
+      .mb8 { margin-bottom: 8px; }
+      .mb16 { margin-bottom: 16px; }
+      .w-120 { width:120px; }
+      .w-160 { width:160px; }
+      .w-200 { width:200px; }
+      .center { text-align:center; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:#b3c0ff; }
+      a { color:#93c5fd; text-decoration:none; }
+      a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Admin - Eros Vitta Members</h1>
+      <div class="row">
+        <span id="whoami" class="code"></span>
+        <button id="logoutBtn" class="ghost">Sair</button>
+      </div>
+    </header>
+    <div class="container">
+      <div id="loginCard" class="card">
+        <h2 class="mb16">Login Admin</h2>
+        <div class="grid grid-2">
+          <div>
+            <label>Email</label>
+            <input id="email" type="email" placeholder="admin@exemplo.com" />
+          </div>
+          <div>
+            <label>Senha</label>
+            <input id="senha" type="password" placeholder="••••••••" />
+          </div>
+        </div>
+        <div class="row mt16">
+          <button id="loginBtn" class="primary">Entrar</button>
+          <span id="loginMsg" class="code"></span>
+        </div>
+      </div>
+
+      <div id="app" class="hidden">
+        <div class="card mb16">
+          <div class="row">
+            <strong>Produtos</strong>
+            <div class="right row">
+              <input id="q" class="w-200" placeholder="Buscar por título/slug" />
+              <select id="tipoFilter" class="w-160">
+                <option value="">Tipo (todos)</option>
+                <option value="ebook">ebook</option>
+                <option value="audio">audio</option>
+              </select>
+              <select id="ativoFilter" class="w-160">
+                <option value="">Status (todos)</option>
+                <option value="1">Ativo</option>
+                <option value="0">Inativo</option>
+              </select>
+              <button id="reloadBtn">Atualizar</button>
+              <button id="newBtn" class="primary">Novo produto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb16">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Slug</th>
+                <th>Ativo</th>
+                <th>PDF</th>
+                <th>Áudio</th>
+                <th class="right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div class="row mt12">
+            <button id="prevBtn">Anterior</button>
+            <button id="nextBtn">Próxima</button>
+            <span id="pageInfo" class="code"></span>
+          </div>
+        </div>
+
+        <div id="formCard" class="card hidden">
+          <h3 id="formTitle">Novo produto</h3>
+          <div class="grid grid-3 mt12">
+            <div>
+              <label>Título</label>
+              <input id="f_titulo" />
+            </div>
+            <div>
+              <label>Tipo</label>
+              <select id="f_tipo">
+                <option value="ebook">ebook</option>
+                <option value="audio">audio</option>
+              </select>
+            </div>
+            <div>
+              <label>Slug</label>
+              <input id="f_slug" />
+            </div>
+          </div>
+
+          <div class="grid grid-3 mt12">
+            <div>
+              <label>Capa URL</label>
+              <input id="f_capa" />
+            </div>
+            <div>
+              <label>Ativo</label>
+              <select id="f_ativo">
+                <option value="1">Sim</option>
+                <option value="0">Não</option>
+              </select>
+            </div>
+            <div>
+              <label>Hotmart Product ID</label>
+              <input id="f_hotmart" />
+            </div>
+          </div>
+
+          <div class="grid grid-2 mt12">
+            <div>
+              <label>Descrição</label>
+              <textarea id="f_desc"></textarea>
+            </div>
+            <div>
+              <div>
+                <label>PDF - storage_view_pdf</label>
+                <input id="f_pdf_view" placeholder="/view/pdf?file=..." />
+              </div>
+              <div class="mt8">
+                <label>Áudio - storage_view_audio_dir</label>
+                <input id="f_audio_dir" placeholder="/view/audio/playlist?dir=..." />
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt16">
+            <button id="saveBtn" class="primary">Salvar</button>
+            <button id="cancelBtn" class="ghost">Cancelar</button>
+            <button id="deactBtn" class="danger hidden">Desativar</button>
+            <span id="formMsg" class="code"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const apiBase = '/api';
+      const els = {
+        loginCard: document.getElementById('loginCard'),
+        app: document.getElementById('app'),
+        email: document.getElementById('email'),
+        senha: document.getElementById('senha'),
+        loginBtn: document.getElementById('loginBtn'),
+        loginMsg: document.getElementById('loginMsg'),
+        whoami: document.getElementById('whoami'),
+        logoutBtn: document.getElementById('logoutBtn'),
+        q: document.getElementById('q'),
+        tipoFilter: document.getElementById('tipoFilter'),
+        ativoFilter: document.getElementById('ativoFilter'),
+        reloadBtn: document.getElementById('reloadBtn'),
+        newBtn: document.getElementById('newBtn'),
+        tbody: document.getElementById('tbody'),
+        prevBtn: document.getElementById('prevBtn'),
+        nextBtn: document.getElementById('nextBtn'),
+        pageInfo: document.getElementById('pageInfo'),
+        formCard: document.getElementById('formCard'),
+        formTitle: document.getElementById('formTitle'),
+        f: {
+          id: null,
+          titulo: document.getElementById('f_titulo'),
+          tipo: document.getElementById('f_tipo'),
+          slug: document.getElementById('f_slug'),
+          capa: document.getElementById('f_capa'),
+          ativo: document.getElementById('f_ativo'),
+          hotmart: document.getElementById('f_hotmart'),
+          desc: document.getElementById('f_desc'),
+          pdf_view: document.getElementById('f_pdf_view'),
+          audio_dir: document.getElementById('f_audio_dir'),
+        },
+        saveBtn: document.getElementById('saveBtn'),
+        cancelBtn: document.getElementById('cancelBtn'),
+        deactBtn: document.getElementById('deactBtn'),
+        formMsg: document.getElementById('formMsg'),
+      };
+
+      const state = { token: localStorage.getItem('adminToken') || '', limit: 20, offset: 0, totalKnown: 0 };
+
+      function setAuth(token){ state.token = token; if(token){ localStorage.setItem('adminToken', token); } else { localStorage.removeItem('adminToken'); } }
+      function hdr(){ return state.token ? { 'Authorization': 'Bearer ' + state.token, 'Content-Type':'application/json' } : { 'Content-Type':'application/json' }; }
+      function show(el, v){ el.classList.toggle('hidden', !v); }
+      function msg(el, text){ el.textContent = text; }
+      function clearTbody(){ els.tbody.innerHTML=''; }
+      function pill(text, ok){ return `<span class="pill ${ok?'ok':'off'}">${text}</span>`; }
+
+      async function login(){
+        msg(els.loginMsg, '...');
+        try{
+          const r = await fetch(apiBase + '/admin/login', { method:'POST', headers: hdr(), body: JSON.stringify({ email: els.email.value.trim(), senha: els.senha.value }) });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Falha no login'); }
+          setAuth(j.token);
+          msg(els.loginMsg, '');
+          enterApp();
+        }catch(e){ msg(els.loginMsg, 'Erro: ' + e.message); }
+      }
+
+      function enterApp(){
+        show(els.loginCard, false);
+        show(els.app, true);
+        els.whoami.textContent = 'admin';
+        loadList();
+      }
+
+      function exitApp(){ setAuth(''); show(els.app, false); show(els.loginCard, true); els.whoami.textContent=''; }
+
+      function buildQuery(){
+        const p = new URLSearchParams();
+        if(els.q.value.trim()) p.set('q', els.q.value.trim());
+        if(els.tipoFilter.value) p.set('tipo', els.tipoFilter.value);
+        if(els.ativoFilter.value !== '') p.set('ativo', els.ativoFilter.value);
+        p.set('limit', String(state.limit));
+        p.set('offset', String(state.offset));
+        return p.toString();
+      }
+
+      async function loadList(){
+        clearTbody();
+        msg(els.pageInfo, 'carregando...');
+        try{
+          const r = await fetch(apiBase + '/admin/products?' + buildQuery(), { headers: hdr() });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro ao listar'); }
+          const items = j.items || [];
+          els.tbody.innerHTML = items.map(row => {
+            const pdf = row.storage_view_pdf ? `<a href="${row.storage_view_pdf}" target="_blank">ver</a>` : '';
+            const aud = row.storage_view_audio_dir ? `<a href="${row.storage_view_audio_dir}" target="_blank">abrir</a>` : '';
+            return `<tr>
+              <td>${row.id}</td>
+              <td>${row.titulo||''}</td>
+              <td>${row.tipo||''}</td>
+              <td><span class="code">${row.slug||''}</span></td>
+              <td>${row.ativo==1?pill('ativo', true):pill('inativo', false)}</td>
+              <td>${pdf}</td>
+              <td>${aud}</td>
+              <td class="right">
+                <button data-edit="${row.id}">Editar</button>
+              </td>
+            </tr>`;
+          }).join('');
+          els.pageInfo.textContent = `offset ${state.offset} • carregados ${items.length}`;
+        }catch(e){ els.pageInfo.textContent = 'Erro: ' + e.message; }
+      }
+
+      function openForm(row){
+        els.formTitle.textContent = row && row.id ? `Editar #${row.id}` : 'Novo produto';
+        els.f.id = row && row.id ? row.id : null;
+        els.f.titulo.value = row?.titulo||'';
+        els.f.tipo.value = row?.tipo||'ebook';
+        els.f.slug.value = row?.slug||'';
+        els.f.capa.value = row?.capa_url||'';
+        els.f.ativo.value = String(row?.ativo ?? 1);
+        els.f.hotmart.value = row?.hotmart_product_id||'';
+        els.f.desc.value = row?.descricao||'';
+        els.f.pdf_view.value = row?.storage_view_pdf||'';
+        els.f.audio_dir.value = row?.storage_view_audio_dir||'';
+        show(els.formCard, true);
+        els.deactBtn.classList.toggle('hidden', !(row && row.id));
+      }
+
+      async function saveForm(){
+        const payload = {
+          titulo: els.f.titulo.value.trim(),
+          tipo: els.f.tipo.value,
+          slug: els.f.slug.value.trim(),
+          descricao: els.f.desc.value,
+          capa_url: els.f.capa.value.trim(),
+          ativo: parseInt(els.f.ativo.value,10),
+          hotmart_product_id: els.f.hotmart.value.trim(),
+          storage_view_pdf: els.f.pdf_view.value.trim(),
+          storage_view_audio_dir: els.f.audio_dir.value.trim(),
+        };
+        const isEdit = !!els.f.id;
+        if(isEdit){ payload.id = els.f.id; }
+        msg(els.formMsg, 'salvando...');
+        try{
+          const url = isEdit ? apiBase + '/admin/products/update' : apiBase + '/admin/products';
+          const method = 'POST';
+          const r = await fetch(url, { method, headers: hdr(), body: JSON.stringify(payload) });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro ao salvar'); }
+          msg(els.formMsg, 'OK');
+          show(els.formCard, false);
+          loadList();
+        }catch(e){ msg(els.formMsg, 'Erro: ' + e.message); }
+      }
+
+      async function deactivate(){
+        if(!els.f.id) return;
+        if(!confirm('Desativar produto #' + els.f.id + '?')) return;
+        msg(els.formMsg, 'desativando...');
+        try{
+          const r = await fetch(apiBase + '/admin/products/deactivate', { method:'POST', headers: hdr(), body: JSON.stringify({ id: els.f.id }) });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro ao desativar'); }
+          msg(els.formMsg, 'Desativado');
+          show(els.formCard, false);
+          loadList();
+        }catch(e){ msg(els.formMsg, 'Erro: ' + e.message); }
+      }
+
+      function onTableClick(ev){
+        const btn = ev.target.closest('button[data-edit]');
+        if(btn){
+          const id = parseInt(btn.getAttribute('data-edit'),10);
+          // Busca a linha diretamente da tabela atual (simplificação)
+          const tr = btn.closest('tr');
+          const row = {
+            id,
+            titulo: tr.children[1].textContent,
+            tipo: tr.children[2].textContent,
+            slug: tr.children[3].textContent,
+            ativo: tr.children[4].textContent.includes('ativo') ? 1 : 0,
+          };
+          openForm(row);
+        }
+      }
+
+      // Eventos
+      els.loginBtn.addEventListener('click', login);
+      els.logoutBtn.addEventListener('click', exitApp);
+      els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
+      els.newBtn.addEventListener('click', () => openForm(null));
+      els.tbody.addEventListener('click', onTableClick);
+      els.prevBtn.addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadList(); });
+      els.nextBtn.addEventListener('click', () => { state.offset += state.limit; loadList(); });
+      els.saveBtn.addEventListener('click', saveForm);
+      els.cancelBtn.addEventListener('click', () => show(els.formCard, false));
+      els.deactBtn.addEventListener('click', deactivate);
+
+      // Auto-login se já tem token
+      if(state.token){ enterApp(); } else { show(els.loginCard, true); }
+    </script>
+  </body>
+  </html>
+
+
