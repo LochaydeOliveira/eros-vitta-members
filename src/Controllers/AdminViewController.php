@@ -17,12 +17,18 @@ final class AdminViewController
         $produtoId = (int)($_GET['produto_id'] ?? 0);
         if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT COALESCE(storage_view_pdf, storage_path_pdf) AS path FROM produtos WHERE id = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT storage_view_pdf, storage_path_pdf FROM produtos WHERE id = ? LIMIT 1');
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row || empty($row['path'])) { JsonResponse::error('PDF não configurado', 404); return; }
-        $path = (string)$row['path'];
-        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        if (!$row) { JsonResponse::error('PDF não configurado', 404); return; }
+        $candidates = [];
+        if (!empty($row['storage_path_pdf'])) { $candidates[] = (string)$row['storage_path_pdf']; }
+        if (!empty($row['storage_view_pdf'])) { $candidates[] = (string)$row['storage_view_pdf']; }
+        $path = '';
+        foreach ($candidates as $p) {
+            if (is_file($p)) { $path = $p; break; }
+        }
+        if ($path === '') { JsonResponse::error('Arquivo não encontrado', 404); return; }
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . basename($path) . '"');
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');

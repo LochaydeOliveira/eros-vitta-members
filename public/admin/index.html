@@ -272,18 +272,13 @@
           const j = await r.json();
           if(!r.ok){ throw new Error((j && j.error) || 'Erro ao listar'); }
           const items = (j && j.data && Array.isArray(j.data.items)) ? j.data.items : (j.items || []);
-          const norm = (u, id) => {
-            if (!u || typeof u !== 'string') return '';
-            if (u.startsWith('/view/pdf')) return `/api/admin/view/pdf-file?produto_id=${encodeURIComponent(id)}`;
-            if (u.startsWith('/view/audio/playlist')) return `/api/admin/view/audio/playlist?produto_id=${encodeURIComponent(id)}`;
-            if (u.startsWith('/view/audio/track')) return `/api/admin/view/audio/track?produto_id=${encodeURIComponent(id)}`;
-            return u;
-          };
+          const playlistUrl = (id) => `/api/admin/view/audio/playlist?produto_id=${encodeURIComponent(id)}`;
+          const trackUrl = (id, trackId) => `/api/admin/view/audio/track?produto_id=${encodeURIComponent(id)}&track_id=${encodeURIComponent(trackId)}`;
           els.tbody.innerHTML = items.map(row => {
-            const pdfUrl = norm(row.storage_view_pdf, row.id);
-            const audUrl = norm(row.storage_view_audio_dir, row.id);
-            const pdf = pdfUrl ? `<a href="${pdfUrl}" target="_blank">ver</a>` : '';
-            const aud = audUrl ? `<a href="#" data-audio="${row.id}">abrir</a>` : '';
+            const hasPdf = !!(row.storage_view_pdf || row.storage_path_pdf);
+            const hasAudio = !!row.storage_view_audio_dir;
+            const pdf = hasPdf ? `<a href="#" data-pdf="${row.id}">ver</a>` : '';
+            const aud = hasAudio ? `<a href="#" data-audio="${row.id}">abrir</a>` : '';
             return `<tr>
               <td>${row.id}</td>
               <td>${row.titulo||''}</td>
@@ -358,6 +353,14 @@
         }catch(e){ msg(els.formMsg, 'Erro: ' + e.message); }
       }
 
+      function openBlobInNewTab(blob, mime){
+        try{
+          const url = URL.createObjectURL(new Blob([blob], { type: mime||'application/octet-stream' }));
+          const w = window.open(url, '_blank', 'noopener');
+          // URL será liberada quando a aba for fechada pelo navegador
+        }catch(e){ alert('Falha ao abrir arquivo'); }
+      }
+
       async function onTableClick(ev){
         const btn = ev.target.closest('button[data-edit]');
         if(btn){
@@ -374,6 +377,18 @@
           openForm(row);
           return;
         }
+        const aPdf = ev.target.closest('a[data-pdf]');
+        if(aPdf){
+          ev.preventDefault();
+          const produtoId = parseInt(aPdf.getAttribute('data-pdf'),10);
+          try{
+            const r = await fetch(`/api/admin/view/pdf-file?produto_id=${encodeURIComponent(produtoId)}`, { headers: hdr() });
+            if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.error||'Falha ao abrir PDF'); }
+            const blob = await r.blob();
+            openBlobInNewTab(blob, 'application/pdf');
+          }catch(e){ alert('Erro ao abrir PDF: ' + e.message); }
+          return;
+        }
         const aAudio = ev.target.closest('a[data-audio]');
         if(aAudio){
           ev.preventDefault();
@@ -384,7 +399,10 @@
             const items = (j && j.data && Array.isArray(j.data.items)) ? j.data.items : (j.items || []);
             if(items.length === 0){ alert('Nenhuma faixa disponível.'); return; }
             const first = items[0];
-            window.open(`/api/admin/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(first.id)}`, '_blank');
+            const t = await fetch(`/api/admin/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(first.id)}`, { headers: hdr() });
+            if(!t.ok){ const tj=await t.json().catch(()=>({})); throw new Error(tj.error||'Falha ao abrir áudio'); }
+            const blob = await t.blob();
+            openBlobInNewTab(blob, 'audio/mpeg');
           } catch(e){ alert('Erro ao abrir áudio: ' + e.message); }
         }
       }
