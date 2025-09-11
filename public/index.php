@@ -63,6 +63,7 @@ $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([Admin
 // Admin - acessos (listar e bloquear)
 $router->get('/api/admin/accesses/by-user', AdminMiddleware::requireAdmin([AdminAccessController::class, 'listByUser']));
 $router->post('/api/admin/accesses/block', AdminMiddleware::requireAdmin([AdminAccessController::class, 'block']));
+$router->post('/api/admin/accesses/update-status', AdminMiddleware::requireAdmin([AdminAccessController::class, 'updateStatus']));
 
 // Produtos e acessos (usuário autenticado)
 $router->get('/api/products', AuthMiddleware::requireUser([ProductController::class, 'list']));

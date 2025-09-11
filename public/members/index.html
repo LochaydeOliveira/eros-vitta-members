@@ -294,7 +294,7 @@
       el.className = 'card';
       const cover = (typeof it.capa_url === 'string' && it.capa_url.trim() !== '') ? it.capa_url : '';
       const coverHtml = cover ? `<img class="thumb" src="${cover}" alt="${escapeHtml(it.titulo)}" loading="lazy" />` : '';
-      const hasAccess = !!it.acesso_status;
+      const hasAccess = (it.acesso_status === 'ativo');
       el.innerHTML = `
         ${coverHtml}
         <div class="title">${escapeHtml(it.titulo)}</div>

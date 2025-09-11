@@ -87,6 +87,33 @@ final class AdminAccessController
         $stmt->execute([$motivo !== '' ? $motivo : 'manual', $usuarioId, $produtoId]);
         JsonResponse::ok(['blocked' => true]);
     }
+
+    /**
+     * Atualiza status do acesso: ativo|bloqueado
+     * Body: { usuario_id:int, produto_id:int, status:'ativo'|'bloqueado', motivo?:string }
+     */
+    public static function updateStatus(array $body): void
+    {
+        $usuarioId = (int)($body['usuario_id'] ?? 0);
+        $produtoId = (int)($body['produto_id'] ?? 0);
+        $status = (string)($body['status'] ?? '');
+        $motivo = trim((string)($body['motivo'] ?? 'manual'));
+        if ($usuarioId <= 0 || $produtoId <= 0 || !in_array($status, ['ativo','bloqueado'], true)) {
+            JsonResponse::error('usuario_id, produto_id e status válidos são obrigatórios', 422);
+            return;
+        }
+        $pdo = Database::pdo();
+        if ($status === 'ativo') {
+            $sql = 'UPDATE acessos SET status = "ativo", data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$usuarioId, $produtoId]);
+        } else {
+            $sql = 'UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = ?, atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?';
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$motivo !== '' ? $motivo : 'manual', $usuarioId, $produtoId]);
+        }
+        JsonResponse::ok(['updated' => true]);
+    }
 }
 
 

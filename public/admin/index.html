@@ -399,8 +399,25 @@
           for(const a of items){
             const div = document.createElement('div');
             div.className = 'row';
-            const title = `${a.titulo} (${a.tipo}) — ${a.status}`;
-            div.innerHTML = `<div>${title}</div><div class="right"><button data-u-blk="${userId}:${a.produto_id}">Bloquear</button></div>`;
+            const label = document.createElement('div');
+            label.textContent = `${a.titulo} (${a.tipo})`;
+            const right = document.createElement('div');
+            right.className = 'right';
+            const sel = document.createElement('select');
+            sel.innerHTML = '<option value="ativo">Ativo</option><option value="bloqueado">Bloqueado</option>';
+            sel.value = a.status === 'ativo' ? 'ativo' : 'bloqueado';
+            sel.addEventListener('change', async ()=>{
+              try{
+                const body = { usuario_id: userId, produto_id: a.produto_id, status: sel.value };
+                const rr = await fetch('/api/admin/accesses/update-status', { method:'POST', headers: hdr(), body: JSON.stringify(body) });
+                const jj = await rr.json();
+                if(!rr.ok){ throw new Error(jj.error||'Erro'); }
+                els.u.msg.textContent = 'Status atualizado.';
+              }catch(e){ els.u.msg.textContent = 'Erro: ' + e.message; sel.value = a.status; }
+            });
+            right.appendChild(sel);
+            div.appendChild(label);
+            div.appendChild(right);
             els.u.accesses.appendChild(div);
           }
           els.u.block.onclick = async ()=>{ try{ const rr = await fetch('/api/admin/users/block', { method:'POST', headers: hdr(), body: JSON.stringify({ id: userId }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Usuário bloqueado.'; loadUsers(); }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
