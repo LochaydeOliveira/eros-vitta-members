@@ -25,7 +25,11 @@
     .side-link { display:flex; align-items:center; gap:8px; padding:10px 12px; color:#0f172a; text-decoration:none; border-radius:8px; }
     .side-link:hover { background:#f1f5f9; }
     .icon { width:18px; height:18px; display:inline-block; color:#475569; }
-    .container { padding: 0; }
+    .container {
+      padding: 0;
+      width: 100%;
+      max-width: 400px;
+    }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 6px 24px rgba(15,23,42,0.06); position:relative; }
     .card.blocked { opacity: .75; filter: grayscale(20%); }
     .badge-lock { position:absolute; top:10px; right:10px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:999px; padding:2px 8px; font-size:11px; }
@@ -68,7 +72,13 @@
     .form-card .row { gap: 12px; }
     .input:focus { outline: 2px solid #0ea5e9; outline-offset: 0; }
     /* Auth (estilo Yampi-like) */
-    .auth-card { max-width: 500px; padding: 28px; margin: 0 auto;width: 100%;}
+    .auth-card {
+      max-width: 548px;
+      padding: 8rem 2rem;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
     .auth-title { font-size: 26px; line-height: 1.2; margin: 4px 0 4px; text-align:center; font-weight:700; }
     .auth-subtitle { text-align:center; margin: 0 0 16px; color:#64748b; }
     .auth-card .input { background:#f8fbff; }
