@@ -23,6 +23,7 @@ final class ProductController
               p.capa_url,
               p.ativo,
               p.hotmart_product_id,
+              p.checkout_url,
               a.status AS acesso_status,
               CASE WHEN a.status = 'ativo' THEN 1 ELSE 0 END AS tem_acesso,
               a.data_liberacao,

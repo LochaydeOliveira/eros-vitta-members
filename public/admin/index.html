@@ -161,6 +161,13 @@
             </div>
           </div>
 
+          <div class="grid grid-3 mt12">
+            <div>
+              <label>Checkout URL (prioritário)</label>
+              <input id="f_checkout" placeholder="https://..." />
+            </div>
+          </div>
+
           <div class="grid grid-2 mt12">
             <div>
               <label>Descrição</label>
@@ -299,6 +306,7 @@
           capa: document.getElementById('f_capa'),
           ativo: document.getElementById('f_ativo'),
           hotmart: document.getElementById('f_hotmart'),
+          checkout: document.getElementById('f_checkout'),
           desc: document.getElementById('f_desc'),
           pdf_view: document.getElementById('f_pdf_view'),
           audio_dir: document.getElementById('f_audio_dir'),
@@ -485,6 +493,7 @@
         els.f.capa.value = row?.capa_url||'';
         els.f.ativo.value = String(row?.ativo ?? 1);
         els.f.hotmart.value = row?.hotmart_product_id||'';
+        els.f.checkout.value = row?.checkout_url||'';
         els.f.desc.value = row?.descricao||'';
         els.f.pdf_view.value = row?.storage_view_pdf||row?.storage_path_pdf||'';
         els.f.audio_dir.value = row?.storage_view_audio_dir||row?.storage_path_audio||'';
@@ -501,6 +510,7 @@
           capa_url: els.f.capa.value.trim(),
           ativo: parseInt(els.f.ativo.value,10),
           hotmart_product_id: els.f.hotmart.value.trim(),
+          checkout_url: els.f.checkout.value.trim(),
           storage_view_pdf: els.f.pdf_view.value.trim(),
           storage_view_audio_dir: els.f.audio_dir.value.trim(),
         };

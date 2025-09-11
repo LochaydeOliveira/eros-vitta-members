@@ -24,7 +24,7 @@ final class AdminProductController
         if (isset($_GET['ativo'])) { $where[] = 'ativo = ?'; $params[] = (int)$_GET['ativo'] === 1 ? 1 : 0; }
         $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
         if ($q !== '') { $where[] = '(titulo LIKE ? OR slug LIKE ?)'; $like = '%' . $q . '%'; $params[] = $like; $params[] = $like; }
-        $sql = 'SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir FROM produtos';
+        $sql = 'SELECT id, titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, checkout_url, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir FROM produtos';
         if ($where) { $sql .= ' WHERE ' . implode(' AND ', $where); }
         // Ordenação
         $allowedOrder = ['id','titulo','tipo','ativo','criado_em','atualizado_em'];
@@ -64,8 +64,9 @@ final class AdminProductController
             return;
         }
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('INSERT INTO produtos (titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir, criado_em, atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW(), NOW())');
-        $stmt->execute([$titulo, $tipo, $slug, $descricao, $capaUrl, $ativo, $hotmartId ?: null, $pdfPath ?: null, $pdfView ?: null, $audioPath ?: null, $audioDir ?: null]);
+        $checkoutUrl = (string)($body['checkout_url'] ?? '');
+        $stmt = $pdo->prepare('INSERT INTO produtos (titulo, tipo, slug, descricao, capa_url, ativo, hotmart_product_id, checkout_url, storage_path_pdf, storage_view_pdf, storage_path_audio, storage_view_audio_dir, criado_em, atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?, ?, NOW(), NOW())');
+        $stmt->execute([$titulo, $tipo, $slug, $descricao, $capaUrl, $ativo, $hotmartId ?: null, $checkoutUrl ?: null, $pdfPath ?: null, $pdfView ?: null, $audioPath ?: null, $audioDir ?: null]);
         JsonResponse::ok(['id' => (int)$pdo->lastInsertId()], 201);
     }
 
@@ -80,7 +81,7 @@ final class AdminProductController
             JsonResponse::error('id obrigatório', 422);
             return;
         }
-        $fields = ['titulo','tipo','slug','descricao','capa_url','ativo','hotmart_product_id','storage_path_pdf','storage_view_pdf','storage_path_audio','storage_view_audio_dir'];
+        $fields = ['titulo','tipo','slug','descricao','capa_url','ativo','hotmart_product_id','checkout_url','storage_path_pdf','storage_view_pdf','storage_path_audio','storage_view_audio_dir'];
         $set = [];
         $values = [];
         foreach ($fields as $f) {

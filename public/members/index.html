@@ -333,8 +333,9 @@
       } else {
         const btnBuy = document.createElement('a');
         btnBuy.className = 'btn secondary';
+        const custom = (it.checkout_url||'').trim();
         const pid = (it.hotmart_product_id||'').trim();
-        const checkout = pid ? `https://pay.hotmart.com/${encodeURIComponent(pid)}` : '#';
+        const checkout = custom ? custom : (pid ? `https://pay.hotmart.com/${encodeURIComponent(pid)}` : '#');
         btnBuy.href = checkout;
         btnBuy.target = '_blank';
         btnBuy.rel = 'noopener';
