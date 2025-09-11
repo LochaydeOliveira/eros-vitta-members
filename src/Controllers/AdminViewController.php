@@ -9,6 +9,52 @@ use PDO;
 
 final class AdminViewController
 {
+    private static function resolveFilePath(string $input): string
+    {
+        $input = trim($input);
+        if ($input === '') { return ''; }
+        if (is_file($input)) { return $input; }
+        // Se for URL, pega apenas o path
+        if (stripos($input, 'http://') === 0 || stripos($input, 'https://') === 0) {
+            $urlPath = parse_url($input, PHP_URL_PATH) ?: '';
+        } else {
+            $urlPath = $input;
+        }
+        // Se já for um caminho absoluto tipo /home1/... tenta diretamente
+        if ($urlPath !== '' && $urlPath[0] === '/' && is_file($urlPath)) { return $urlPath; }
+        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT
+        if ($urlPath !== '' && $urlPath[0] === '/') {
+            $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            if ($docRoot !== '') {
+                $base = rtrim(dirname($docRoot), '/');
+                $candidate = $base . $urlPath;
+                if (is_file($candidate)) { return $candidate; }
+            }
+        }
+        return '';
+    }
+
+    private static function resolveDirPath(string $input): string
+    {
+        $input = trim($input);
+        if ($input === '') { return ''; }
+        if (is_dir($input)) { return $input; }
+        if (stripos($input, 'http://') === 0 || stripos($input, 'https://') === 0) {
+            $urlPath = parse_url($input, PHP_URL_PATH) ?: '';
+        } else {
+            $urlPath = $input;
+        }
+        if ($urlPath !== '' && $urlPath[0] === '/' && is_dir($urlPath)) { return $urlPath; }
+        if ($urlPath !== '' && $urlPath[0] === '/') {
+            $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            if ($docRoot !== '') {
+                $base = rtrim(dirname($docRoot), '/');
+                $candidate = $base . $urlPath;
+                if (is_dir($candidate)) { return $candidate; }
+            }
+        }
+        return '';
+    }
     /**
      * Preview PDF (somente admin). Query: produto_id (int)
      */
@@ -21,13 +67,9 @@ final class AdminViewController
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) { JsonResponse::error('PDF não configurado', 404); return; }
-        $candidates = [];
-        if (!empty($row['storage_path_pdf'])) { $candidates[] = (string)$row['storage_path_pdf']; }
-        if (!empty($row['storage_view_pdf'])) { $candidates[] = (string)$row['storage_view_pdf']; }
         $path = '';
-        foreach ($candidates as $p) {
-            if (is_file($p)) { $path = $p; break; }
-        }
+        if (!empty($row['storage_path_pdf'])) { $path = self::resolveFilePath((string)$row['storage_path_pdf']); }
+        if ($path === '' && !empty($row['storage_view_pdf'])) { $path = self::resolveFilePath((string)$row['storage_view_pdf']); }
         if ($path === '') { JsonResponse::error('Arquivo não encontrado', 404); return; }
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . basename($path) . '"');
@@ -48,7 +90,7 @@ final class AdminViewController
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_view_audio_dir'])) { JsonResponse::ok(['items' => []]); return; }
-        $dir = (string)$row['storage_view_audio_dir'];
+        $dir = self::resolveDirPath((string)$row['storage_view_audio_dir']);
         $items = [];
         if (is_dir($dir)) {
             $files = glob(rtrim($dir, '/\\') . '/*.mp3');
@@ -82,7 +124,7 @@ final class AdminViewController
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_view_audio_dir'])) { JsonResponse::error('Áudio não configurado', 404); return; }
-        $dir = (string)$row['storage_view_audio_dir'];
+        $dir = self::resolveDirPath((string)$row['storage_view_audio_dir']);
         $path = '';
         if (is_dir($dir)) {
             $files = glob(rtrim($dir, '/\\') . '/*.mp3');
@@ -113,8 +155,8 @@ final class AdminViewController
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_path_audio'])) { JsonResponse::error('Áudio não configurado', 404); return; }
-        $path = (string)$row['storage_path_audio'];
-        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        $path = self::resolveFilePath((string)$row['storage_path_audio']);
+        if ($path === '') { JsonResponse::error('Arquivo não encontrado', 404); return; }
         header('Content-Type: audio/mpeg');
         header('Content-Disposition: inline; filename="' . basename($path) . '"');
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
