@@ -45,6 +45,11 @@ Eros Vitta Members - Progresso do Projeto
   - Player de áudio em modal (playlist por diretório), lembrar posição por faixa
   - Miniplayer flutuante (retomar/pausar/abrir)
   - Anti-cópia básica (bloqueio de clique direito e atalhos comuns)
+  - Header com saudação “Olá, Nome”, avatar com menu funcional (toggle corrigido)
+  - Modal “Perfil” para troca de senha do usuário (chama /api/auth/password/change)
+  - Formulário de login remodelado (estilo Yampi): labels acima, link “Esqueci minha senha”, botão preto full-width
+  - Ajustes visuais: capas sem borda, cantos 2px, paleta com preto no lugar do roxo
+  - Correções JS: safe keydown `(e.key || '').toLowerCase()`
 - DocumentRoot apontando para public/; .htaccess simplificado (as variáveis sensíveis ficam em config.local.php)
 
 2) Onde paramos
@@ -58,6 +63,7 @@ Eros Vitta Members - Progresso do Projeto
 - CRON `cron/daily.php` criado: envio automático pós D+7 com link temporário (48h)
 - Áudio por diretório funcionando (playlist + stream por faixa)
 - Bug de avanço entre faixas corrigido (início no tempo zero por padrão)
+ - UI refinada (avatar menu ok, formulários estilo Yampi, bordas removidas, radius=2px)
 
 3) O que falta para continuar
 - Operacional imediato:
@@ -69,10 +75,11 @@ Eros Vitta Members - Progresso do Projeto
   - Atribuição/remoção manual de acessos
   - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos)
 - Front-end Área do Membro (refino do MVP atual):
-  - Ajuste visual fino (cores, tipografia, espaçamentos)
+  - Ajuste visual fino restante (microespaçamentos e responsividade extrema)
+  - Implementar fluxo “Esqueci minha senha” usando /api/auth/password/forgot e tela de reset
   - Exibir duração total do álbum ao lado do título (opcional)
-  - Página “Perfil” (alterar senha, sair)
-  - Estados/CTAs (bloqueado até D+7, ativo, sem acesso)
+  - Estados/CTAs claros no catálogo (bloqueado até D+7, ativo, sem acesso)
+  - Tratar eventuais 404 de assets (ex.: favicon); precisa da URL específica do erro
 - Segurança e robustez:
   - Webhook: manter validação Hottok e rate limiting
   - Observabilidade (melhorar logs de falhas de e-mail/webhook)

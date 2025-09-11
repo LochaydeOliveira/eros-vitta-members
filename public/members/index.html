@@ -86,8 +86,98 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- Wavesurfer.js (opcional futuramente) -->
   <script>
-    function openForgot(){ alert('Em breve: fluxo de recuperação de senha.'); }
+    function openForgot(){
+      let modal = document.getElementById('forgot-modal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.className = 'overlay';
+        modal.id = 'forgot-modal';
+        modal.innerHTML = `
+          <div class="overlay-inner">
+            <div class="overlay-toolbar">
+              <div class="overlay-actions"><button class="overlay-btn ghost" id="fg-close">Fechar</button></div>
+              <div class="overlay-actions"><span class="small">Recuperar senha</span></div>
+            </div>
+            <div class="overlay-canvas">
+              <div class="card form-card">
+                <h3 class="title">Recuperar senha</h3>
+                <div class="row">
+                  <div><label class="muted">E-mail</label><input id="fg-email" class="input" type="email" placeholder="seu@email.com" required /></div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn secondary" id="fg-send">Enviar</button>
+                </div>
+                <div class="small" id="fg-msg" style="margin-top:8px"></div>
+              </div>
+            </div>
+            <div class="overlay-toolbar" style="justify-content:center"><span class="small">Suporte</span></div>
+          </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('#fg-close').addEventListener('click', ()=> modal.classList.remove('show'));
+        modal.querySelector('#fg-send').addEventListener('click', async ()=>{
+          const email = (document.getElementById('fg-email').value||'').trim().toLowerCase();
+          const msg = document.getElementById('fg-msg');
+          if(!email){ msg.textContent = 'Informe seu e-mail.'; return; }
+          msg.textContent = 'Enviando...';
+          try{
+            const res = await api('/api/auth/password/forgot', { method:'POST', body: JSON.stringify({ email }) });
+            msg.textContent = (res && res.message) ? res.message : 'Se existir, um e-mail será enviado.';
+          }catch(e){ msg.textContent = 'Falha: ' + e.message; }
+        });
+      }
+      modal.classList.add('show');
+    }
+
     function openRegister(){ alert('Cadastro via webhook / admin. Registro manual opcional.'); }
+
+    function openReset(prefillToken){
+      let modal = document.getElementById('reset-modal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.className = 'overlay';
+        modal.id = 'reset-modal';
+        modal.innerHTML = `
+          <div class="overlay-inner">
+            <div class="overlay-toolbar">
+              <div class="overlay-actions"><button class="overlay-btn ghost" id="rs-close">Fechar</button></div>
+              <div class="overlay-actions"><span class="small">Redefinir senha</span></div>
+            </div>
+            <div class="overlay-canvas">
+              <div class="card form-card">
+                <h3 class="title">Defina uma nova senha</h3>
+                <div class="row">
+                  <div><label class="muted">Token</label><input id="rs-token" class="input" type="text" placeholder="cole aqui o token" required /></div>
+                  <div><label class="muted">Nova senha</label><input id="rs-new" class="input" type="password" placeholder="mínimo 6 caracteres" required /></div>
+                  <div><label class="muted">Confirmar senha</label><input id="rs-confirm" class="input" type="password" required /></div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn secondary" id="rs-send">Salvar</button>
+                </div>
+                <div class="small" id="rs-msg" style="margin-top:8px"></div>
+              </div>
+            </div>
+            <div class="overlay-toolbar" style="justify-content:center"><span class="small">Segurança</span></div>
+          </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('#rs-close').addEventListener('click', ()=> modal.classList.remove('show'));
+        modal.querySelector('#rs-send').addEventListener('click', async ()=>{
+          const token = (document.getElementById('rs-token').value||'').trim();
+          const senha = (document.getElementById('rs-new').value||'');
+          const confirm = (document.getElementById('rs-confirm').value||'');
+          const msg = document.getElementById('rs-msg');
+          if (!token){ msg.textContent = 'Informe o token.'; return; }
+          if (!senha || senha.length < 6){ msg.textContent = 'Senha muito curta (mínimo 6).'; return; }
+          if (senha !== confirm){ msg.textContent = 'As senhas não conferem.'; return; }
+          msg.textContent = 'Enviando...';
+          try{
+            const res = await api('/api/auth/password/reset', { method:'POST', body: JSON.stringify({ token, senha }) });
+            msg.textContent = (res && res.message) ? res.message : 'Senha atualizada.';
+          }catch(e){ msg.textContent = 'Falha: ' + e.message; }
+        });
+      }
+      modal.classList.add('show');
+      if (prefillToken){ const t = document.getElementById('rs-token'); if (t) t.value = prefillToken; }
+    }
     // Menu helpers (definido antes do restante para evitar ReferenceError)
     function toggleMenu(force){
       const p = document.getElementById('userMenu');
