@@ -160,7 +160,7 @@
         const btnPlay = document.createElement('button');
         btnPlay.className = 'btn';
         btnPlay.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> Ouvir álbum';
-        btnPlay.onclick = async ()=>{ await playAudio(it.id); };
+        btnPlay.onclick = async ()=>{ await playAudio(it.id, it.titulo || 'Álbum'); };
         actions.appendChild(btnPlay);
       }
       // Download removido da área de membros (entrega pós D+7 por e-mail)
@@ -318,31 +318,113 @@
       await render();
     }
 
-    async function playAudio(produtoId){
-      // Busca playlist
+    function ensureAudioModal(){
+      let modal = document.getElementById('audio-modal');
+      if (modal) return modal;
+      modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.id = 'audio-modal';
+      modal.innerHTML = `
+        <div class="overlay-inner">
+          <div class="overlay-toolbar">
+            <div class="overlay-actions">
+              <button class="overlay-btn ghost" id="am-close">Fechar</button>
+            </div>
+            <div class="overlay-actions"><span class="small" id="am-title">Reprodutor</span></div>
+          </div>
+          <div class="overlay-canvas">
+            <div style="width:100%;max-width:860px;">
+              <audio id="am-audio" controls style="width:100%"></audio>
+              <div class="progress" id="am-progress"><div class="bar" id="am-bar"></div></div>
+              <div class="time" id="am-time"></div>
+              <div id="am-list" class="small" style="margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="overlay-toolbar" style="justify-content:center"><span class="small">Álbum</span></div>
+        </div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('#am-close').addEventListener('click', ()=>{ modal.classList.remove('show'); showMiniPlayer(); });
+      return modal;
+    }
+
+    function ensureMiniPlayer(){
+      let mini = document.getElementById('mini-player');
+      if (mini) return mini;
+      mini = document.createElement('div');
+      mini.id = 'mini-player';
+      mini.style.position = 'fixed';
+      mini.style.right = '16px';
+      mini.style.bottom = '16px';
+      mini.style.zIndex = '1001';
+      mini.style.display = 'none';
+      mini.style.background = '#111827';
+      mini.style.color = '#fff';
+      mini.style.borderRadius = '10px';
+      mini.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)';
+      mini.style.padding = '10px 12px';
+      mini.innerHTML = '<div id="mini-title" style="font-size:13px; max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Reprodutor</div>' +
+                       '<div id="mini-time" class="small" style="margin:4px 0 8px; opacity:.85">0:00 / 0:00</div>' +
+                       '<div style="display:flex; gap:8px; align-items:center; justify-content:flex-end">' +
+                       '  <button id="mini-toggle" class="btn" style="background:#111827">Reproduzir</button>' +
+                       '  <button id="mini-open" class="btn" style="background:#10b981">Abrir</button>' +
+                       '  <button id="mini-close" class="btn" style="background:#374151">Fechar</button>' +
+                       '</div>';
+      document.body.appendChild(mini);
+      mini.querySelector('#mini-open').addEventListener('click', ()=>{ const m = document.getElementById('audio-modal'); if(m){ m.classList.add('show'); hideMiniPlayer(); }});
+      mini.querySelector('#mini-toggle').addEventListener('click', ()=>{
+        const a = document.getElementById('am-audio');
+        if (!a) return;
+        if (a.paused) { a.play().catch(()=>{}); } else { a.pause(); }
+        updateMiniTime();
+      });
+      mini.querySelector('#mini-close').addEventListener('click', ()=> hideMiniPlayer());
+      return mini;
+    }
+
+    function showMiniPlayer(){
+      const mini = ensureMiniPlayer();
+      const title = document.getElementById('am-title');
+      const mt = document.getElementById('mini-title');
+      if (mt && title) mt.textContent = title.textContent || 'Reprodutor';
+      updateMiniTime();
+      mini.style.display = 'block';
+    }
+
+    function hideMiniPlayer(){
+      const mini = ensureMiniPlayer();
+      mini.style.display = 'none';
+    }
+
+    function updateMiniTime(){
+      const a = document.getElementById('am-audio');
+      const mt = document.getElementById('mini-time');
+      const toggle = document.getElementById('mini-toggle');
+      if (!a || !mt || !toggle) return;
+      const fmt = (s)=>{ const m = Math.floor(s/60), r = Math.floor(s%60); return `${m}:${String(r).padStart(2,'0')}`; };
+      const cur = a.currentTime || 0;
+      const dur = a.duration || 0;
+      mt.textContent = `${fmt(cur)} / ${dur>0?fmt(dur):'0:00'}`;
+      toggle.textContent = a.paused ? 'Reproduzir' : 'Pausar';
+    }
+
+    async function playAudio(produtoId, albumTitulo='Reprodutor de Áudio'){
       const token = getToken();
       let playlist;
       try {
         const j = await api(`/api/view/audio/playlist?produto_id=${encodeURIComponent(produtoId)}`);
         playlist = (j.items || j.data?.items || []);
       } catch(e){ alert('Erro ao carregar playlist: ' + e.message); return; }
-      const media = document.querySelector(`#media-${produtoId}`);
-      media.innerHTML = '';
-      const container = document.createElement('div');
-      container.className = 'card';
-      const audio = document.createElement('audio');
-      audio.controls = true;
-      audio.style.width = '100%';
-      const list = document.createElement('div');
-      list.className = 'small';
-      const progress = document.createElement('div'); progress.className = 'progress';
-      const bar = document.createElement('div'); bar.className = 'bar'; progress.appendChild(bar);
-      const time = document.createElement('div'); time.className = 'time'; time.textContent = '';
-      container.appendChild(audio);
-      container.appendChild(progress);
-      container.appendChild(time);
-      container.appendChild(list);
-      media.appendChild(container);
+
+      const modal = ensureAudioModal();
+      modal.classList.add('show');
+      hideMiniPlayer();
+      const audio = document.getElementById('am-audio');
+      const progress = document.getElementById('am-progress');
+      const bar = document.getElementById('am-bar');
+      const time = document.getElementById('am-time');
+      const list = document.getElementById('am-list');
+      const title = document.getElementById('am-title');
+      title.textContent = albumTitulo;
 
       let idx = 0;
       function keyFor(trackId){ return `ev_audio_pos_${currentUserEmail}_${produtoId}_${trackId}`; }
@@ -351,14 +433,12 @@
         if(i < 0 || i >= playlist.length){ return; }
         idx = i;
         const tr = playlist[idx];
-        // carrega stream da faixa
         const url = `/api/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(tr.id)}`;
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         if(!res.ok){ alert('Falha ao carregar faixa'); return; }
         const blob = await res.blob();
         const obj = URL.createObjectURL(blob);
         audio.src = obj;
-        // restaurar posição
         const saved = parseFloat(localStorage.getItem(keyFor(tr.id)) || '0');
         if(!isNaN(saved) && saved > 0){ audio.currentTime = saved; }
         audio.play().catch(()=>{});
@@ -397,13 +477,11 @@
         const pct = dur > 0 ? (cur / dur * 100) : 0;
         bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
         const left = dur > 0 ? Math.max(0, Math.round(dur - cur)) : 0;
-        const fmt = (s)=>{
-          const m = Math.floor(s/60), r = s%60; return `${m}:${String(r).padStart(2,'0')}`;
-        };
+        const fmt = (s)=>{ const m = Math.floor(s/60), r = s%60; return `${m}:${String(r).padStart(2,'0')}`; };
         time.textContent = (dur>0) ? `${fmt(Math.round(cur))} / ${fmt(Math.round(dur))}  (restante: ${fmt(left)})` : '';
+        updateMiniTime();
       }
 
-      let seeking = false;
       progress.addEventListener('click', (e)=>{
         const rect = progress.getBoundingClientRect();
         const ratio = (e.clientX - rect.left) / rect.width;
@@ -415,18 +493,11 @@
         try { localStorage.setItem(keyFor(tr.id), String(audio.currentTime||0)); } catch {}
         updateProgress();
       });
-      audio.addEventListener('ended', ()=>{
-        const tr = playlist[idx]; if(!tr) return;
-        try { localStorage.removeItem(keyFor(tr.id)); } catch {}
-        // auto-avanço
-        loadTrack(idx+1);
-      });
+      audio.addEventListener('ended', ()=>{ const tr = playlist[idx]; if(!tr) return; try { localStorage.removeItem(keyFor(tr.id)); } catch {}; loadTrack(idx+1); });
       audio.addEventListener('loadedmetadata', updateProgress);
       audio.addEventListener('seeked', updateProgress);
 
-      if(playlist.length > 0){ loadTrack(0); } else {
-        list.textContent = 'Nenhuma faixa disponível.';
-      }
+      if(playlist.length > 0){ loadTrack(0); } else { list.textContent = 'Nenhuma faixa disponível.'; }
     }
 
     async function doDownload(produtoId){
