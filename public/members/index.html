@@ -530,7 +530,7 @@
       const has = !!getToken();
       document.querySelector('#login').style.display = has ? 'none' : 'block';
       document.querySelector('#app').style.display = has ? 'block' : 'none';
-      if(has){ loadCatalog(); }
+      if(has){ loadUserProfile().finally(loadCatalog); }
       // Bloqueios básicos (não infalíveis): clique direito e atalhos comuns
       window.addEventListener('contextmenu', e => {
         if (!e.target.closest('input, textarea')) e.preventDefault();
