@@ -6,10 +6,17 @@
   <title>Área de Membros - Eros Vitta</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: #0f172a; background: #f8fafc; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+    .layout { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
+    @media(max-width: 900px){ .layout { grid-template-columns: 1fr; } }
+    .sidebar { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px; height: fit-content; position: sticky; top: 64px; }
+    .sidebar h3 { font-size:14px; color:#475569; margin:8px 8px 6px; text-transform: uppercase; letter-spacing: .02em; }
+    .side-link { display:flex; align-items:center; gap:8px; padding:10px 12px; color:#0f172a; text-decoration:none; border-radius:8px; }
+    .side-link:hover { background:#f1f5f9; }
+    .icon { width:18px; height:18px; display:inline-block; color:#475569; }
+    .container { padding: 0; }
+    .card { background: #fff; border: 0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px; }
     .btn { appearance: none; border: 0; background: #7c3aed; color: #fff; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .btn.secondary { background: #0ea5e9; }
     .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
@@ -25,7 +32,7 @@
     .pager { display: inline-flex; gap: 6px; align-items: center; }
     .small { font-size: 12px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
-    .thumb { width: 100%; height: auto; border: 0; border-radius: 6px; background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
+    .thumb { width: 100%; height: auto; border: 0; border-radius: 10px; background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
     /* Bloqueio de seleção global (inputs continuam permitidos) */
     body { -webkit-user-select: none; user-select: none; }
     input, textarea { -webkit-user-select: text; user-select: text; }
@@ -93,6 +100,26 @@
 
     async function logout(){ clearToken(); location.reload(); }
 
+    // Acessos (exemplo simples)
+    async function loadAccesses(){
+      setHeader('Início / Meus acessos', 'Meus acessos');
+      const list = document.querySelector('#catalog');
+      list.innerHTML = '<div class="muted">Carregando acessos...</div>';
+      try {
+        const j = await api('/api/accesses');
+        const items = j.data.items || [];
+        list.innerHTML = '<h3 class="title">Meus acessos</h3>' + (items.length ? '' : '<div class="muted">Nenhum acesso ativo.</div>');
+      } catch(e){ list.innerHTML = '<div class="muted">Erro: '+e.message+'</div>'; }
+    }
+
+    function openHelp(){ setHeader('Início / Ajuda', 'Ajuda'); alert('Em breve: FAQ e suporte.'); }
+
+    function setHeader(path, title){
+      const sh = document.getElementById('sectionHeader'); if (sh) sh.style.display = 'block';
+      const bc = document.getElementById('breadcrumbs'); if (bc) bc.textContent = path;
+      const st = document.getElementById('sectionTitle'); if (st) st.textContent = title;
+    }
+
     async function loadCatalog(){
       const list = document.querySelector('#catalog');
       list.innerHTML = '<div class="muted">Carregando...</div>';
@@ -103,6 +130,7 @@
         list.innerHTML = '';
         for(const it of items){ list.appendChild(renderItem(it)); }
       } catch(e){ list.innerHTML = '<div class="muted">Erro: '+e.message+'</div>'; }
+      setHeader('Início / Catálogo', 'Catálogo');
     }
 
     function renderItem(it){
@@ -404,7 +432,10 @@
       const has = !!getToken();
       document.querySelector('#login').style.display = has ? 'none' : 'block';
       document.querySelector('#app').style.display = has ? 'block' : 'none';
-      if(has){ loadCatalog(); }
+      if(has){
+        const sb = document.getElementById('sidebar'); if (sb) sb.style.display = 'block';
+        loadCatalog();
+      }
       // Bloqueios básicos (não infalíveis): clique direito e atalhos comuns
       window.addEventListener('contextmenu', e => {
         if (!e.target.closest('input, textarea')) e.preventDefault();
@@ -429,7 +460,24 @@
     </div>
   </header>
 
-  <main class="container">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" style="display:none">
+      <h3>Navegação</h3>
+      <a class="side-link" href="#" onclick="loadCatalog(); return false;">
+        <span class="icon">📚</span> <span>Catálogo</span>
+      </a>
+      <a class="side-link" href="#" onclick="loadAccesses(); return false;">
+        <span class="icon">🔑</span> <span>Meus acessos</span>
+      </a>
+      <a class="side-link" href="#" onclick="openHelp(); return false;">
+        <span class="icon">❓</span> <span>Ajuda</span>
+      </a>
+    </aside>
+    <main class="container">
+    <div class="card" id="sectionHeader" style="margin-bottom:16px; display:none">
+      <div class="muted" id="breadcrumbs">Início</div>
+      <h2 id="sectionTitle" style="margin:6px 0 0">Catálogo</h2>
+    </div>
     <section id="login" class="card" style="display:none">
       <h2>Entrar</h2>
       <form onsubmit="login(event)">
@@ -445,7 +493,8 @@
       <h2>Catálogo</h2>
       <div id="catalog" class="grid"></div>
     </section>
-  </main>
+    </main>
+  </div>
   <!-- PDF.js iframe modal simples -->
   <div id="pdfjs-modal" class="overlay"><div class="overlay-inner">
     <div class="overlay-toolbar"><div></div><div class="overlay-actions"><button class="overlay-btn ghost" onclick="document.getElementById('pdfjs-modal').classList.remove('show')">Fechar</button></div></div>
