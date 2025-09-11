@@ -31,50 +31,55 @@ Eros Vitta Members - Progresso do Projeto
 - Storage seguro implementado (paths fora de public/ via storage_path_* e streaming autenticado)
 - View-only protegido (sem URL pública):
   - GET /api/view/pdf?produto_id=&page=&width= (renderização por página com marca d’água)
-  - GET /api/view/audio?produto_id= (stream inline)
-- Download por token sempre attachment (usar apenas após D+7)
+  - GET /api/view/pdf-file?produto_id= (PDF completo para PDF.js)
+  - GET /api/view/audio/playlist?produto_id= (playlist por diretório)
+  - GET /api/view/audio/track?produto_id=&track_id= (stream de faixa)
+  - Download por token sempre attachment (usar apenas após D+7)
 - Webhook Hotmart validado via Hottok (X-HOTMART-HOTTOK)
 - Envio de e-mail automático no webhook (boas-vindas com login/senha provisória)
- - Logs básicos em logs/api_YYYY-MM-DD.log
- - Colunas separadas view vs download em produtos (storage_view_* e storage_dl_*)
- - Front-end MVP simples em public/members/index.html (login + catálogo + visualizar/ouvir + download pós D+7)
- - DocumentRoot apontando para public/; .htaccess com APP_KEY, DB_*, SMTP_*, HOTMART_HOTTOK
+- Logs básicos em logs/api_YYYY-MM-DD.log
+- Colunas separadas view vs download em produtos (storage_view_* e storage_dl_*)
+- Front-end em public/members/index.html:
+  - Login JWT e catálogo responsivo (cards lado a lado)
+  - Visualização de PDFs com PDF.js (sem download/print) e watermark
+  - Player de áudio em modal (playlist por diretório), lembrar posição por faixa
+  - Miniplayer flutuante (retomar/pausar/abrir)
+  - Anti-cópia básica (bloqueio de clique direito e atalhos comuns)
+- DocumentRoot apontando para public/; .htaccess simplificado (as variáveis sensíveis ficam em config.local.php)
 
 2) Onde paramos
 - Deploy realizado e API online (ex.: https://erosvitta.com.br)
 - Conexão com DB validada (ok)
 - Login admin VALIDADO com sucesso (POST /api/admin/login)
-- Rotas admin protegidas testadas (ex.: GET /api/admin/users) — acesso ok; lista vazia
+- Rotas admin protegidas testadas (ex.: GET /api/admin/users) — acesso ok
 - Admin usado: lochaydeguerreiro@hotmail.com (ativo=1, senha atualizada com Bcrypt)
 - Rotas de diagnóstico removidas do roteador público
 - Webhook processando evento approved -> cria/atualiza usuário, registra compra, calcula data_liberacao (D+7), cria/ativa acesso, envia e-mail
+- CRON `cron/daily.php` criado: envio automático pós D+7 com link temporário (48h)
+- Áudio por diretório funcionando (playlist + stream por faixa)
+- Bug de avanço entre faixas corrigido (início no tempo zero por padrão)
 
 3) O que falta para continuar
 - Operacional imediato:
   - Criar um admin de backup e guardar as credenciais com gerenciador
-  - Manter endpoints de diagnóstico fora de produção (já removidos)
-- Deploy e smoke test (contínuo):
-  - Health: GET /api/health
-  - (opcional) E-mail: POST /api/test/email; após sucesso, remover por segurança
+  - Validar execução do CRON em produção e logs de envio D+7
 - Painel Admin (backoffice):
-  - Rotas para CRUD de produtos (upload, editar, deletar)
-  - CRUD de clientes (listar/editar/bloquear/desbloquear, resetar senha)
-  - Atribuir produtos manualmente a clientes
-  - Dashboard usando as views e snapshots (resumo, faturamento diário/mensal, top produtos)
-- Front-end Área do Membro (evolução do MVP para React/Tailwind):
-  - Paginação de PDF (próx/ant), viewer completo (ou integração PDF.js)
-  - Player de áudio com barra/pausa/lembrar posição
-  - Perfil e troca de senha
-  - Estados/CTAs (comprado, bloqueado, comprar)
+  - CRUD de produtos (upload de capas e caminhos de mídia), editar/arquivar
+  - CRUD de usuários (listar/editar/bloquear/desbloquear, resetar senha)
+  - Atribuição/remoção manual de acessos
+  - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos)
+- Front-end Área do Membro (refino do MVP atual):
+  - Ajuste visual fino (cores, tipografia, espaçamentos)
+  - Exibir duração total do álbum ao lado do título (opcional)
+  - Página “Perfil” (alterar senha, sair)
+  - Estados/CTAs (bloqueado até D+7, ativo, sem acesso)
 - Segurança e robustez:
-  - Webhook: manter validação Hottok
-  - Rate limiting em login e webhook
-  - Logs/observabilidade (falhas de e-mail/webhook) – log básico já ativo
+  - Webhook: manter validação Hottok e rate limiting
+  - Observabilidade (melhorar logs de falhas de e-mail/webhook)
   - Proteção da mídia (armazenamento fora da public/, streaming autenticado)
-  - Watermark opcional para PDFs
+  - Watermark já aplicado; avaliar densidade/posição
 - Operacional:
   - CRON diário para snapshots (se EVENT_SCHEDULER indisponível)
-  - CRON D+7: e-mail de liberação com senha/link da cópia de download
   - Backups do banco e retenção
 
 4) Como testar depois do deploy

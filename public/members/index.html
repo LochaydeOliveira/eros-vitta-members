@@ -539,6 +539,7 @@
     <div><strong>Eros Vitta Members</strong></div>
     <div>
       <span class="muted" id="userEmail"></span>
+      <button class="btn" onclick="openProfile()">Perfil</button>
       <button class="btn secondary" onclick="logout()">Sair</button>
     </div>
   </header>
@@ -571,6 +572,50 @@
     <div class="overlay-toolbar" style="justify-content:center"><span class="small">Visualização PDF</span></div>
   </div></div>
   <script>
+    function openProfile(){
+      let modal = document.getElementById('profile-modal');
+      if(!modal){
+        modal = document.createElement('div');
+        modal.className = 'overlay';
+        modal.id = 'profile-modal';
+        modal.innerHTML = `
+          <div class="overlay-inner">
+            <div class="overlay-toolbar">
+              <div class="overlay-actions"><button class="overlay-btn ghost" id="pf-close">Fechar</button></div>
+              <div class="overlay-actions"><span class="small">Perfil</span></div>
+            </div>
+            <div class="overlay-canvas">
+              <div class="card" style="width:100%;max-width:520px;">
+                <h3 class="title">Trocar senha</h3>
+                <div class="row">
+                  <div><label class="muted">Senha atual</label><input id="pf-old" class="input" type="password" required /></div>
+                  <div><label class="muted">Nova senha</label><input id="pf-new" class="input" type="password" required /></div>
+                </div>
+                <div class="actions" style="margin-top:12px">
+                  <button class="btn" id="pf-save">Salvar</button>
+                </div>
+                <div class="small" id="pf-msg" style="margin-top:8px"></div>
+              </div>
+            </div>
+            <div class="overlay-toolbar" style="justify-content:center"><span class="small">Conta</span></div>
+          </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('#pf-close').addEventListener('click', ()=> modal.classList.remove('show'));
+        modal.querySelector('#pf-save').addEventListener('click', async ()=>{
+          const senha_atual = (document.getElementById('pf-old').value||'');
+          const senha_nova = (document.getElementById('pf-new').value||'');
+          const msg = document.getElementById('pf-msg');
+          msg.textContent = 'Enviando...';
+          try{
+            const res = await api('/api/auth/password/change', { method:'POST', body: JSON.stringify({ senha_atual, senha_nova }) });
+            msg.textContent = 'Senha alterada com sucesso.';
+            document.getElementById('pf-old').value = '';
+            document.getElementById('pf-new').value = '';
+          }catch(e){ msg.textContent = 'Falha: ' + e.message; }
+        });
+      }
+      modal.classList.add('show');
+    }
     function openPdfJs(produtoId){
       const token = getToken();
       const src = `/api/view/pdf-file?produto_id=${encodeURIComponent(produtoId)}`;

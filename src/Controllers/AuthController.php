@@ -138,4 +138,25 @@ final class AuthController
             'user' => $user,
         ]);
     }
+
+    public static function changePassword(array $body, array $req): void
+    {
+        $userId = (int)($req['user_id'] ?? 0);
+        if ($userId <= 0) { JsonResponse::error('Não autenticado', 401); return; }
+        $atual = (string)($body['senha_atual'] ?? '');
+        $nova = (string)($body['senha_nova'] ?? '');
+        if ($atual === '' || $nova === '') { JsonResponse::error('senha_atual e senha_nova são obrigatórias', 422); return; }
+        if (strlen($nova) < 6) { JsonResponse::error('Senha nova muito curta (mín. 6)', 422); return; }
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT senha_hash FROM usuarios WHERE id = ? LIMIT 1');
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || empty($row['senha_hash']) || !password_verify($atual, (string)$row['senha_hash'])) {
+            JsonResponse::error('Senha atual inválida', 400);
+            return;
+        }
+        $hash = password_hash($nova, PASSWORD_BCRYPT);
+        $pdo->prepare('UPDATE usuarios SET senha_hash = ?, atualizado_em = NOW() WHERE id = ?')->execute([$hash, $userId]);
+        JsonResponse::ok(['message' => 'Senha alterada com sucesso']);
+    }
 }

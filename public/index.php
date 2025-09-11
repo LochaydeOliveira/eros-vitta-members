@@ -16,6 +16,7 @@ use App\Controllers\AdminProductController;
 use App\Controllers\AdminUserController;
 use App\Controllers\AdminAccessController;
 use App\Controllers\ViewController;
+use App\Controllers\AdminCronController;
  
 
 $router = new Router();
@@ -35,6 +36,7 @@ $router->post('/api/auth/login', [AuthController::class, 'login']);
 $router->post('/api/auth/password/forgot', [AuthController::class, 'forgotPassword']);
 $router->post('/api/auth/password/reset', [AuthController::class, 'resetPassword']);
 $router->get('/api/auth/me', AuthMiddleware::requireUser([AuthController::class, 'me']));
+$router->post('/api/auth/password/change', AuthMiddleware::requireUser([AuthController::class, 'changePassword']));
 
 // Auth admin
 $router->post('/api/admin/login', [AdminAuthController::class, 'login']);
@@ -51,6 +53,9 @@ $router->get('/api/admin/users', AdminMiddleware::requireAdmin([AdminUserControl
 $router->post('/api/admin/users/block', AdminMiddleware::requireAdmin([AdminUserController::class, 'block']));
 $router->post('/api/admin/users/unblock', AdminMiddleware::requireAdmin([AdminUserController::class, 'unblock']));
 $router->post('/api/admin/users/reset-password', AdminMiddleware::requireAdmin([AdminUserController::class, 'resetPassword']));
+
+// Admin - CRON (teste)
+$router->post('/api/admin/cron/run-d7', AdminMiddleware::requireAdmin([AdminCronController::class, 'runD7']));
 
 // Admin - acessos
 $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([AdminAccessController::class, 'assign']));
