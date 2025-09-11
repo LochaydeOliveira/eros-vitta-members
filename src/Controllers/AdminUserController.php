@@ -9,12 +9,38 @@ use PDO;
 
 final class AdminUserController
 {
-    public static function list(): void
+    /**
+     * @param array<string,mixed> $_body
+     * @param array<string,mixed> $_request
+     */
+    public static function list(array $_body = [], array $_request = []): void
     {
         $pdo = Database::pdo();
-        $stmt = $pdo->query('SELECT id, nome, email, status, criado_em, atualizado_em, ultimo_login_em FROM usuarios ORDER BY id DESC');
+        // Filtros
+        $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+        $where = [];
+        $params = [];
+        if ($q !== '') {
+            $where[] = '(email LIKE ? OR nome LIKE ?)';
+            $like = '%' . $q . '%';
+            $params[] = $like; $params[] = $like;
+        }
+        $sql = 'SELECT id, nome, email, status, criado_em, atualizado_em, ultimo_login_em FROM usuarios';
+        if ($where) { $sql .= ' WHERE ' . implode(' AND ', $where); }
+        // Ordenação
+        $allowed = ['id','nome','email','status','criado_em','atualizado_em','ultimo_login_em'];
+        $order = isset($_GET['order']) ? (string)$_GET['order'] : 'id';
+        if (!in_array($order, $allowed, true)) { $order = 'id'; }
+        $dir = strtolower((string)($_GET['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
+        $sql .= ' ORDER BY ' . $order . ' ' . $dir;
+        // Paginação
+        $limit = (int)($_GET['limit'] ?? 50); if ($limit <= 0 || $limit > 200) { $limit = 50; }
+        $offset = (int)($_GET['offset'] ?? 0); if ($offset < 0) { $offset = 0; }
+        $sql .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        JsonResponse::ok(['items' => $items]);
+        JsonResponse::ok(['items' => $items, 'limit' => $limit, 'offset' => $offset, 'order' => $order, 'dir' => $dir]);
     }
 
     public static function block(array $body): void

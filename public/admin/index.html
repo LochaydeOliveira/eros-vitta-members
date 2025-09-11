@@ -74,6 +74,11 @@
       </div>
 
       <div id="app" class="hidden">
+        <div class="row" style="margin-bottom:12px">
+          <button id="tabProducts" class="primary">Produtos</button>
+          <button id="tabUsers" class="ghost">Usuários</button>
+        </div>
+        <div id="viewProducts">
         <div class="card mb16">
           <div class="row">
             <strong>Produtos</strong>
@@ -180,6 +185,64 @@
             <span id="formMsg" class="code"></span>
           </div>
         </div>
+        </div>
+
+        <div id="viewUsers" class="hidden">
+          <div class="card mb16">
+            <div class="row">
+              <strong>Usuários</strong>
+              <div class="right row">
+                <input id="u_q" class="w-200" placeholder="Buscar por email/nome" />
+                <button id="u_reload">Buscar</button>
+              </div>
+            </div>
+          </div>
+          <div class="card mb16">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="u_tbody"></tbody>
+            </table>
+          </div>
+          <div class="card hidden" id="u_detail">
+            <div class="row"><strong id="u_title">Detalhes do usuário</strong></div>
+            <div class="row mt12">
+              <div class="w-200">
+                <button id="u_block">Bloquear usuário</button>
+                <button id="u_unblock">Desbloquear</button>
+              </div>
+              <div class="w-200">
+                <input id="u_reset_pwd" placeholder="Nova senha" />
+                <button id="u_do_reset">Resetar senha</button>
+              </div>
+            </div>
+            <div class="mt12">
+              <strong>Acessos</strong>
+              <div id="u_accesses"></div>
+            </div>
+            <div class="mt12">
+              <strong>Liberar produto</strong>
+              <div class="row">
+                <input id="u_prod_id" class="w-120" placeholder="produto_id" />
+                <input id="u_data" class="w-200" placeholder="YYYY-MM-DD HH:MM:SS (opcional)" />
+                <button id="u_assign">Liberar</button>
+              </div>
+              <div class="row mt8">
+                <input id="u_block_pid" class="w-120" placeholder="produto_id" />
+                <input id="u_motivo" class="w-200" placeholder="motivo (opcional)" />
+                <button id="u_block_access">Bloquear acesso</button>
+              </div>
+            </div>
+            <div class="small mt8" id="u_msg"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -203,6 +266,29 @@
         prevBtn: document.getElementById('prevBtn'),
         nextBtn: document.getElementById('nextBtn'),
         pageInfo: document.getElementById('pageInfo'),
+        tabProducts: document.getElementById('tabProducts'),
+        tabUsers: document.getElementById('tabUsers'),
+        viewProducts: document.getElementById('viewProducts'),
+        viewUsers: document.getElementById('viewUsers'),
+        u: {
+          q: document.getElementById('u_q'),
+          reload: document.getElementById('u_reload'),
+          tbody: document.getElementById('u_tbody'),
+          detail: document.getElementById('u_detail'),
+          title: document.getElementById('u_title'),
+          block: document.getElementById('u_block'),
+          unblock: document.getElementById('u_unblock'),
+          resetPwd: document.getElementById('u_reset_pwd'),
+          doReset: document.getElementById('u_do_reset'),
+          accesses: document.getElementById('u_accesses'),
+          prodId: document.getElementById('u_prod_id'),
+          data: document.getElementById('u_data'),
+          assign: document.getElementById('u_assign'),
+          blockPid: document.getElementById('u_block_pid'),
+          motivo: document.getElementById('u_motivo'),
+          blockAccess: document.getElementById('u_block_access'),
+          msg: document.getElementById('u_msg'),
+        },
         formCard: document.getElementById('formCard'),
         formTitle: document.getElementById('formTitle'),
         f: {
@@ -249,7 +335,80 @@
         show(els.loginCard, false);
         show(els.app, true);
         els.whoami.textContent = 'admin';
+        show(els.viewProducts, true);
+        show(els.viewUsers, false);
         loadList();
+      }
+      function switchTab(tab){
+        const isUsers = tab === 'users';
+        show(els.viewProducts, !isUsers);
+        show(els.viewUsers, isUsers);
+        els.tabProducts.classList.toggle('primary', !isUsers);
+        els.tabProducts.classList.toggle('ghost', isUsers);
+        els.tabUsers.classList.toggle('primary', isUsers);
+        els.tabUsers.classList.toggle('ghost', !isUsers);
+        if(isUsers){ loadUsers(); }
+      }
+
+      async function loadUsers(){
+        els.u.tbody.innerHTML = '<tr><td colspan="5" class="muted">Carregando...</td></tr>';
+        try{
+          const qs = new URLSearchParams();
+          const q = (els.u.q.value||'').trim();
+          if(q) qs.set('q', q);
+          qs.set('limit', '20');
+          qs.set('offset', String(state.offset||0));
+          const r = await fetch('/api/admin/users?' + qs.toString(), { headers: hdr() });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro ao listar usuários'); }
+          const items = (j.data && Array.isArray(j.data.items)) ? j.data.items : (j.items||[]);
+          els.u.tbody.innerHTML = items.map(u => `<tr>
+            <td>${u.id}</td>
+            <td>${u.nome||''}</td>
+            <td><span class="code">${u.email||''}</span></td>
+            <td>${u.status||''}</td>
+            <td class="right"><button data-u-open="${u.id}">Abrir</button></td>
+          </tr>`).join('');
+          // pager
+          let pager = document.getElementById('u_pager');
+          if(!pager){
+            pager = document.createElement('div');
+            pager.id = 'u_pager';
+            pager.className = 'row mt12';
+            els.viewUsers.appendChild(pager);
+          }
+          pager.innerHTML = '';
+          const prev = document.createElement('button'); prev.textContent = 'Anterior'; prev.onclick = ()=>{ state.offset=Math.max(0,(state.offset||0)-20); loadUsers(); };
+          const next = document.createElement('button'); next.textContent = 'Próxima'; next.onclick = ()=>{ state.offset=(state.offset||0)+20; loadUsers(); };
+          const info = document.createElement('span'); info.className='code'; info.textContent = `offset ${state.offset||0} • carregados ${items.length}`;
+          pager.appendChild(prev); pager.appendChild(next); pager.appendChild(info);
+        }catch(e){ els.u.tbody.innerHTML = `<tr><td colspan="5" class="muted">Erro: ${e.message}</td></tr>`; }
+      }
+
+      async function openUser(userId){
+        els.u.detail.classList.remove('hidden');
+        els.u.title.textContent = `Usuário #${userId}`;
+        // carrega acessos
+        els.u.accesses.innerHTML = 'Carregando acessos...';
+        try{
+          const r = await fetch(`/api/admin/accesses/by-user?usuario_id=${encodeURIComponent(userId)}`, { headers: hdr() });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro'); }
+          const items = (j.data && Array.isArray(j.data.items)) ? j.data.items : (j.items||[]);
+          els.u.accesses.innerHTML = items.length ? '' : '<div class="muted">Nenhum acesso.</div>';
+          for(const a of items){
+            const div = document.createElement('div');
+            div.className = 'row';
+            const title = `${a.titulo} (${a.tipo}) — ${a.status}`;
+            div.innerHTML = `<div>${title}</div><div class="right"><button data-u-blk="${userId}:${a.produto_id}">Bloquear</button></div>`;
+            els.u.accesses.appendChild(div);
+          }
+          els.u.block.onclick = async ()=>{ try{ const rr = await fetch('/api/admin/users/block', { method:'POST', headers: hdr(), body: JSON.stringify({ id: userId }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Usuário bloqueado.'; loadUsers(); }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
+          els.u.unblock.onclick = async ()=>{ try{ const rr = await fetch('/api/admin/users/unblock', { method:'POST', headers: hdr(), body: JSON.stringify({ id: userId }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Usuário desbloqueado.'; loadUsers(); }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
+          els.u.doReset.onclick = async ()=>{ const senha = els.u.resetPwd.value; if(!senha){ els.u.msg.textContent='Informe a nova senha.'; return; } try{ const rr = await fetch('/api/admin/users/reset-password', { method:'POST', headers: hdr(), body: JSON.stringify({ id: userId, senha }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Senha redefinida.'; }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
+          els.u.assign.onclick = async ()=>{ const pid = parseInt(els.u.prodId.value,10)||0; const data = (els.u.data.value||'').trim(); if(!pid){ els.u.msg.textContent='Informe produto_id'; return; } try{ const rr = await fetch('/api/admin/accesses/assign', { method:'POST', headers: hdr(), body: JSON.stringify({ usuario_id: userId, produto_id: pid, data_liberacao: data||undefined }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Acesso liberado.'; openUser(userId); }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
+          els.u.blockAccess.onclick = async ()=>{ const pid = parseInt(els.u.blockPid.value,10)||0; const motivo = (els.u.motivo.value||'').trim(); if(!pid){ els.u.msg.textContent='Informe produto_id'; return; } try{ const rr = await fetch('/api/admin/accesses/block', { method:'POST', headers: hdr(), body: JSON.stringify({ usuario_id: userId, produto_id: pid, motivo }) }); const jj = await rr.json(); if(!rr.ok) throw new Error(jj.error||'Erro'); els.u.msg.textContent='Acesso bloqueado.'; openUser(userId); }catch(e){ els.u.msg.textContent='Erro: '+e.message; } };
+        }catch(e){ els.u.accesses.innerHTML = 'Erro: ' + e.message; }
       }
 
       function exitApp(){ setAuth(''); show(els.app, false); show(els.loginCard, true); els.whoami.textContent=''; }
@@ -429,9 +588,16 @@
       // Eventos
       els.loginBtn.addEventListener('click', login);
       els.logoutBtn.addEventListener('click', exitApp);
+      els.tabProducts.addEventListener('click', ()=> switchTab('products'));
+      els.tabUsers.addEventListener('click', ()=> switchTab('users'));
       els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
       els.newBtn.addEventListener('click', () => openForm(null));
       els.tbody.addEventListener('click', onTableClick);
+      els.u.reload.addEventListener('click', ()=>{ state.offset=0; loadUsers(); });
+      els.u.tbody.addEventListener('click', (ev)=>{
+        const b = ev.target.closest('button[data-u-open]');
+        if(b){ const id = parseInt(b.getAttribute('data-u-open'),10); openUser(id); }
+      });
       els.prevBtn.addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadList(); });
       els.nextBtn.addEventListener('click', () => { state.offset += state.limit; loadList(); });
       els.saveBtn.addEventListener('click', saveForm);

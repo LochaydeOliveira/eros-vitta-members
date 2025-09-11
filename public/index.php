@@ -60,6 +60,9 @@ $router->post('/api/admin/cron/run-d7', AdminMiddleware::requireAdmin([AdminCron
 
 // Admin - acessos
 $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([AdminAccessController::class, 'assign']));
+// Admin - acessos (listar e bloquear)
+$router->get('/api/admin/accesses/by-user', AdminMiddleware::requireAdmin([AdminAccessController::class, 'listByUser']));
+$router->post('/api/admin/accesses/block', AdminMiddleware::requireAdmin([AdminAccessController::class, 'block']));
 
 // Produtos e acessos (usuário autenticado)
 $router->get('/api/products', AuthMiddleware::requireUser([ProductController::class, 'list']));
