@@ -11,8 +11,8 @@
       --border:#e5e7eb; 
       --text:#0f172a; 
       --muted:#64748b; 
-      --radius:4px; 
-      --radius-lg:4px;
+      --radius:6px; 
+      --radius-lg:6px;
     }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--text); background: var(--bg); font-size: 15px; }
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
@@ -131,6 +131,13 @@
     .progress .bar { height:100%; background:#111827; width:0%; border-radius:999px; }
     .time { margin-top:6px; color:#475569; }
   </style>
+  <style>
+    /* Toasts leves (não intrusivos) */
+    #toast { position: fixed; right: 16px; bottom: 16px; z-index: 2000; max-width: 360px; display:none; }
+    #toast .tcard { background:#111827; color:#fff; padding:10px 12px; border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,.25); font-size:14px; }
+    #toast.ok .tcard { background:#065f46; }
+    #toast.warn .tcard { background:#7c2d12; }
+  </style>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -177,7 +184,18 @@
       modal.classList.add('show');
     }
 
-    function openRegister(){ alert('Cadastro via webhook / admin. Registro manual opcional.'); }
+    function showToast(msg, type){
+      const box = document.getElementById('toast');
+      const m = document.getElementById('toast-msg');
+      if(!box || !m){ alert(msg); return; }
+      m.textContent = msg;
+      box.className = type ? type : '';
+      box.style.display = 'block';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{ box.style.display='none'; }, 3500);
+    }
+
+    function openRegister(){ showToast('Cadastro via webhook / admin. Registro manual opcional.', 'warn'); }
 
     function openReset(prefillToken){
       let modal = document.getElementById('reset-modal');
@@ -288,7 +306,7 @@
         await loadUserProfile();
         currentUserEmail = email;
         await loadCatalog();
-      } catch(e){ alert('Falha no login: ' + e.message); }
+      } catch(e){ showToast('Falha no login: ' + e.message, 'warn'); }
     }
 
     async function logout(){ clearToken(); location.reload(); }
@@ -305,7 +323,7 @@
       } catch(e){ list.innerHTML = '<div class="muted">Erro: '+e.message+'</div>'; }
     }
 
-    function openHelp(){ setHeader('Início / Ajuda', 'Ajuda'); alert('Em breve: FAQ e suporte.'); }
+    function openHelp(){ setHeader('Início / Ajuda', 'Ajuda'); showToast('Em breve: FAQ e suporte.', ''); }
 
     function setHeader(path, title){
       const sh = document.getElementById('sectionHeader'); if (sh) sh.style.display = 'block';
@@ -442,11 +460,11 @@
         if(res.status === 404 && !opts.silent404 && opts.dir === +1){
           // última página atingida: volta uma
           pdfPageByProduct[produtoId] = Math.max(1, page-1);
-          alert('Última página alcançada.');
+          showToast('Última página alcançada.', '');
           return;
         }
-        if(res.status === 403){ alert('Acesso bloqueado para este conteúdo.'); return; }
-        alert('Erro ao carregar página');
+        if(res.status === 403){ showToast('Acesso bloqueado para este conteúdo.', 'warn'); return; }
+        showToast('Erro ao carregar página', 'warn');
         return;
       }
       const blob = await res.blob();
@@ -496,13 +514,13 @@
     }
 
     async function openPdfReader(produtoId){
-      if(!window['pdfjsLib']){ alert('Visualizador PDF indisponível.'); return; }
+      if(!window['pdfjsLib']){ showToast('Visualizador PDF indisponível.', 'warn'); return; }
       const ov = ensurePdfReader();
       ov.classList.add('show');
       const token = getToken();
       // carrega o PDF como ArrayBuffer
       const res = await fetch(`/api/view/pdf-file?produto_id=${encodeURIComponent(produtoId)}`, { headers: { 'Authorization': 'Bearer ' + token } });
-      if(!res.ok){ if(res.status===403){ alert('Acesso bloqueado para este conteúdo.'); return; } alert('Falha ao carregar PDF'); return; }
+      if(!res.ok){ if(res.status===403){ showToast('Acesso bloqueado para este conteúdo.', 'warn'); return; } showToast('Falha ao carregar PDF', 'warn'); return; }
       const buf = await res.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
       let pageNum = 1; let scale = 1.2;
@@ -641,7 +659,7 @@
         const j = await api(`/api/view/audio/playlist?produto_id=${encodeURIComponent(produtoId)}`);
         playlist = (j.items || j.data?.items || []);
       } catch(e){
-        if(String(e.message||'').toLowerCase().includes('bloqueado')){ alert('Acesso bloqueado para este conteúdo.'); } else { alert('Erro ao carregar playlist: ' + e.message); }
+        if(String(e.message||'').toLowerCase().includes('bloqueado')){ showToast('Acesso bloqueado para este conteúdo.', 'warn'); } else { showToast('Erro ao carregar playlist: ' + e.message, 'warn'); }
         return;
       }
 
@@ -665,7 +683,7 @@
         const tr = playlist[idx];
         const url = `/api/view/audio/track?produto_id=${encodeURIComponent(produtoId)}&track_id=${encodeURIComponent(tr.id)}`;
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-        if(!res.ok){ if(res.status===403){ alert('Acesso bloqueado para este conteúdo.'); return; } alert('Falha ao carregar faixa'); return; }
+        if(!res.ok){ if(res.status===403){ showToast('Acesso bloqueado para este conteúdo.', 'warn'); return; } showToast('Falha ao carregar faixa', 'warn'); return; }
         const blob = await res.blob();
         const obj = URL.createObjectURL(blob);
         audio.pause();
@@ -777,6 +795,7 @@
   </script>
   </head>
 <body>
+  <div id="toast" style="position: fixed; right: 16px; bottom: 16px; z-index: 2000; max-width: 360px; display:none;"><div class="tcard" id="toast-msg">...</div></div>
   <header>
     <div><strong>Eros Vitta Members</strong></div>
     <div class="menu">
