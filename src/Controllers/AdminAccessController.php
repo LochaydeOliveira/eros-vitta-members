@@ -112,6 +112,8 @@ final class AdminAccessController
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$motivo !== '' ? $motivo : 'manual', $usuarioId, $produtoId]);
         }
+        // normaliza duplicatas antigas: mantém apenas o último registro por usuario/produto
+        $pdo->prepare('DELETE a FROM acessos a JOIN acessos b ON a.usuario_id=b.usuario_id AND a.produto_id=b.produto_id AND a.id < b.id')->execute();
         JsonResponse::ok(['updated' => true]);
     }
 }

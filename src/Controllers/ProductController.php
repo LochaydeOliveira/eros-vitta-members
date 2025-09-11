@@ -32,7 +32,15 @@ final class ProductController
                 ELSE 0
               END AS download_liberado
             FROM produtos p
-            LEFT JOIN acessos a ON a.produto_id = p.id AND a.usuario_id = ?
+            LEFT JOIN (
+              SELECT a1.* FROM acessos a1
+              JOIN (
+                SELECT produto_id, MAX(id) AS max_id
+                FROM acessos
+                WHERE usuario_id = ?
+                GROUP BY produto_id
+              ) mx ON mx.max_id = a1.id
+            ) a ON a.produto_id = p.id
             WHERE p.ativo = 1
             ORDER BY p.titulo ASC
         ";
