@@ -9,6 +9,38 @@ use PDO;
 
 final class AdminProductController
 {
+    private static function getUploadDir(): string
+    {
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/../storage/covers';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        return $uploadDir;
+    }
+
+    private static function validateImageFile(array $file): array
+    {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['error' => 'Erro no upload: ' . $file['error']];
+        }
+        
+        if ($file['size'] > $maxSize) {
+            return ['error' => 'Arquivo muito grande. Máximo 5MB.'];
+        }
+        
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mimeType, $allowedTypes, true)) {
+            return ['error' => 'Tipo de arquivo inválido. Use JPG, PNG ou WebP.'];
+        }
+        
+        return ['success' => true, 'mime' => $mimeType];
+    }
     /**
      * @param array<string,mixed> $_body
      * @param array<string,mixed> $_request
@@ -101,6 +133,70 @@ final class AdminProductController
         $stmt = $pdo->prepare($sql);
         $stmt->execute($values);
         JsonResponse::ok(['updated' => true]);
+    }
+
+    /**
+     * Upload de capa para produto
+     * @param array<string,mixed> $_body
+     * @param array<string,mixed> $_request
+     */
+    public static function uploadCover(array $_body = [], array $_request = []): void
+    {
+        if (!isset($_FILES['cover']) || !is_array($_FILES['cover'])) {
+            JsonResponse::error('Arquivo de capa não enviado', 400);
+            return;
+        }
+
+        $produtoId = (int)($_POST['produto_id'] ?? 0);
+        if ($produtoId <= 0) {
+            JsonResponse::error('produto_id obrigatório', 422);
+            return;
+        }
+
+        // Validar se produto existe
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT id, titulo FROM produtos WHERE id = ? LIMIT 1');
+        $stmt->execute([$produtoId]);
+        $produto = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$produto) {
+            JsonResponse::error('Produto não encontrado', 404);
+            return;
+        }
+
+        // Validar arquivo
+        $validation = self::validateImageFile($_FILES['cover']);
+        if (isset($validation['error'])) {
+            JsonResponse::error($validation['error'], 400);
+            return;
+        }
+
+        // Gerar nome único para o arquivo
+        $extension = match($validation['mime']) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            default => 'jpg'
+        };
+        $filename = 'produto_' . $produtoId . '_' . time() . '.' . $extension;
+        $uploadDir = self::getUploadDir();
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Mover arquivo
+        if (!move_uploaded_file($_FILES['cover']['tmp_name'], $filepath)) {
+            JsonResponse::error('Falha ao salvar arquivo', 500);
+            return;
+        }
+
+        // Atualizar capa_url no banco
+        $webPath = '/storage/covers/' . $filename;
+        $stmt = $pdo->prepare('UPDATE produtos SET capa_url = ?, atualizado_em = NOW() WHERE id = ?');
+        $stmt->execute([$webPath, $produtoId]);
+
+        JsonResponse::ok([
+            'success' => true,
+            'capa_url' => $webPath,
+            'filename' => $filename
+        ]);
     }
 
     /**

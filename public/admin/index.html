@@ -159,6 +159,11 @@
             <div>
               <label>Capa URL</label>
               <input id="f_capa" />
+              <div class="mt8">
+                <input type="file" id="f_cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" />
+                <button type="button" id="f_upload_btn" class="secondary small">Upload de capa</button>
+                <div id="f_cover_preview" class="mt8"></div>
+              </div>
             </div>
             <div>
               <label>Ativo</label>
@@ -340,6 +345,9 @@
           tipo: document.getElementById('f_tipo'),
           slug: document.getElementById('f_slug'),
           capa: document.getElementById('f_capa'),
+          coverFile: document.getElementById('f_cover_file'),
+          uploadBtn: document.getElementById('f_upload_btn'),
+          coverPreview: document.getElementById('f_cover_preview'),
           ativo: document.getElementById('f_ativo'),
           hotmart: document.getElementById('f_hotmart'),
           checkout: document.getElementById('f_checkout'),
@@ -570,6 +578,7 @@
         els.f.desc.value = row?.descricao||'';
         els.f.pdf_view.value = row?.storage_view_pdf||row?.storage_path_pdf||'';
         els.f.audio_dir.value = row?.storage_view_audio_dir||row?.storage_path_audio||'';
+        showCoverPreview(row?.capa_url);
         show(els.formCard, true);
         els.deactBtn.classList.toggle('hidden', !(row && row.id));
       }
@@ -707,6 +716,47 @@
       els.saveBtn.addEventListener('click', saveForm);
       els.cancelBtn.addEventListener('click', () => show(els.formCard, false));
       els.deactBtn.addEventListener('click', deactivate);
+      els.f.uploadBtn.addEventListener('click', () => els.f.coverFile.click());
+      els.f.coverFile.addEventListener('change', handleCoverUpload);
+
+      // Função para upload de capa
+      async function handleCoverUpload(){
+        const file = els.f.coverFile.files[0];
+        if(!file) return;
+        
+        if(!els.f.id){
+          alert('Salve o produto primeiro antes de fazer upload da capa');
+          return;
+        }
+        
+        const formData = new FormData();
+        formData.append('cover', file);
+        formData.append('produto_id', els.f.id);
+        
+        try {
+          const res = await fetch(apiBase + '/admin/products/upload-cover', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + state.token },
+            body: formData
+          });
+          const data = await res.json();
+          
+          if(data.success){
+            els.f.capa.value = data.capa_url;
+            showCoverPreview(data.capa_url);
+            alert('Capa enviada com sucesso!');
+          } else {
+            alert('Erro: ' + (data.error || 'Falha no upload'));
+          }
+        } catch(e){
+          alert('Erro: ' + e.message);
+        }
+      }
+      
+      function showCoverPreview(url){
+        if(!url) return;
+        els.f.coverPreview.innerHTML = `<img src="${url}" style="max-width:200px;max-height:120px;object-fit:cover;border-radius:4px;" alt="Preview" />`;
+      }
 
       // Auto-login se já tem token
       if(state.token){ enterApp(); } else { show(els.loginCard, true); }
