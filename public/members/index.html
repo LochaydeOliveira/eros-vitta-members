@@ -42,7 +42,17 @@
       width: 100%;
       max-width: 400px;
     }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 6px 24px rgba(15,23,42,0.06); position:relative; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: 0 6px 24px rgba(15,23,42,0.06);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
     .card.blocked { opacity: .75; filter: grayscale(20%); }
     .badge-lock { position:absolute; top:10px; right:10px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:999px; padding:2px 8px; font-size:11px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }

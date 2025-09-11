@@ -211,6 +211,11 @@
               <strong>Usuários</strong>
               <div class="right row">
                 <input id="u_q" class="w-200" placeholder="Buscar por email/nome" />
+                <select id="u_status" class="w-160">
+                  <option value="">Status (todos)</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="bloqueado">Bloqueado</option>
+                </select>
                 <button id="u_reload">Buscar</button>
               </div>
             </div>
@@ -292,6 +297,7 @@
         viewUsers: document.getElementById('viewUsers'),
         u: {
           q: document.getElementById('u_q'),
+          status: document.getElementById('u_status'),
           reload: document.getElementById('u_reload'),
           tbody: document.getElementById('u_tbody'),
           detail: document.getElementById('u_detail'),
@@ -377,6 +383,8 @@
           const qs = new URLSearchParams();
           const q = (els.u.q.value||'').trim();
           if(q) qs.set('q', q);
+          const st = (els.u.status && els.u.status.value) ? els.u.status.value : '';
+          if(st) qs.set('status', st);
           const usp = new URLSearchParams(location.hash.replace(/^#/,''));
           const uOrder = usp.get('u_order') || 'id:desc';
           const parts = uOrder.split(':');
@@ -653,6 +661,7 @@
       els.newBtn.addEventListener('click', () => openForm(null));
       els.tbody.addEventListener('click', onTableClick);
       els.u.reload.addEventListener('click', ()=>{ state.offset=0; loadUsers(); });
+      if(els.u.status){ els.u.status.addEventListener('change', ()=>{ state.offset=0; loadUsers(); }); }
       els.u.tbody.addEventListener('click', (ev)=>{
         const b = ev.target.closest('button[data-u-open]');
         if(b){ const id = parseInt(b.getAttribute('data-u-open'),10); openUser(id); }

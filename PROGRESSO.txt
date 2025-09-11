@@ -89,7 +89,6 @@ Eros Vitta Members - Progresso do Projeto
     - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos)
   - Front-end Área do Membro (refino do MVP atual):
     - Ajuste visual fino restante (microespaçamentos e responsividade extrema)
-    - Implementar fluxo “Esqueci minha senha” usando /api/auth/password/forgot e tela de reset
     - Exibir duração total do álbum ao lado do título (opcional)
     - Melhorar UX de feedbacks (toasts não intrusivos) 
     - Tratar eventuais 404 de assets (ex.: favicon); precisa da URL específica do erro
