@@ -36,7 +36,8 @@
     .pager { display: inline-flex; gap: 6px; align-items: center; }
     .small { font-size: 11px; }
     .tag { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 999px; background: #e2e8f0; color: #0f172a; }
-    .thumb { width: 100%; height: auto; border: 0; border-radius: var(--radius); background: transparent; object-fit: contain; aspect-ratio: 3 / 4; }
+    .thumb { width: 100%; height: auto; border: 0; border-radius: var(--radius); background: #f8fafc; object-fit: cover; aspect-ratio: 3 / 4; }
+    .thumb.ph { display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700; }
     /* Ícones SVG */
     .icon { width:16px; height:16px; vertical-align:-3px; }
     .muted .icon { color:#475569; }
@@ -301,8 +302,11 @@
       const el = document.createElement('div');
       const hasAccess = (it.acesso_status === 'ativo');
       el.className = 'card' + (hasAccess ? '' : ' blocked');
-      const cover = (typeof it.capa_url === 'string' && it.capa_url.trim() !== '') ? it.capa_url : '';
-      const coverHtml = cover ? `<img class="thumb" src="${cover}" alt="${escapeHtml(it.titulo)}" loading="lazy" />` : '';
+      let cover = (typeof it.capa_url === 'string' && it.capa_url.trim() !== '') ? it.capa_url.trim() : '';
+      if(cover && !/^https?:\/\//i.test(cover) && !cover.startsWith('/')){
+        cover = '/' + cover; // normaliza relativo
+      }
+      const coverHtml = cover ? `<img class="thumb" src="${cover}" alt="${escapeHtml(it.titulo)}" loading="lazy" onerror="this.onerror=null;this.classList.add('ph');this.removeAttribute('src');this.textContent='Sem capa';" />` : `<div class="thumb ph">Sem capa</div>`;
       
       el.innerHTML = `
         ${coverHtml}
