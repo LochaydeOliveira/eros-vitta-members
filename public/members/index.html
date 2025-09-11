@@ -559,7 +559,7 @@
         if (!e.target.closest('input, textarea')) e.preventDefault();
       });
       window.addEventListener('keydown', e => {
-        const k = e.key.toLowerCase();
+        const k = (e.key || '').toLowerCase();
         const ctrl = e.ctrlKey || e.metaKey;
         // bloquear F12, Ctrl+Shift+I/J/C/U, Ctrl+S, Ctrl+P
         if (k === 'f12') { e.preventDefault(); e.stopPropagation(); }
