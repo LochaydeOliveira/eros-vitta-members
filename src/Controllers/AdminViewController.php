@@ -62,7 +62,12 @@ final class AdminViewController
     {
         $produtoId = (int)($_GET['produto_id'] ?? 0);
         if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
+        // Bloqueia preview se produto estiver inativo
         $pdo = Database::pdo();
+        $activeStmt = $pdo->prepare('SELECT ativo FROM produtos WHERE id = ? LIMIT 1');
+        $activeStmt->execute([$produtoId]);
+        $activeRow = $activeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$activeRow || (int)$activeRow['ativo'] !== 1) { JsonResponse::error('Produto inativo', 403); return; }
         $stmt = $pdo->prepare('SELECT storage_view_pdf, storage_path_pdf FROM produtos WHERE id = ? LIMIT 1');
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -86,6 +91,10 @@ final class AdminViewController
         $produtoId = (int)($_GET['produto_id'] ?? 0);
         if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
         $pdo = Database::pdo();
+        $activeStmt = $pdo->prepare('SELECT ativo FROM produtos WHERE id = ? LIMIT 1');
+        $activeStmt->execute([$produtoId]);
+        $activeRow = $activeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$activeRow || (int)$activeRow['ativo'] !== 1) { JsonResponse::ok(['items' => []]); return; }
         $stmt = $pdo->prepare('SELECT storage_view_audio_dir FROM produtos WHERE id = ? LIMIT 1');
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -120,6 +129,10 @@ final class AdminViewController
         $trackId = (int)($_GET['track_id'] ?? 0);
         if ($produtoId <= 0 || $trackId <= 0) { JsonResponse::error('produto_id e track_id são obrigatórios', 422); return; }
         $pdo = Database::pdo();
+        $activeStmt = $pdo->prepare('SELECT ativo FROM produtos WHERE id = ? LIMIT 1');
+        $activeStmt->execute([$produtoId]);
+        $activeRow = $activeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$activeRow || (int)$activeRow['ativo'] !== 1) { JsonResponse::error('Produto inativo', 403); return; }
         $stmt = $pdo->prepare('SELECT storage_view_audio_dir FROM produtos WHERE id = ? LIMIT 1');
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -151,6 +164,10 @@ final class AdminViewController
         $produtoId = (int)($_GET['produto_id'] ?? 0);
         if ($produtoId <= 0) { JsonResponse::error('produto_id é obrigatório', 422); return; }
         $pdo = Database::pdo();
+        $activeStmt = $pdo->prepare('SELECT ativo FROM produtos WHERE id = ? LIMIT 1');
+        $activeStmt->execute([$produtoId]);
+        $activeRow = $activeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$activeRow || (int)$activeRow['ativo'] !== 1) { JsonResponse::error('Produto inativo', 403); return; }
         $stmt = $pdo->prepare('SELECT storage_path_audio FROM produtos WHERE id = ? LIMIT 1');
         $stmt->execute([$produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);

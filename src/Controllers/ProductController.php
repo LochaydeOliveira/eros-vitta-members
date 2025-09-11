@@ -22,6 +22,7 @@ final class ProductController
               p.descricao,
               p.capa_url,
               p.ativo,
+              p.hotmart_product_id,
               a.status AS acesso_status,
               a.data_liberacao,
               CASE 
