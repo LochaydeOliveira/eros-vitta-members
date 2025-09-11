@@ -445,6 +445,8 @@
                 const jj = await rr.json();
                 if(!rr.ok){ throw new Error(jj.error||'Erro'); }
                 els.u.msg.textContent = 'Status atualizado.';
+                // Recarrega a lista de acessos para refletir exatamente o que está no banco
+                await openUser(userId);
               }catch(e){ els.u.msg.textContent = 'Erro: ' + e.message; sel.value = a.status; }
             });
             right.appendChild(sel);
