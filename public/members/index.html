@@ -33,7 +33,7 @@
     .btn { appearance: none; border: 0; background: #111827; color: #fff; padding: 10px 12px; border-radius: var(--radius); cursor: pointer; font-weight: 600; }
     .btn.secondary { background: #0ea5e9; }
     .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
-    .input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background:#fff; }
+    .input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background:#fff; box-sizing: border-box;}
     .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
     /* Forçar uma coluna em qualquer largura */
     @media(min-width: 640px){ .row { grid-template-columns: 1fr; } }
@@ -62,7 +62,7 @@
     .menu-item:hover { background:#f1f5f9; }
     /* Forms */
     label { display:block; margin: 4px 0 6px; font-size:13px; color:#475569; }
-    .input { height: 44px; }
+
     .form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
     .form-card { width:100%; max-width: 900px; margin: 0 auto; }
     .form-card .row { gap: 12px; }
@@ -115,7 +115,7 @@
               <div class="card form-card">
                 <h3 class="title">Recuperar senha</h3>
                 <div class="row">
-                  <div><label class="muted">E-mail</label><input id="fg-email" class="input" type="email" placeholder="seu@email.com" required /></div>
+                  <div><label class="muted">E-mail</label><input id="fg-email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
                 </div>
                 <div class="form-actions">
                   <button class="btn secondary" id="fg-send">Enviar</button>
@@ -159,7 +159,7 @@
               <div class="card form-card">
                 <h3 class="title">Defina uma nova senha</h3>
                 <div class="row">
-                  <div><label class="muted">Token</label><input id="rs-token" class="input" type="text" placeholder="cole aqui o token" required /></div>
+                  <div><label class="muted">Token</label><input id="rs-token" class="input" type="text" placeholder="cole aqui o token" autocomplete="one-time-code" required /></div>
                   <div><label class="muted">Nova senha</label><input id="rs-new" class="input" type="password" placeholder="mínimo 6 caracteres" required /></div>
                   <div><label class="muted">Confirmar senha</label><input id="rs-confirm" class="input" type="password" required /></div>
                 </div>
@@ -763,13 +763,13 @@
         <div class="auth-subtitle">Digite seu e-mail e senha</div>
           <form onsubmit="login(event)">
             <div class="row">
-              <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" required /></div>
+              <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <label class="muted">Senha</label>
                   <a class="link" href="#" onclick="openForgot(); return false;">Esqueci minha senha</a>
                 </div>
-                <input id="senha" class="input" type="password" placeholder="sua senha" required />
+                <input id="senha" class="input" type="password" placeholder="sua senha" autocomplete="current-password" required />
               </div>
             </div>
             <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
