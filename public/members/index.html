@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Eros Vitta - Área de Membros</title>
   <style>
-    :root { --bg:#f8fafc; --surface:#ffffff; --border:#e5e7eb; --text:#0f172a; --muted:#64748b; --radius:2px; --radius-lg:2px; }
+    :root { --bg:#f8f7f3; --surface:#ffffff; --border:#e5e7eb; --text:#0f172a; --muted:#64748b; --radius:2px; --radius-lg:2px; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--text); background: var(--bg); font-size: 15px; }
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
     .layout {
@@ -115,7 +115,7 @@
               <div class="card form-card">
                 <h3 class="title">Recuperar senha</h3>
                 <div class="row">
-                  <div><label class="muted">E-mail</label><input id="fg-email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
+                  <div><label class="muted" for="fg-email">E-mail</label><input id="fg-email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
                 </div>
                 <div class="form-actions">
                   <button class="btn secondary" id="fg-send">Enviar</button>
@@ -159,9 +159,9 @@
               <div class="card form-card">
                 <h3 class="title">Defina uma nova senha</h3>
                 <div class="row">
-                  <div><label class="muted">Token</label><input id="rs-token" class="input" type="text" placeholder="cole aqui o token" autocomplete="one-time-code" required /></div>
-                  <div><label class="muted">Nova senha</label><input id="rs-new" class="input" type="password" placeholder="mínimo 6 caracteres" required /></div>
-                  <div><label class="muted">Confirmar senha</label><input id="rs-confirm" class="input" type="password" required /></div>
+                  <div><label class="muted" for="rs-token">Token</label><input id="rs-token" class="input" type="text" placeholder="cole aqui o token" autocomplete="one-time-code" required /></div>
+                  <div><label class="muted" for="rs-new">Nova senha</label><input id="rs-new" class="input" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password" required /></div>
+                  <div><label class="muted" for="rs-confirm">Confirmar senha</label><input id="rs-confirm" class="input" type="password" autocomplete="new-password" required /></div>
                 </div>
                 <div class="form-actions">
                   <button class="btn secondary" id="rs-send">Salvar</button>
@@ -763,10 +763,10 @@
         <div class="auth-subtitle">Digite seu e-mail e senha</div>
           <form onsubmit="login(event)">
             <div class="row">
-              <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
+              <div><label class="muted" for="email">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" autocomplete="email" required /></div>
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <label class="muted">Senha</label>
+                  <label class="muted" for="senha">Senha</label>
                   <a class="link" href="#" onclick="openForgot(); return false;">Esqueci minha senha</a>
                 </div>
                 <input id="senha" class="input" type="password" placeholder="sua senha" autocomplete="current-password" required />
@@ -808,8 +808,8 @@
               <div class="card form-card">
                 <h3 class="title">Trocar senha</h3>
                 <div class="row">
-                  <div><label class="muted">Senha atual</label><input id="pf-old" class="input" type="password" required /></div>
-                  <div><label class="muted">Nova senha</label><input id="pf-new" class="input" type="password" required /></div>
+                  <div><label class="muted" for="pf-old">Senha atual</label><input id="pf-old" class="input" type="password" autocomplete="current-password" required /></div>
+                  <div><label class="muted" for="pf-new">Nova senha</label><input id="pf-new" class="input" type="password" autocomplete="new-password" required /></div>
                 </div>
                 <div class="form-actions">
                   <button class="btn secondary" id="pf-save">Salvar</button>
