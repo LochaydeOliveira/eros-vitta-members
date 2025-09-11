@@ -54,6 +54,15 @@
     .form-card { width:100%; max-width: 900px; margin: 0 auto; }
     .form-card .row { gap: 12px; }
     .input:focus { outline: 2px solid #0ea5e9; outline-offset: 0; }
+    /* Auth (estilo Yampi-like) */
+    .auth-card { max-width: 420px; padding: 28px; }
+    .auth-title { font-size: 26px; line-height: 1.2; margin: 4px 0 4px; text-align:center; font-weight:700; }
+    .auth-subtitle { text-align:center; margin: 0 0 16px; color:#64748b; }
+    .auth-card .input { background:#f8fbff; }
+    .link { color:#111827; text-decoration:none; font-size:13px; }
+    .link:hover { text-decoration:underline; }
+    .text-right { text-align:right; }
+    .btn.block { width:100%; }
     /* Bloqueio de seleção global (inputs continuam permitidos) */
     body { -webkit-user-select: none; user-select: none; }
     input, textarea { -webkit-user-select: text; user-select: text; }
@@ -77,6 +86,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- Wavesurfer.js (opcional futuramente) -->
   <script>
+    function openForgot(){ alert('Em breve: fluxo de recuperação de senha.'); }
+    function openRegister(){ alert('Cadastro via webhook / admin. Registro manual opcional.'); }
     // Menu helpers (definido antes do restante para evitar ReferenceError)
     function toggleMenu(force){
       const p = document.getElementById('userMenu');
@@ -603,14 +614,23 @@
     <!-- Sidebar removida a pedido -->
     <aside id="sidebar" style="display:none"></aside>
     <main class="container">
-    <section id="login" class="card form-card" style="display:none">
-      <h2>Entrar</h2>
+    <section id="login" class="card auth-card" style="display:none">
+      <div style="text-align:center; margin-bottom:12px;"><strong style="font-size:20px">Eros Vitta</strong></div>
+      <div class="auth-title">Identifique-se</div>
+      <div class="auth-subtitle">Digite seu e-mail e senha</div>
       <form onsubmit="login(event)">
         <div class="row">
           <div><label class="muted">E-mail</label><input id="email" class="input" type="email" placeholder="seu@email.com" required /></div>
-          <div><label class="muted">Senha</label><input id="senha" class="input" type="password" placeholder="sua senha" required /></div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="muted">Senha</label>
+              <a class="link" href="#" onclick="openForgot(); return false;">Esqueci minha senha</a>
+            </div>
+            <input id="senha" class="input" type="password" placeholder="sua senha" required />
+          </div>
         </div>
-        <div class="form-actions"><button class="btn secondary" type="submit">Entrar</button></div>
+        <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
+        <div class="muted" style="text-align:center; margin-top:14px">Primeira vez aqui? <a class="link" href="#" onclick="openRegister(); return false;">Criar conta</a></div>
       </form>
     </section>
 
