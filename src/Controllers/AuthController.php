@@ -8,6 +8,7 @@ use App\Http\JsonResponse;
 use App\Security\Jwt;
 use App\Security\RateLimiter;
 use App\Mail\Mailer;
+use App\Config;
 use PDO;
 
 final class AuthController
@@ -91,8 +92,12 @@ final class AuthController
         $userId = (int)$row['id'];
         $token = bin2hex(random_bytes(32));
         $pdo->prepare('INSERT INTO password_resets (usuario_id, token, expira_em, criado_em) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR), NOW())')->execute([$userId, $token]);
-        $resetUrl = '/reset-password?token=' . urlencode($token);
-        $ok = Mailer::send($email, 'Recuperação de Senha', '<p>Olá ' . htmlspecialchars((string)$row['nome']) . ',</p><p>Para redefinir sua senha, acesse: <a href="' . $resetUrl . '">' . $resetUrl . '</a></p>');
+        $resetUrl = rtrim(Config::appUrl(), '/') . '/members/?reset=' . urlencode($token);
+        $bodyHtml = '<p>Olá ' . htmlspecialchars((string)($row['nome'] ?: $email)) . ',</p>'
+            . '<p>Para redefinir sua senha, clique no link abaixo:</p>'
+            . '<p><a href="' . htmlspecialchars($resetUrl) . '">Redefinir senha</a></p>'
+            . '<p>Se o link não abrir, copie e cole este endereço no navegador:<br>' . htmlspecialchars($resetUrl) . '</p>';
+        $ok = Mailer::send($email, 'Recuperação de Senha', $bodyHtml);
         JsonResponse::ok(['message' => $ok ? 'Email de recuperação enviado' : 'Falha ao enviar e-mail, tente novamente']);
     }
 
