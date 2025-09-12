@@ -168,10 +168,10 @@ final class WebhookController
                 $stmt->execute([$userId, $produtoId]);
                 $ac = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($ac) {
-                    $pdo->prepare('UPDATE acessos SET status = "ativo", ativo = 1, data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
+                    $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
                         ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
                 } else {
-                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, ativo, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", 1, ?, NOW(), NOW())')
+                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
                         ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
                 }
             } elseif ($cancelada) {
