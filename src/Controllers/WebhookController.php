@@ -175,18 +175,22 @@ final class WebhookController
                         ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
                 }
             } elseif ($cancelada) {
-                // Bloqueia acesso imediatamente em caso de reembolso/cancelamento
+                // Bloqueia TODOS os acessos do usuário imediatamente em caso de reembolso/cancelamento
+                $pdo->prepare('UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = "webhook_reembolso", atualizado_em = NOW() WHERE usuario_id = ? AND status = "ativo"')
+                    ->execute([$userId]);
+                
+                // Bloqueia o acesso específico do produto se não existir
                 $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? ORDER BY criado_em DESC LIMIT 1');
                 $stmt->execute([$userId, $produtoId]);
                 $ac = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($ac) {
-                    $pdo->prepare('UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = "webhook_reembolso", atualizado_em = NOW() WHERE id = ?')
-                        ->execute([(int)$ac['id']]);
-                } else {
-                    // Cria acesso bloqueado se não existir
+                if (!$ac) {
                     $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_bloqueio, motivo_bloqueio, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "bloqueado", NOW(), "webhook_reembolso", NOW(), NOW())')
                         ->execute([$userId, $produtoId, $compraId]);
                 }
+                
+                // Envia email de notificação de reembolso
+                $refundEmailHtml = self::getRefundEmailTemplate($nome ?: 'Cliente', $email);
+                Mailer::send($email, 'Reembolso Processado | Eros Vitta', $refundEmailHtml);
             }
 
             // Marca processamento OK
@@ -313,6 +317,80 @@ final class WebhookController
                     </ul>
 
                     <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>
+                </div>
+
+                <div class="footer">
+                    <p><strong>Eros Vitta</strong> - Transformando relacionamentos, uma conexão por vez</p>
+                    <p>Este é um email automático, por favor não responda diretamente.</p>
+                </div>
+            </div>
+        </body>
+        </html>';
+    }
+
+    private static function getRefundEmailTemplate(string $nome, string $email): string
+    {
+        return '
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reembolso Processado | Eros Vitta</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .header { background: #dc3545; color: white; padding: 30px; text-align: center; }
+                .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+                .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+                .content { padding: 40px 30px; }
+                .refund-box { background: #f8d7da; border-left: 4px solid #dc3545; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+                .info-box { background: #fff; border: 2px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
+                .warning-note { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0; }
+                .icon { font-size: 24px; margin-right: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>⚠️ Reembolso Processado</h1>
+                    <p>Seu reembolso foi processado com sucesso</p>
+                </div>
+                
+                <div class="content">
+                    <div class="refund-box">
+                        <h2>Olá, ' . htmlspecialchars($nome) . '!</h2>
+                        <p>Informamos que seu reembolso foi processado com sucesso. O valor será creditado na sua conta conforme as políticas da Hotmart.</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h3>📧 Email da Conta:</h3>
+                        <p style="font-family: monospace; background: #f8f9fa; padding: 10px; border-radius: 4px; color: #dc3545;">' . htmlspecialchars($email) . '</p>
+                    </div>
+
+                    <div class="warning-note">
+                        <strong>🔒 Acesso Bloqueado:</strong> Conforme nossa política, todos os acessos à área de membros foram bloqueados imediatamente após o processamento do reembolso. Isso inclui:
+                        <ul style="margin: 10px 0;">
+                            <li>📚 E-books e materiais digitais</li>
+                            <li>🎧 Áudios e conteúdo de áudio</li>
+                            <li>💡 Dicas e técnicas exclusivas</li>
+                            <li>🎯 Qualquer conteúdo premium</li>
+                        </ul>
+                    </div>
+
+                    <h3>💰 Sobre o Reembolso:</h3>
+                    <ul>
+                        <li>✅ O valor será creditado na sua conta em até 5 dias úteis</li>
+                        <li>📧 Você receberá um email de confirmação da Hotmart</li>
+                        <li>💳 O valor aparecerá na fatura do seu cartão</li>
+                        <li>📞 Em caso de dúvidas, entre em contato com o suporte da Hotmart</li>
+                    </ul>
+
+                    <h3>🤝 Obrigado pela Confiança:</h3>
+                    <p>Mesmo com o reembolso, agradecemos por ter confiado no Eros Vitta. Se mudar de ideia no futuro, estaremos aqui para ajudar você a transformar sua vida íntima.</p>
+
+                    <p>Se você tiver alguma dúvida sobre este processo ou precisar de suporte, nossa equipe está sempre disponível.</p>
                 </div>
 
                 <div class="footer">
