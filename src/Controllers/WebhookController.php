@@ -51,9 +51,6 @@ final class WebhookController
             // Extrair dados da estrutura real da Hotmart
             $data = $body['data'] ?? $body; // Fallback para estrutura antiga
             
-            // Debug: log do payload recebido
-            error_log('Webhook payload: ' . json_encode($body, JSON_PRETTY_PRINT));
-            
             $email = strtolower(trim((string)($data['buyer']['email'] ?? $body['buyer']['email'] ?? $body['email'] ?? '')));
             $nome = trim((string)($data['buyer']['name'] ?? $body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
             $hotmartUserId = (string)($data['buyer']['ucode'] ?? $body['buyer']['ucode'] ?? $body['hotmart_user_id'] ?? null);
@@ -66,8 +63,48 @@ final class WebhookController
             $confirmada = in_array($status, ['approved','aprovada','completed','complete'], true);
             $cancelada = in_array($status, ['refunded','chargeback','canceled','cancelled','cancelada','reembolsado'], true);
 
-            // Debug: log dos valores extraídos
-            error_log("Email extraído: '$email', Product ID extraído: '$produtoHotmartId'");
+            // Extrair dados adicionais do payload
+            $telefone = (string)($data['buyer']['checkout_phone'] ?? $body['buyer']['checkout_phone'] ?? '');
+            $documento = (string)($data['buyer']['document'] ?? $body['buyer']['document'] ?? '');
+            $tipoDocumento = (string)($data['buyer']['document_type'] ?? $body['buyer']['document_type'] ?? '');
+            $cidade = (string)($data['buyer']['address']['city'] ?? $body['buyer']['address']['city'] ?? '');
+            $estado = (string)($data['buyer']['address']['state'] ?? $body['buyer']['address']['state'] ?? '');
+            $pais = (string)($data['buyer']['address']['country'] ?? $body['buyer']['address']['country'] ?? '');
+            $cep = (string)($data['buyer']['address']['zipcode'] ?? $body['buyer']['address']['zipcode'] ?? '');
+            $endereco = (string)($data['buyer']['address']['address'] ?? $body['buyer']['address']['address'] ?? '');
+            $numero = (string)($data['buyer']['address']['number'] ?? $body['buyer']['address']['number'] ?? '');
+            $complemento = (string)($data['buyer']['address']['complement'] ?? $body['buyer']['address']['complement'] ?? '');
+
+            // Dados de afiliado
+            $affiliateCode = '';
+            $affiliateName = '';
+            if (isset($data['affiliates']) && is_array($data['affiliates']) && count($data['affiliates']) > 0) {
+                $affiliate = $data['affiliates'][0];
+                $affiliateCode = (string)($affiliate['affiliate_code'] ?? '');
+                $affiliateName = (string)($affiliate['name'] ?? '');
+            }
+
+            // Dados de pagamento
+            $parcelas = (int)($data['purchase']['payment']['installments_number'] ?? $body['purchase']['payment']['installments_number'] ?? 1);
+            $tipoPagamento = (string)($data['purchase']['payment']['type'] ?? $body['purchase']['payment']['type'] ?? '');
+            $paisCheckout = (string)($data['purchase']['checkout_country']['iso'] ?? $body['purchase']['checkout_country']['iso'] ?? '');
+
+            // Dados de oferta
+            $codigoOferta = (string)($data['purchase']['offer']['code'] ?? $body['purchase']['offer']['code'] ?? '');
+            $cupomDesconto = (string)($data['purchase']['offer']['coupon_code'] ?? $body['purchase']['offer']['coupon_code'] ?? '');
+            $precoOriginal = (float)($data['purchase']['original_offer_price']['value'] ?? $body['purchase']['original_offer_price']['value'] ?? $valor);
+
+            // Dados de assinatura
+            $assinaturaAtiva = (bool)($data['subscription']['status'] === 'ACTIVE' ?? false);
+            $planoId = (int)($data['subscription']['plan']['id'] ?? 0);
+            $planoNome = (string)($data['subscription']['plan']['name'] ?? '');
+            $codigoAssinante = (string)($data['subscription']['subscriber']['code'] ?? '');
+
+            // Dados adicionais
+            $isOrderBump = (bool)($data['purchase']['order_bump']['is_order_bump'] ?? false);
+            $parentTransaction = (string)($data['purchase']['order_bump']['parent_purchase_transaction'] ?? '');
+            $businessModel = (string)($data['purchase']['business_model'] ?? '');
+            $isFunnel = (bool)($data['purchase']['is_funnel'] ?? false);
 
             if ($email === '' || $produtoHotmartId === '') {
                 throw new \RuntimeException('Payload inválido: falta email ou product_id. Email: "' . $email . '", Product ID: "' . $produtoHotmartId . '"');
@@ -79,13 +116,13 @@ final class WebhookController
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($user) {
                 $userId = (int)$user['id'];
-                $pdo->prepare('UPDATE usuarios SET nome = COALESCE(NULLIF(?, ""), nome), hotmart_user_id = COALESCE(?, hotmart_user_id), atualizado_em = NOW() WHERE id = ?')
-                    ->execute([$nome, $hotmartUserId ?: null, $userId]);
+                $pdo->prepare('UPDATE usuarios SET nome = COALESCE(NULLIF(?, ""), nome), hotmart_user_id = COALESCE(?, hotmart_user_id), telefone = COALESCE(NULLIF(?, ""), telefone), documento = COALESCE(NULLIF(?, ""), documento), tipo_documento = COALESCE(NULLIF(?, ""), tipo_documento), cidade = COALESCE(NULLIF(?, ""), cidade), estado = COALESCE(NULLIF(?, ""), estado), pais = COALESCE(NULLIF(?, ""), pais), cep = COALESCE(NULLIF(?, ""), cep), endereco = COALESCE(NULLIF(?, ""), endereco), numero = COALESCE(NULLIF(?, ""), numero), complemento = COALESCE(NULLIF(?, ""), complemento), atualizado_em = NOW() WHERE id = ?')
+                    ->execute([$nome, $hotmartUserId ?: null, $telefone, $documento, $tipoDocumento, $cidade, $estado, $pais, $cep, $endereco, $numero, $complemento, $userId]);
             } else {
                 $senhaPlain = bin2hex(random_bytes(4)); // 8 hex chars (~4 bytes)
                 $senhaHash = password_hash($senhaPlain, PASSWORD_BCRYPT);
-                $pdo->prepare('INSERT INTO usuarios (nome, email, senha_hash, status, hotmart_user_id, criado_em, atualizado_em) VALUES (?, ?, ?, "ativo", ?, NOW(), NOW())')
-                    ->execute([$nome ?: 'Cliente', $email, $senhaHash, $hotmartUserId ?: null]);
+                $pdo->prepare('INSERT INTO usuarios (nome, email, senha_hash, status, hotmart_user_id, telefone, documento, tipo_documento, cidade, estado, pais, cep, endereco, numero, complemento, criado_em, atualizado_em) VALUES (?, ?, ?, "ativo", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())')
+                    ->execute([$nome ?: 'Cliente', $email, $senhaHash, $hotmartUserId ?: null, $telefone, $documento, $tipoDocumento, $cidade, $estado, $pais, $cep, $endereco, $numero, $complemento]);
                 $userId = (int)$pdo->lastInsertId();
                 // Email de boas-vindas com credenciais
                 $loginUrl = rtrim(Config::appUrl(), '/') . '/login';
@@ -119,12 +156,12 @@ final class WebhookController
             $dataLiberacao = $confirmada ? date('Y-m-d H:i:s', strtotime(($dataConfirmacao ?? date('Y-m-d H:i:s')) . ' +7 days')) : null;
 
             if ($compra) {
-                $pdo->prepare('UPDATE compras SET usuario_id = ?, produto_id = ?, origem = "hotmart", status = ?, valor_pago = ?, moeda = ?, data_compra = COALESCE(?, data_compra), data_confirmacao = ?, data_liberacao = ?, atualizado_em = NOW() WHERE id = ?')
-                    ->execute([$userId, $produtoId, $statusCompra, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, (int)$compra['id']]);
+                $pdo->prepare('UPDATE compras SET usuario_id = ?, produto_id = ?, origem = "hotmart", status = ?, valor_pago = ?, moeda = ?, data_compra = COALESCE(?, data_compra), data_confirmacao = ?, data_liberacao = ?, affiliate_code = ?, affiliate_name = ?, parcelas = ?, tipo_pagamento = ?, pais_checkout = ?, codigo_oferta = ?, cupom_desconto = ?, preco_original = ?, assinatura_ativa = ?, plano_id = ?, plano_nome = ?, codigo_assinante = ?, is_order_bump = ?, parent_transaction = ?, business_model = ?, is_funnel = ?, atualizado_em = NOW() WHERE id = ?')
+                    ->execute([$userId, $produtoId, $statusCompra, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel, (int)$compra['id']]);
                 $compraId = (int)$compra['id'];
             } else {
-                $pdo->prepare('INSERT INTO compras (usuario_id, produto_id, origem, status, hotmart_transaction_id, valor_pago, moeda, data_compra, data_confirmacao, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, "hotmart", ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())')
-                    ->execute([$userId, $produtoId, $statusCompra, $transactionId, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao]);
+                $pdo->prepare('INSERT INTO compras (usuario_id, produto_id, origem, status, hotmart_transaction_id, valor_pago, moeda, data_compra, data_confirmacao, data_liberacao, affiliate_code, affiliate_name, parcelas, tipo_pagamento, pais_checkout, codigo_oferta, cupom_desconto, preco_original, assinatura_ativa, plano_id, plano_nome, codigo_assinante, is_order_bump, parent_transaction, business_model, is_funnel, criado_em, atualizado_em) VALUES (?, ?, "hotmart", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())')
+                    ->execute([$userId, $produtoId, $statusCompra, $transactionId, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel]);
                 $compraId = (int)$pdo->lastInsertId();
             }
 
