@@ -68,6 +68,15 @@ final class AuthController
             JsonResponse::error('Usuário bloqueado', 403);
             return;
         }
+        
+        // Verificar se usuário tem acessos bloqueados por reembolso
+        $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM acessos WHERE usuario_id = ? AND status = "bloqueado" AND motivo_bloqueio = "webhook_reembolso"');
+        $stmt->execute([$userId]);
+        $blockedAccess = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($blockedAccess && (int)$blockedAccess['total'] > 0) {
+            JsonResponse::error('Acesso bloqueado devido a reembolso', 403);
+            return;
+        }
         $userId = (int)$row['id'];
         $pdo->prepare('UPDATE usuarios SET ultimo_login_em = NOW() WHERE id = ?')->execute([$userId]);
         $token = Jwt::sign(['sub' => $userId, 'email' => $email]);
@@ -87,6 +96,16 @@ final class AuthController
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             JsonResponse::ok(['message' => 'Se existir, um e-mail será enviado']);
+            return;
+        }
+        
+        // Verificar se usuário tem acessos bloqueados por reembolso
+        $userId = (int)$row['id'];
+        $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM acessos WHERE usuario_id = ? AND status = "bloqueado" AND motivo_bloqueio = "webhook_reembolso"');
+        $stmt->execute([$userId]);
+        $blockedAccess = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($blockedAccess && (int)$blockedAccess['total'] > 0) {
+            JsonResponse::error('Acesso bloqueado devido a reembolso. Não é possível recuperar senha.', 403);
             return;
         }
         $userId = (int)$row['id'];

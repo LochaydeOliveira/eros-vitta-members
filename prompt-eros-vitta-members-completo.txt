@@ -406,3 +406,30 @@ curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
     },
     "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
   }'
+
+
+  curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
+  -d '{
+    "id": "test-refund-brasil",
+    "event": "PURCHASE_REFUNDED",
+    "data": {
+      "product": {
+        "id": 6157971
+      },
+      "buyer": {
+        "email": "helivaoficial@gmail.com",
+        "name": "Heliva Oficial"
+      },
+      "purchase": {
+        "status": "REFUNDED",
+        "transaction": "HP123456789012345",
+        "price": {
+          "value": 100.00,
+          "currency_value": "BRL"
+        }
+      }
+    },
+    "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+  }'

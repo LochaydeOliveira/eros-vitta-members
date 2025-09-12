@@ -24,8 +24,21 @@ final class AuthMiddleware
                 JsonResponse::error('Token inválido ou expirado', 401);
                 return null;
             }
+            
+            $userId = (int)$payload['sub'];
+            
+            // Verificar se usuário tem acessos bloqueados por reembolso
+            $pdo = \App\Database::pdo();
+            $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM acessos WHERE usuario_id = ? AND status = "bloqueado" AND motivo_bloqueio = "webhook_reembolso"');
+            $stmt->execute([$userId]);
+            $blockedAccess = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($blockedAccess && (int)$blockedAccess['total'] > 0) {
+                JsonResponse::error('Acesso bloqueado devido a reembolso', 403);
+                return null;
+            }
+            
             // injeta user_id no request
-            $request['user_id'] = (int)$payload['sub'];
+            $request['user_id'] = $userId;
             return $next($body, $request);
         };
     }
