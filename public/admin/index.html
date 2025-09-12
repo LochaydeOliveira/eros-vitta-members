@@ -499,7 +499,6 @@
         app: document.getElementById('app'),
         email: document.getElementById('email'),
         senha: document.getElementById('senha'),
-        loginBtn: document.getElementById('loginBtn'),
         loginMsg: document.getElementById('loginMsg'),
         whoami: document.getElementById('whoami'),
         logoutBtn: document.getElementById('logoutBtn'),
@@ -602,6 +601,7 @@
         els.whoami.textContent = 'admin';
         show(els.viewProducts, true);
         show(els.viewUsers, false);
+        setupEventListeners(); // Configurar event listeners após mostrar a app
         loadList();
       }
       function switchTab(tab){
@@ -1036,39 +1036,49 @@
         }
       }
 
-      // Eventos
-      els.loginBtn.addEventListener('click', login);
-      els.logoutBtn.addEventListener('click', exitApp);
-      els.tabProducts.addEventListener('click', ()=> switchTab('products'));
-      els.tabUsers.addEventListener('click', ()=> switchTab('users'));
-      els.tabDashboard.addEventListener('click', ()=> switchTab('dash'));
-      els.tabBackup.addEventListener('click', ()=> switchTab('backup'));
-      els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
-      els.orderProd.addEventListener('change', () => { state.offset = 0; loadList(); });
-      els.limitProd.addEventListener('change', () => { state.offset = 0; loadList(); });
-      els.newBtn.addEventListener('click', () => openForm(null));
-      els.tbody.addEventListener('click', onTableClick);
-      els.u.reload.addEventListener('click', ()=>{ state.offset=0; loadUsers(); });
-      if(els.u.status){ els.u.status.addEventListener('change', ()=>{ state.offset=0; loadUsers(); }); }
-      els.u.tbody.addEventListener('click', (ev)=>{
-        const b = ev.target.closest('button[data-u-open]');
-        if(b){ const id = parseInt(b.getAttribute('data-u-open'),10); openUser(id); }
-      });
-      els.prevBtn.addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadList(); });
-      els.nextBtn.addEventListener('click', () => { state.offset += state.limit; loadList(); });
-      els.saveBtn.addEventListener('click', saveForm);
-      els.cancelBtn.addEventListener('click', () => show(els.formCard, false));
-      els.deactBtn.addEventListener('click', deactivate);
-      els.f.uploadBtn.addEventListener('click', () => els.f.coverFile.click());
-      els.f.coverFile.addEventListener('change', handleCoverUpload);
-      els.f.uploadPdfBtn.addEventListener('click', () => els.f.pdfFile.click());
-      els.f.pdfFile.addEventListener('change', () => handleMediaUpload('pdf'));
-      els.f.uploadAudioBtn.addEventListener('click', () => els.f.audioFile.click());
-      els.f.audioFile.addEventListener('change', () => handleMediaUpload('audio'));
-      document.getElementById('d_reload').addEventListener('click', loadDashboardMetrics);
-      document.getElementById('d_period').addEventListener('change', loadDashboardMetrics);
-      document.getElementById('createBackupBtn').addEventListener('click', createBackupAdmin);
-      document.getElementById('testBackupBtn').addEventListener('click', testBackupLogin);
+      // Função para configurar event listeners
+      let eventListenersSetup = false;
+      function setupEventListeners() {
+        if(eventListenersSetup) return; // Evitar configurar múltiplas vezes
+        eventListenersSetup = true;
+        if(els.logoutBtn) els.logoutBtn.addEventListener('click', exitApp);
+        if(els.tabProducts) els.tabProducts.addEventListener('click', ()=> switchTab('products'));
+        if(els.tabUsers) els.tabUsers.addEventListener('click', ()=> switchTab('users'));
+        if(els.tabDashboard) els.tabDashboard.addEventListener('click', ()=> switchTab('dash'));
+        if(els.tabBackup) els.tabBackup.addEventListener('click', ()=> switchTab('backup'));
+        if(els.reloadBtn) els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
+        if(els.orderProd) els.orderProd.addEventListener('change', () => { state.offset = 0; loadList(); });
+        if(els.limitProd) els.limitProd.addEventListener('change', () => { state.offset = 0; loadList(); });
+        if(els.newBtn) els.newBtn.addEventListener('click', () => openForm(null));
+        if(els.tbody) els.tbody.addEventListener('click', onTableClick);
+        if(els.u.reload) els.u.reload.addEventListener('click', ()=>{ state.offset=0; loadUsers(); });
+        if(els.u.status) els.u.status.addEventListener('change', ()=>{ state.offset=0; loadUsers(); });
+        if(els.u.tbody) els.u.tbody.addEventListener('click', (ev)=>{
+          const b = ev.target.closest('button[data-u-open]');
+          if(b){ const id = parseInt(b.getAttribute('data-u-open'),10); openUser(id); }
+        });
+        if(els.prevBtn) els.prevBtn.addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadList(); });
+        if(els.nextBtn) els.nextBtn.addEventListener('click', () => { state.offset += state.limit; loadList(); });
+        if(els.saveBtn) els.saveBtn.addEventListener('click', saveForm);
+        if(els.cancelBtn) els.cancelBtn.addEventListener('click', () => show(els.formCard, false));
+        if(els.deactBtn) els.deactBtn.addEventListener('click', deactivate);
+        if(els.f.uploadBtn) els.f.uploadBtn.addEventListener('click', () => els.f.coverFile.click());
+        if(els.f.coverFile) els.f.coverFile.addEventListener('change', handleCoverUpload);
+        if(els.f.uploadPdfBtn) els.f.uploadPdfBtn.addEventListener('click', () => els.f.pdfFile.click());
+        if(els.f.pdfFile) els.f.pdfFile.addEventListener('change', () => handleMediaUpload('pdf'));
+        if(els.f.uploadAudioBtn) els.f.uploadAudioBtn.addEventListener('click', () => els.f.audioFile.click());
+        if(els.f.audioFile) els.f.audioFile.addEventListener('change', () => handleMediaUpload('audio'));
+        
+        const dReload = document.getElementById('d_reload');
+        const dPeriod = document.getElementById('d_period');
+        const createBackupBtn = document.getElementById('createBackupBtn');
+        const testBackupBtn = document.getElementById('testBackupBtn');
+        
+        if(dReload) dReload.addEventListener('click', loadDashboardMetrics);
+        if(dPeriod) dPeriod.addEventListener('change', loadDashboardMetrics);
+        if(createBackupBtn) createBackupBtn.addEventListener('click', createBackupAdmin);
+        if(testBackupBtn) testBackupBtn.addEventListener('click', testBackupLogin);
+      }
 
       // Função para upload de capa
       async function handleCoverUpload(){
@@ -1171,8 +1181,8 @@
       document.addEventListener('DOMContentLoaded', async function() {
         if(state.token){
           try {
-            // Verificar se o token é válido
-            const r = await fetch(apiBase + '/admin/dashboard/summary', { headers: hdr() });
+            // Verificar se o token é válido - usar endpoint mais simples
+            const r = await fetch(apiBase + '/admin/products?limit=1', { headers: hdr() });
             if(r.ok){
               enterApp();
             } else {
