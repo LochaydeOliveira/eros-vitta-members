@@ -70,8 +70,8 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 300px;
         transition: all 0.2s ease;
+        max-height: max-content;
       }
       @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
       .card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
@@ -161,6 +161,7 @@
     </style>
   </head>
   <body>
+
     <header id="mainHeader" class="hidden">
       <h1><i class="fas fa-cog"></i> Admin - Eros Vitta Members</h1>
       <div class="row">
@@ -168,6 +169,7 @@
         <button id="logoutBtn" class="ghost"><i class="fas fa-sign-out-alt"></i> Sair</button>
       </div>
     </header>
+
     <div class="layout">
       <div class="container-login">
         <section id="loginCard" class="card auth-card">
@@ -175,7 +177,8 @@
           <div class="auth-title">Identifique-se</div>
           <div class="auth-subtitle">Digite seu e-mail e senha</div>
           <form onsubmit="login(event)">
-            <div class="row">
+
+            <div>
               <div><label class="muted" for="email">E-mail</label><input id="email" class="input" type="email" placeholder="admin@exemplo.com" autocomplete="email" required /></div>
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -184,6 +187,7 @@
                 <input id="senha" class="input" type="password" placeholder="sua senha" autocomplete="current-password" required />
               </div>
             </div>
+
             <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
             <div id="loginMsg" class="code" style="margin-top:8px; text-align:center;"></div>
           </form>
@@ -201,7 +205,7 @@
         <div class="card mb16">
           <div>
             <strong>Produtos</strong>
-            <div class="right row">
+            <div class="right">
               <input id="q" class="w-200" placeholder="Buscar por título/slug" />
               <select id="tipoFilter" class="w-160">
                 <option value="">Tipo (todos)</option>
@@ -246,7 +250,7 @@
             </thead>
             <tbody id="tbody"></tbody>
           </table>
-          <div class="row mt12">
+          <div class="mt12">
             <button id="prevBtn">Anterior</button>
             <button id="nextBtn">Próxima</button>
             <span id="pageInfo" class="code"></span>
@@ -369,8 +373,8 @@
             </table>
           </div>
           <div class="card hidden" id="u_detail">
-            <div class="row"><strong id="u_title">Detalhes do usuário</strong></div>
-            <div class="row mt12">
+            <div><strong id="u_title">Detalhes do usuário</strong></div>
+            <div class="mt12">
               <div class="w-200">
                 <button id="u_block">Bloquear usuário</button>
                 <button id="u_unblock">Desbloquear</button>
@@ -386,12 +390,12 @@
             </div>
             <div class="mt12">
               <strong>Liberar produto</strong>
-              <div class="row">
+              <div>
                 <input id="u_prod_id" class="w-120" placeholder="produto_id" />
                 <input id="u_data" class="w-200" placeholder="YYYY-MM-DD HH:MM:SS (opcional)" />
                 <button id="u_assign">Liberar</button>
               </div>
-              <div class="row mt8">
+              <div class="mt8">
                 <input id="u_block_pid" class="w-120" placeholder="produto_id" />
                 <input id="u_motivo" class="w-200" placeholder="motivo (opcional)" />
                 <button id="u_block_access">Bloquear acesso</button>
@@ -403,7 +407,7 @@
 
         <div id="viewDashboard" class="hidden">
           <div class="card mb16">
-            <div class="row">
+            <div>
               <strong>Dashboard</strong>
               <div class="right">
                 <select id="d_period">
@@ -419,7 +423,7 @@
           
           <!-- Resumo básico -->
           <div class="card mb16">
-            <div class="row">
+            <div>
               <div class="w-200"><div class="muted">Usuários</div><div id="d_users" class="title">-</div></div>
               <div class="w-200"><div class="muted">Produtos</div><div id="d_products" class="title">-</div></div>
               <div class="w-200"><div class="muted">Acessos ativos</div><div id="d_accesses" class="title">-</div></div>
@@ -429,8 +433,8 @@
           
           <!-- Métricas de faturamento -->
           <div class="card mb16">
-            <div class="row"><strong>Faturamento do Período</strong></div>
-            <div class="row mt12">
+            <div><strong>Faturamento do Período</strong></div>
+            <div class="mt12">
               <div class="w-200"><div class="muted">Total de vendas</div><div id="d_total_vendas" class="title">-</div></div>
               <div class="w-200"><div class="muted">Faturamento total</div><div id="d_faturamento" class="title">-</div></div>
               <div class="w-200"><div class="muted">Ticket médio</div><div id="d_ticket_medio" class="title">-</div></div>
@@ -439,7 +443,7 @@
           
           <!-- Top produtos -->
           <div class="card">
-            <div class="row"><strong>Top Produtos</strong></div>
+            <div><strong>Top Produtos</strong></div>
             <div class="mt12">
               <table>
                 <thead>
@@ -458,11 +462,11 @@
 
         <div id="viewBackup" class="hidden">
           <div class="card mb16">
-            <div class="row"><strong><i class="fas fa-shield-alt"></i> Admin de Backup</strong></div>
+            <div ><strong><i class="fas fa-shield-alt"></i> Admin de Backup</strong></div>
             <div class="muted">Crie um usuário de backup para casos de emergência</div>
           </div>
           <div class="card">
-            <div class="row">
+            <div>
               <div class="w-200">
                 <button id="createBackupBtn" class="primary">
                   <i class="fas fa-plus"></i> Criar Admin de Backup
