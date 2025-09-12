@@ -51,6 +51,7 @@ $router->put('/api/admin/products', AdminMiddleware::requireAdmin([AdminProductC
 $router->post('/api/admin/products/update', AdminMiddleware::requireAdmin([AdminProductController::class, 'update'])) ;
 $router->post('/api/admin/products/deactivate', AdminMiddleware::requireAdmin([AdminProductController::class, 'deactivate'])) ;
 $router->post('/api/admin/products/upload-cover', AdminMiddleware::requireAdmin([AdminProductController::class, 'uploadCover']));
+$router->post('/api/admin/products/upload-media', AdminMiddleware::requireAdmin([AdminProductController::class, 'uploadMedia']));
 
 // Admin - usuários
 $router->get('/api/admin/users', AdminMiddleware::requireAdmin([AdminUserController::class, 'list']));

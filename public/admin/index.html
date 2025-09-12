@@ -204,10 +204,20 @@
               <div>
                 <label>PDF - storage_view_pdf</label>
                 <input id="f_pdf_view" placeholder="/view/pdf?file=..." />
+                <div class="mt8">
+                  <input type="file" id="f_pdf_file" accept=".pdf" style="display:none" />
+                  <button type="button" id="f_upload_pdf_btn" class="secondary small"><i class="fas fa-file-pdf"></i> Upload PDF</button>
+                  <div id="f_pdf_preview" class="mt8"></div>
+                </div>
               </div>
               <div class="mt8">
                 <label>Áudio - storage_view_audio_dir</label>
                 <input id="f_audio_dir" placeholder="/view/audio/playlist?dir=..." />
+                <div class="mt8">
+                  <input type="file" id="f_audio_file" accept=".mp3,.wav,.ogg,.m4a" style="display:none" />
+                  <button type="button" id="f_upload_audio_btn" class="secondary small"><i class="fas fa-music"></i> Upload Áudio</button>
+                  <div id="f_audio_preview" class="mt8"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -431,6 +441,12 @@
           coverFile: document.getElementById('f_cover_file'),
           uploadBtn: document.getElementById('f_upload_btn'),
           coverPreview: document.getElementById('f_cover_preview'),
+          pdfFile: document.getElementById('f_pdf_file'),
+          uploadPdfBtn: document.getElementById('f_upload_pdf_btn'),
+          pdfPreview: document.getElementById('f_pdf_preview'),
+          audioFile: document.getElementById('f_audio_file'),
+          uploadAudioBtn: document.getElementById('f_upload_audio_btn'),
+          audioPreview: document.getElementById('f_audio_preview'),
           ativo: document.getElementById('f_ativo'),
           hotmart: document.getElementById('f_hotmart'),
           checkout: document.getElementById('f_checkout'),
@@ -926,6 +942,10 @@
       els.deactBtn.addEventListener('click', deactivate);
       els.f.uploadBtn.addEventListener('click', () => els.f.coverFile.click());
       els.f.coverFile.addEventListener('change', handleCoverUpload);
+      els.f.uploadPdfBtn.addEventListener('click', () => els.f.pdfFile.click());
+      els.f.pdfFile.addEventListener('change', () => handleMediaUpload('pdf'));
+      els.f.uploadAudioBtn.addEventListener('click', () => els.f.audioFile.click());
+      els.f.audioFile.addEventListener('change', () => handleMediaUpload('audio'));
       document.getElementById('d_reload').addEventListener('click', loadDashboardMetrics);
       document.getElementById('d_period').addEventListener('change', loadDashboardMetrics);
       document.getElementById('createBackupBtn').addEventListener('click', createBackupAdmin);
@@ -935,16 +955,16 @@
       async function handleCoverUpload(){
         const file = els.f.coverFile.files[0];
         if(!file) return;
-        
+
         if(!els.f.id){
           alert('Salve o produto primeiro antes de fazer upload da capa');
           return;
         }
-        
+
         const formData = new FormData();
         formData.append('cover', file);
         formData.append('produto_id', els.f.id);
-        
+
         try {
           const res = await fetch(apiBase + '/admin/products/upload-cover', {
             method: 'POST',
@@ -952,7 +972,7 @@
             body: formData
           });
           const data = await res.json();
-          
+
           if(data.success){
             els.f.capa.value = data.capa_url;
             showCoverPreview(data.capa_url);
@@ -962,6 +982,64 @@
           }
         } catch(e){
           alert('Erro: ' + e.message);
+        }
+      }
+
+      async function handleMediaUpload(mediaType){
+        const file = mediaType === 'pdf' ? els.f.pdfFile.files[0] : els.f.audioFile.files[0];
+        if(!file) return;
+
+        if(!els.f.id){
+          alert('Salve o produto primeiro antes de fazer upload do arquivo');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('media', file);
+        formData.append('produto_id', els.f.id);
+        formData.append('media_type', mediaType);
+
+        const btn = mediaType === 'pdf' ? els.f.uploadPdfBtn : els.f.uploadAudioBtn;
+        const preview = mediaType === 'pdf' ? els.f.pdfPreview : els.f.audioPreview;
+        const input = mediaType === 'pdf' ? els.f.pdf_view : els.f.audio_dir;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+          const res = await fetch(apiBase + '/admin/products/upload-media', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + state.token },
+            body: formData
+          });
+          const data = await res.json();
+
+          if(data.success){
+            input.value = data.file_path;
+            preview.innerHTML = `
+              <div style="color: #10b981; font-size: 12px;">
+                <i class="fas fa-check-circle"></i> ${data.filename} enviado com sucesso!
+              </div>
+            `;
+            alert(`${mediaType.toUpperCase()} enviado com sucesso!`);
+          } else {
+            preview.innerHTML = `
+              <div style="color: #ef4444; font-size: 12px;">
+                <i class="fas fa-times-circle"></i> ${data.error || 'Falha no upload'}
+              </div>
+            `;
+            alert('Erro: ' + (data.error || 'Falha no upload'));
+          }
+        } catch(e){
+          preview.innerHTML = `
+            <div style="color: #ef4444; font-size: 12px;">
+              <i class="fas fa-times-circle"></i> Erro: ${e.message}
+            </div>
+          `;
+          alert('Erro: ' + e.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = mediaType === 'pdf' ? '<i class="fas fa-file-pdf"></i> Upload PDF' : '<i class="fas fa-music"></i> Upload Áudio';
         }
       }
       

@@ -18,6 +18,15 @@ final class AdminProductController
         return $uploadDir;
     }
 
+    private static function getMediaUploadDir(): string
+    {
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/../storage/media';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        return $uploadDir;
+    }
+
     private static function validateImageFile(array $file): array
     {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -37,6 +46,45 @@ final class AdminProductController
         
         if (!in_array($mimeType, $allowedTypes, true)) {
             return ['error' => 'Tipo de arquivo inválido. Use JPG, PNG ou WebP.'];
+        }
+        
+        return ['success' => true, 'mime' => $mimeType];
+    }
+
+    private static function validateMediaFile(array $file, string $type): array
+    {
+        $allowedTypes = match($type) {
+            'pdf' => ['application/pdf'],
+            'audio' => ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'],
+            default => []
+        };
+        
+        $maxSize = match($type) {
+            'pdf' => 50 * 1024 * 1024, // 50MB
+            'audio' => 100 * 1024 * 1024, // 100MB
+            default => 10 * 1024 * 1024 // 10MB
+        };
+        
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return ['error' => 'Erro no upload: ' . $file['error']];
+        }
+        
+        if ($file['size'] > $maxSize) {
+            $maxSizeMB = round($maxSize / 1024 / 1024);
+            return ['error' => "Arquivo muito grande. Máximo {$maxSizeMB}MB."];
+        }
+        
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mimeType, $allowedTypes, true)) {
+            $allowedExts = match($type) {
+                'pdf' => 'PDF',
+                'audio' => 'MP3, WAV, OGG, M4A',
+                default => 'arquivos válidos'
+            };
+            return ['error' => "Tipo de arquivo inválido. Use {$allowedExts}."];
         }
         
         return ['success' => true, 'mime' => $mimeType];
@@ -196,6 +244,88 @@ final class AdminProductController
             'success' => true,
             'capa_url' => $webPath,
             'filename' => $filename
+        ]);
+    }
+
+    /**
+     * Upload de arquivos de mídia (PDF/Audio)
+     */
+    public static function uploadMedia(array $_body = [], array $_request = []): void
+    {
+        if (!isset($_FILES['media']) || !is_array($_FILES['media'])) {
+            JsonResponse::error('Arquivo de mídia não enviado', 400);
+            return;
+        }
+
+        $produtoId = (int)($_POST['produto_id'] ?? 0);
+        $mediaType = (string)($_POST['media_type'] ?? '');
+        
+        if ($produtoId <= 0) {
+            JsonResponse::error('produto_id obrigatório', 422);
+            return;
+        }
+        
+        if (!in_array($mediaType, ['pdf', 'audio'], true)) {
+            JsonResponse::error('media_type deve ser "pdf" ou "audio"', 422);
+            return;
+        }
+
+        // Validar se produto existe
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT id, titulo FROM produtos WHERE id = ? LIMIT 1');
+        $stmt->execute([$produtoId]);
+        $produto = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$produto) {
+            JsonResponse::error('Produto não encontrado', 404);
+            return;
+        }
+
+        // Validar arquivo
+        $validation = self::validateMediaFile($_FILES['media'], $mediaType);
+        if (isset($validation['error'])) {
+            JsonResponse::error($validation['error'], 400);
+            return;
+        }
+
+        // Gerar nome único para o arquivo
+        $extension = match($mediaType) {
+            'pdf' => 'pdf',
+            'audio' => match($validation['mime']) {
+                'audio/mpeg', 'audio/mp3' => 'mp3',
+                'audio/wav' => 'wav',
+                'audio/ogg' => 'ogg',
+                'audio/m4a' => 'm4a',
+                default => 'mp3'
+            },
+            default => 'bin'
+        };
+        
+        $filename = 'produto_' . $produtoId . '_' . $mediaType . '_' . time() . '.' . $extension;
+        $uploadDir = self::getMediaUploadDir();
+        $filepath = $uploadDir . '/' . $filename;
+
+        // Mover arquivo
+        if (!move_uploaded_file($_FILES['media']['tmp_name'], $filepath)) {
+            JsonResponse::error('Falha ao salvar arquivo', 500);
+            return;
+        }
+
+        // Atualizar campo apropriado no banco
+        $webPath = '/storage/media/' . $filename;
+        $fieldName = match($mediaType) {
+            'pdf' => 'storage_view_pdf',
+            'audio' => 'storage_path_audio',
+            default => 'storage_view_pdf'
+        };
+        
+        $stmt = $pdo->prepare("UPDATE produtos SET {$fieldName} = ?, atualizado_em = NOW() WHERE id = ?");
+        $stmt->execute([$webPath, $produtoId]);
+
+        JsonResponse::ok([
+            'success' => true,
+            'file_path' => $webPath,
+            'filename' => $filename,
+            'media_type' => $mediaType
         ]);
     }
 
