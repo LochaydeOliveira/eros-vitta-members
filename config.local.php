@@ -4,8 +4,8 @@ return [
     'DB_HOST' => 'localhost',
     'DB_PORT' => '3306',
     'DB_NAME' => 'paymen58_eros_vitta_members',
-    'DB_USER' => 'DB_USER_AQUI',
-    'DB_PASS' => 'DB_PASS_AQUI',
+    'DB_USER' => 'paymen58_app',
+    'DB_PASS' => 'Lochayde@100423',
     
     // Configurações da aplicação
     'APP_KEY' => '45c2fea14e8647080a1f1e1fa489e6c9df49a8b36a94cf108550d9848f628ae9',

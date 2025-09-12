@@ -50,6 +50,10 @@ final class WebhookController
 
             // Extrair dados da estrutura real da Hotmart
             $data = $body['data'] ?? $body; // Fallback para estrutura antiga
+            
+            // Debug: log do payload recebido
+            error_log('Webhook payload: ' . json_encode($body, JSON_PRETTY_PRINT));
+            
             $email = strtolower(trim((string)($data['buyer']['email'] ?? $body['buyer']['email'] ?? $body['email'] ?? '')));
             $nome = trim((string)($data['buyer']['name'] ?? $body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
             $hotmartUserId = (string)($data['buyer']['ucode'] ?? $body['buyer']['ucode'] ?? $body['hotmart_user_id'] ?? null);
@@ -62,8 +66,11 @@ final class WebhookController
             $confirmada = in_array($status, ['approved','aprovada','completed','complete'], true);
             $cancelada = in_array($status, ['refunded','chargeback','canceled','cancelled','cancelada','reembolsado'], true);
 
+            // Debug: log dos valores extraídos
+            error_log("Email extraído: '$email', Product ID extraído: '$produtoHotmartId'");
+
             if ($email === '' || $produtoHotmartId === '') {
-                throw new \RuntimeException('Payload inválido: falta email ou product_id');
+                throw new \RuntimeException('Payload inválido: falta email ou product_id. Email: "' . $email . '", Product ID: "' . $produtoHotmartId . '"');
             }
 
             // Upsert usuário (gera senha se novo)
