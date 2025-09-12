@@ -378,51 +378,77 @@ $body='{"limit":5}'
 Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/cron/run-d7' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 5
 
 
-$adminToken='SEU_TOKEN_ADMIN'
-$body = @{
-  titulo = 'Libido Renovada (Versão em Áudio)'
-  tipo = 'audio'
-  slug = 'versao-em-audio-libido-renovada'
-  descricao = 'Álbum completo'
-  capa_url = 'https://erosvitta.com.br/covers/versao-em-audio-libido-renovada.webp'
-  storage_view_audio_dir = '/home1/paymen58/storage/audios/view/versao-em-audio-libido-renovada'
-  ativo = 1
-} | ConvertTo-Json -Compress
-Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/products' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 5
 
-
-$adminToken='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NTg4MjgsImV4cCI6MTc1NzY0NTIyOH0.Zb_qV9sOfqqNLsTbCM6DabdaB44shHupbrhxsi37JG0'
-Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/admin/products' -Headers @{ Authorization = "Bearer $adminToken" } | ConvertTo-Json -Depth 6
-
-
-
-
-$headers = @{
-    "Content-Type" = "application/json"
-    "X-Hotmart-Hottok" = "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
-}
-
-$body = @{
-    event = "PURCHASE_APPROVED"
-    data = @{
-        purchase = @{
-            transaction = "HP123456789"
-            product = @{
-                id = "123456"
-                name = "Produto Teste"
-            }
-            buyer = @{
-                email = "lochaydeguerreiro2@gmail.com"
-                name = "João Silva"
-            }
-            purchase_date = "2024-01-15T10:30:00Z"
-            price = @{
-                value = 97.00
-                currency_code = "BRL"
-            }
-            status = "APPROVED"
+  -H "Content-Type: application/json" \
+  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
+  -d '{
+    "id": "test-completo",
+    "creation_date": 1757694018639,
+    "event": "PURCHASE_APPROVED",
+    "version": "2.0.0",
+    "data": {
+      "product": {
+        "id": 6157971,
+        "ucode": "fb056612-bcc6-4217-9e6d-2a5d1110ac2f",
+        "name": "Produto test postback2"
+      },
+      "buyer": {
+        "email": "lochaydeguerreiro2@gmail.com",
+        "name": "Teste Comprador",
+        "first_name": "Teste",
+        "last_name": "Comprador",
+        "checkout_phone": "99999999900",
+        "address": {
+          "city": "Uberlândia",
+          "country": "Brasil",
+          "state": "Minas Gerais",
+          "zipcode": "38400123",
+          "address": "Avenida Francisco Galassi",
+          "number": "10",
+          "complement": "Perto do shopping"
+        },
+        "document": "69526128664",
+        "document_type": "CPF"
+      },
+      "purchase": {
+        "approved_date": 1511783346000,
+        "price": {
+          "value": 1500,
+          "currency_value": "BRL"
+        },
+        "status": "APPROVED",
+        "transaction": "HP16015479281022",
+        "payment": {
+          "installments_number": 12,
+          "type": "CREDIT_CARD"
+        },
+        "offer": {
+          "code": "test",
+          "coupon_code": "SHHUHA"
+        },
+        "original_offer_price": {
+          "value": 1500,
+          "currency_value": "BRL"
+        },
+        "order_bump": {
+          "is_order_bump": true,
+          "parent_purchase_transaction": "HP02316330308193"
+        },
+        "business_model": "I",
+        "is_funnel": false,
+        "checkout_country": {
+          "iso": "BR"
         }
+      },
+      "subscription": {
+        "status": "ACTIVE",
+        "plan": {
+          "id": 123,
+          "name": "plano de teste"
+        },
+        "subscriber": {
+          "code": "I9OT62C3"
+        }
+      }
     }
-} | ConvertTo-Json -Depth 10
-
-Invoke-RestMethod -Uri "https://erosvitta.com.br/api/hotmart/webhook" -Method POST -Headers $headers -Body $body
+  }'

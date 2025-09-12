@@ -48,13 +48,22 @@ final class WebhookController
             // Daqui em diante, faz a escrita de negócio dentro de transação
             $pdo->beginTransaction();
 
+            // Debug: log do payload recebido
+            error_log('=== WEBHOOK DEBUG ===');
+            error_log('Body recebido: ' . json_encode($body, JSON_PRETTY_PRINT));
+            
             // Extrair dados da estrutura real da Hotmart
             $data = $body['data'] ?? $body; // Fallback para estrutura antiga
+            
+            error_log('Data extraída: ' . json_encode($data, JSON_PRETTY_PRINT));
             
             $email = strtolower(trim((string)($data['buyer']['email'] ?? $body['buyer']['email'] ?? $body['email'] ?? '')));
             $nome = trim((string)($data['buyer']['name'] ?? $body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
             $hotmartUserId = (string)($data['buyer']['ucode'] ?? $body['buyer']['ucode'] ?? $body['hotmart_user_id'] ?? null);
             $produtoHotmartId = (string)($data['product']['id'] ?? $body['product']['id'] ?? $body['product_id'] ?? '');
+            
+            error_log("Email extraído: '$email'");
+            error_log("Product ID extraído: '$produtoHotmartId'");
             $transactionId = (string)($data['purchase']['transaction'] ?? $body['purchase']['transaction'] ?? $body['transaction'] ?? null);
             $status = strtolower((string)($data['purchase']['status'] ?? $body['purchase']['status'] ?? $body['status'] ?? 'pendente'));
             $valor = (float)($data['purchase']['price']['value'] ?? $body['purchase']['price'] ?? $body['price'] ?? 0);
@@ -95,7 +104,7 @@ final class WebhookController
             $precoOriginal = (float)($data['purchase']['original_offer_price']['value'] ?? $body['purchase']['original_offer_price']['value'] ?? $valor);
 
             // Dados de assinatura
-            $assinaturaAtiva = (bool)($data['subscription']['status'] === 'ACTIVE' ?? false);
+            $assinaturaAtiva = (bool)(($data['subscription']['status'] ?? '') === 'ACTIVE');
             $planoId = (int)($data['subscription']['plan']['id'] ?? 0);
             $planoNome = (string)($data['subscription']['plan']['name'] ?? '');
             $codigoAssinante = (string)($data['subscription']['subscriber']['code'] ?? '');

@@ -57,6 +57,10 @@ class Router
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         if (stripos($contentType, 'application/json') !== false) {
             $data = json_decode($raw, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log('JSON decode error: ' . json_last_error_msg() . ' | Raw body: ' . $raw);
+                return [];
+            }
             return is_array($data) ? $data : [];
         }
         return $_POST ?: [];
