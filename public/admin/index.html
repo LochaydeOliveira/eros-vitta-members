@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin - Eros Vitta Members</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
       :root { color-scheme: light; --bg:#f8fafc; --fg:#1e293b; --muted:#64748b; --card:#ffffff; --acc:#3b82f6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --border:#e2e8f0; }
       * { box-sizing: border-box; }
@@ -48,14 +49,18 @@
       .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:var(--muted); }
       a { color:var(--acc); text-decoration:none; }
       a:hover { text-decoration: underline; }
+      /* Ícones Font Awesome */
+      .fas, .far, .fab { margin-right: 6px; }
+      .btn i { margin-right: 6px; }
+      .menu-item i { margin-right: 8px; }
     </style>
   </head>
   <body>
     <header id="mainHeader" class="hidden">
-      <h1>Admin - Eros Vitta Members</h1>
+      <h1><i class="fas fa-cog"></i> Admin - Eros Vitta Members</h1>
       <div class="row">
-        <span id="whoami" class="code"></span>
-        <button id="logoutBtn" class="ghost">Sair</button>
+        <span id="whoami" class="code"><i class="fas fa-user-shield"></i> admin</span>
+        <button id="logoutBtn" class="ghost"><i class="fas fa-sign-out-alt"></i> Sair</button>
       </div>
     </header>
     <div class="container">
@@ -79,9 +84,9 @@
 
       <div id="app" class="hidden">
         <div class="row" style="margin-bottom:12px">
-          <button id="tabProducts" class="primary">Produtos</button>
-          <button id="tabUsers" class="ghost">Usuários</button>
-          <button id="tabDashboard" class="ghost">Dashboard</button>
+          <button id="tabProducts" class="primary"><i class="fas fa-box"></i> Produtos</button>
+          <button id="tabUsers" class="ghost"><i class="fas fa-users"></i> Usuários</button>
+          <button id="tabDashboard" class="ghost"><i class="fas fa-chart-bar"></i> Dashboard</button>
         </div>
         <div id="viewProducts">
         <div class="card mb16">
@@ -110,8 +115,8 @@
                 <option value="50">50 por página</option>
                 <option value="100">100 por página</option>
               </select>
-              <button id="reloadBtn">Atualizar</button>
-              <button id="newBtn" class="primary">Novo produto</button>
+              <button id="reloadBtn"><i class="fas fa-sync-alt"></i> Atualizar</button>
+              <button id="newBtn" class="primary"><i class="fas fa-plus"></i> Novo produto</button>
             </div>
           </div>
         </div>
@@ -165,7 +170,7 @@
               <input id="f_capa" />
               <div class="mt8">
                 <input type="file" id="f_cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" />
-                <button type="button" id="f_upload_btn" class="secondary small">Upload de capa</button>
+                <button type="button" id="f_upload_btn" class="secondary small"><i class="fas fa-upload"></i> Upload de capa</button>
                 <div id="f_cover_preview" class="mt8"></div>
               </div>
             </div>
@@ -207,9 +212,9 @@
           </div>
 
           <div class="row mt16">
-            <button id="saveBtn" class="primary">Salvar</button>
-            <button id="cancelBtn" class="ghost">Cancelar</button>
-            <button id="deactBtn" class="danger hidden">Desativar</button>
+            <button id="saveBtn" class="primary"><i class="fas fa-save"></i> Salvar</button>
+            <button id="cancelBtn" class="ghost"><i class="fas fa-times"></i> Cancelar</button>
+            <button id="deactBtn" class="danger hidden"><i class="fas fa-ban"></i> Desativar</button>
             <span id="formMsg" class="code"></span>
           </div>
         </div>
@@ -226,7 +231,7 @@
                   <option value="ativo">Ativo</option>
                   <option value="bloqueado">Bloqueado</option>
                 </select>
-                <button id="u_reload">Buscar</button>
+                <button id="u_reload"><i class="fas fa-search"></i> Buscar</button>
               </div>
             </div>
           </div>
@@ -288,7 +293,7 @@
                   <option value="90d">Últimos 90 dias</option>
                   <option value="1y">Último ano</option>
                 </select>
-                <button id="d_reload">Atualizar</button>
+                <button id="d_reload"><i class="fas fa-sync-alt"></i> Atualizar</button>
               </div>
             </div>
           </div>

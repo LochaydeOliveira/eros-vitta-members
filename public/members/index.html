@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Eros Vitta - Área de Membros</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root { 
       --bg:#f8f7f3; 
@@ -17,6 +18,8 @@
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--text); background: var(--bg); font-size: 15px; }
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
     @media(max-width: 640px){ header { padding: 10px 12px; } }
+    .header-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
     .layout {
       max-width: 1200px;
       margin: 0 auto;
@@ -60,7 +63,7 @@
     @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
     .card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
     .card.blocked { opacity: .75; filter: grayscale(20%); }
-    .card.auth-card::after { content: 'BLOCk'; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); }
+    .card.blocked::after { content: 'BLOCk'; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); }
     .badge-lock { position:absolute; top:10px; right:10px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:999px; padding:2px 8px; font-size:11px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
     @media(max-width: 640px){ .grid { gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
@@ -96,10 +99,11 @@
     .tag.blocked { background: #fee2e2; color: #991b1b; }
     .thumb { width: 100%; height: auto; border: 0; border-radius: var(--radius); background: #fff; object-fit: cover; aspect-ratio: 3 / 4; }
     .thumb.ph { display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:700; }
-    /* Ícones SVG */
-    .icon { width:16px; height:16px; vertical-align:-3px; }
-    .muted .icon { color:#475569; }
-    .btn svg.icon { color:#fff; margin-right:6px; }
+    /* Ícones Font Awesome */
+    .fas, .far, .fab { margin-right: 6px; }
+    .btn i { margin-right: 6px; }
+    .tag i { margin-right: 4px; }
+    .menu-item i { margin-right: 8px; }
     /* Avatar + menu */
     .avatar { width: 36px; height: 36px; border-radius: 999px; background:#111827; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; cursor: pointer; }
     .menu { position: relative; }
@@ -403,7 +407,11 @@
       el.innerHTML = `
         ${coverHtml}
         <div class="title">${escapeHtml(it.titulo)}</div>
-        <div class="muted">Tipo: ${it.tipo === 'ebook' ? 'Ebook' : 'Áudio'} ${hasAccess ? '<span class="tag">liberado</span>' : '<span class="tag">bloqueado</span>'}</div>
+        <div class="muted">
+          <i class="fas fa-${it.tipo === 'ebook' ? 'file-pdf' : 'music'}"></i>
+          ${it.tipo === 'ebook' ? 'Ebook' : 'Áudio'} 
+          ${hasAccess ? '<span class="tag ok"><i class="fas fa-check"></i> liberado</span>' : '<span class="tag blocked"><i class="fas fa-lock"></i> bloqueado</span>'}
+        </div>
         <div class="actions"></div>
         <div class="media" id="media-${it.id}"></div>
       `;
@@ -412,13 +420,13 @@
         if(it.tipo === 'ebook'){
           const btnPdf = document.createElement('button');
           btnPdf.className = 'btn';
-          btnPdf.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1v4h4"/></svg> Ler agora';
+          btnPdf.innerHTML = '<i class="fas fa-book-open"></i> Ler agora';
           btnPdf.onclick = async ()=>{ openPdfReader(it.id); };
           actions.appendChild(btnPdf);
         } else {
           const btnPlay = document.createElement('button');
           btnPlay.className = 'btn';
-          btnPlay.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> Ouvir álbum';
+          btnPlay.innerHTML = '<i class="fas fa-play"></i> Ouvir álbum';
           btnPlay.onclick = async ()=>{ await playAudio(it.id, it.titulo || 'Álbum'); };
           actions.appendChild(btnPlay);
         }
@@ -431,9 +439,9 @@
         btnBuy.href = checkout;
         btnBuy.target = '_blank';
         btnBuy.rel = 'noopener';
-        btnBuy.textContent = 'Comprar e liberar';
+        btnBuy.innerHTML = '<i class="fas fa-shopping-cart"></i> Comprar e liberar';
         actions.appendChild(btnBuy);
-        const lock = document.createElement('div'); lock.className='badge-lock'; lock.textContent='Bloqueado'; el.appendChild(lock);
+        const lock = document.createElement('div'); lock.className='badge-lock'; lock.innerHTML='<i class="fas fa-lock"></i> Bloqueado'; el.appendChild(lock);
       }
       // Download removido da área de membros (entrega pós D+7 por e-mail)
       return el;
@@ -825,14 +833,27 @@
 <body>
   <div id="toast" style="position: fixed; right: 16px; bottom: 16px; z-index: 2000; max-width: 360px; display:none;"><div class="tcard" id="toast-msg">...</div></div>
   <header>
-    <div><strong>Eros Vitta Members</strong></div>
-    <div class="menu">
-      <span class="muted" style="margin-right:8px">Olá, <strong id="userName"></strong></span>
-      <button id="avatarBtn" class="avatar" aria-haspopup="true" aria-expanded="false">EV</button>
-      <div id="userMenu" class="menu-panel" role="menu">
-        <button class="menu-item" onclick="loadAccesses(); toggleMenu(false)">Meus acessos</button>
-        <button class="menu-item" onclick="openProfile(); toggleMenu(false)">Perfil</button>
-        <button class="menu-item" onclick="logout()">Sair</button>
+    <div class="header-title">
+      <i class="fas fa-book-open"></i>
+      <strong>Eros Vitta Members</strong>
+    </div>
+    <div class="header-actions">
+      <span class="muted">Olá, <strong id="userName"></strong></span>
+      <div class="menu">
+        <button id="avatarBtn" class="avatar" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user"></i>
+        </button>
+        <div id="userMenu" class="menu-panel" role="menu">
+          <button class="menu-item" onclick="loadAccesses(); toggleMenu(false)">
+            <i class="fas fa-key"></i> Meus acessos
+          </button>
+          <button class="menu-item" onclick="openProfile(); toggleMenu(false)">
+            <i class="fas fa-user-cog"></i> Perfil
+          </button>
+          <button class="menu-item" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
       </div>
     </div>
   </header>
