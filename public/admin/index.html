@@ -6,21 +6,116 @@
     <title>Admin - Eros Vitta Members</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-      :root { color-scheme: light; --bg:#f8fafc; --fg:#1e293b; --muted:#64748b; --card:#ffffff; --acc:#3b82f6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --border:#e2e8f0; }
+      :root { 
+        --bg:#f8f7f3; 
+        --surface:#ffffff; 
+        --border:#e5e7eb; 
+        --text:#0f172a; 
+        --muted:#64748b; 
+        --radius:6px; 
+        --radius-lg:6px;
+        --acc:#3b82f6; 
+        --ok:#10b981; 
+        --warn:#f59e0b; 
+        --err:#ef4444; 
+      }
       * { box-sizing: border-box; }
-      body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); }
-      header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background: var(--card); position: sticky; top:0; z-index:10; }
-      header h1 { margin:0; font-size:16px; letter-spacing:.3px; }
-      .container { padding: 16px; max-width: 1200px; margin: 0 auto; }
-      .card { background: var(--card); border:1px solid var(--border); border-radius: 8px; padding:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+      body { 
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+        margin: 0; 
+        color: var(--text); 
+        background: var(--bg); 
+        font-size: 15px; 
+      }
+      header { 
+        display: none; 
+        align-items: center; 
+        justify-content: space-between; 
+        padding: 12px 16px; 
+        background: #fff; 
+        border-bottom: 1px solid #e2e8f0; 
+        position: sticky; 
+        top: 0; 
+        z-index: 10; 
+      }
+      @media(max-width: 640px){ header { padding: 10px 12px; } }
+      .header-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+      .header-actions { display: flex; align-items: center; gap: 12px; }
+      .layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        min-height: 100vh;
+        box-sizing: border-box;
+        justify-content: center;
+        align-content: center;
+        flex-wrap: wrap;
+      }
+      @media(max-width: 900px){ .layout { padding: 16px; } }
+      @media(max-width: 640px){ .layout { padding: 12px; } }
+      .container { padding: 0; }
+      .container-login {
+        padding: 0;
+        width: 100%;
+        max-width: 400px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: 0 4px 16px rgba(15,23,42,0.04);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 300px;
+        transition: all 0.2s ease;
+      }
+      @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
+      .card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
       .grid { display: grid; gap:12px; }
       .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-      input, select, textarea { width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--fg); }
+      .input { 
+        width: 100%; 
+        padding: 10px 12px; 
+        border: 1px solid var(--border); 
+        border-radius: var(--radius); 
+        background:#fff; 
+        box-sizing: border-box; 
+        height: 44px; 
+        font-size: 14px; 
+        transition: all 0.2s ease; 
+      }
+      .input:focus { outline: 2px solid #0ea5e9; outline-offset: 0; border-color: #0ea5e9; }
+      input, select, textarea { width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); }
       textarea { min-height: 96px; resize: vertical; }
       label { font-size:12px; color: var(--muted); display:block; margin-bottom:6px; }
-      button { padding:10px 14px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--fg); cursor:pointer; transition: all 0.2s; }
+      .btn {
+        appearance: none; 
+        border: 0; 
+        background: #111827; 
+        color: #fff; 
+        padding: 8px 12px; 
+        border-radius: var(--radius); 
+        cursor: pointer; 
+        font-weight: 600; 
+        height: 36px; 
+        font-size: 14px;
+        width: 100%;
+        text-align: center;
+        transition: all 0.2s ease;
+      }
+      .btn:hover { background: #1f2937; transform: translateY(-1px); }
+      .btn:active { transform: translateY(0); }
+      .btn.secondary { background: #0ea5e9; max-height: max-content; }
+      .btn.secondary:hover { background: #0284c7; }
+      .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
+      .btn.muted:hover { background: #cbd5e1; transform: none; }
+      button { padding:10px 14px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; transition: all 0.2s; }
       button:hover { background: #f1f5f9; }
       button.primary { background: var(--acc); border-color: var(--acc); color: white; }
       button.primary:hover { background: #2563eb; }
@@ -53,6 +148,16 @@
       .fas, .far, .fab { margin-right: 6px; }
       .btn i { margin-right: 6px; }
       .menu-item i { margin-right: 8px; }
+      
+      /* Estilos específicos para login */
+      .auth-title { font-size: 18px; font-weight: 700; margin: 8px 0; line-height: 1.3; text-align: center; }
+      .auth-subtitle { color: #475569; font-size: 14px; margin: 4px 0 16px; line-height: 1.4; text-align: center; }
+      .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      .title { font-size: 16px; font-weight: 700; margin: 6px 0; line-height: 1.3; }
+      .muted { color: #475569; font-size: 12px; margin: 4px 0; line-height: 1.4; }
+      .link { color: var(--acc); text-decoration: none; font-size: 12px; }
+      .link:hover { text-decoration: underline; }
+      .block { width: 100%; }
     </style>
   </head>
   <body>
@@ -63,23 +168,26 @@
         <button id="logoutBtn" class="ghost"><i class="fas fa-sign-out-alt"></i> Sair</button>
       </div>
     </header>
-    <div class="container">
-      <div id="loginCard" class="card">
-        <h2 class="mb16">Login Admin</h2>
-        <div class="grid grid-2">
-          <div>
-            <label>Email</label>
-            <input id="email" type="email" placeholder="admin@exemplo.com" />
-          </div>
-          <div>
-            <label>Senha</label>
-            <input id="senha" type="password" placeholder="••••••••" />
-          </div>
-        </div>
-        <div class="row mt16">
-          <button id="loginBtn" class="primary">Entrar</button>
-          <span id="loginMsg" class="code"></span>
-        </div>
+    <div class="layout">
+      <div class="container-login">
+        <section id="loginCard" class="card auth-card">
+          <div style="text-align:center; margin-bottom:12px;"><strong style="font-size:20px">Eros Vitta</strong></div>
+          <div class="auth-title">Identifique-se</div>
+          <div class="auth-subtitle">Digite seu e-mail e senha</div>
+          <form onsubmit="login(event)">
+            <div class="row">
+              <div><label class="muted" for="email">E-mail</label><input id="email" class="input" type="email" placeholder="admin@exemplo.com" autocomplete="email" required /></div>
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <label class="muted" for="senha">Senha</label>
+                </div>
+                <input id="senha" class="input" type="password" placeholder="sua senha" autocomplete="current-password" required />
+              </div>
+            </div>
+            <div style="margin-top:14px"><button class="btn block" type="submit">Entrar</button></div>
+            <div id="loginMsg" class="code" style="margin-top:8px; text-align:center;"></div>
+          </form>
+        </section>
       </div>
 
       <div id="app" class="hidden">
@@ -469,7 +577,8 @@
       function clearTbody(){ els.tbody.innerHTML=''; }
       function pill(text, ok){ return `<span class="pill ${ok?'ok':'off'}">${text}</span>`; }
 
-      async function login(){
+      async function login(ev){
+        if(ev) ev.preventDefault();
         msg(els.loginMsg, '...');
         try{
           const r = await fetch(apiBase + '/admin/login', { method:'POST', headers: hdr(), body: JSON.stringify({ email: els.email.value.trim(), senha: els.senha.value }) });
@@ -736,7 +845,13 @@
         }catch(e){ els.u.accesses.innerHTML = 'Erro: ' + e.message; }
       }
 
-      function exitApp(){ setAuth(''); show(els.app, false); show(els.loginCard, true); show(document.getElementById('mainHeader'), false); els.whoami.textContent=''; }
+      function exitApp(){ 
+        setAuth(''); 
+        show(els.app, false); 
+        show(els.loginCard, true); 
+        show(document.getElementById('mainHeader'), false); 
+        els.whoami.textContent=''; 
+      }
 
       function buildQuery(){
         const p = new URLSearchParams();
@@ -1048,8 +1163,29 @@
         els.f.coverPreview.innerHTML = `<img src="${url}" style="max-width:200px;max-height:120px;object-fit:cover;border-radius:4px;" alt="Preview" />`;
       }
 
-      // Auto-login se já tem token
-      if(state.token){ enterApp(); } else { show(els.loginCard, true); }
+      // Verificar token na inicialização
+      document.addEventListener('DOMContentLoaded', async function() {
+        if(state.token){
+          try {
+            // Verificar se o token é válido
+            const r = await fetch(apiBase + '/admin/dashboard/summary', { headers: hdr() });
+            if(r.ok){
+              enterApp();
+            } else {
+              setAuth('');
+              show(els.loginCard, true);
+              show(document.getElementById('mainHeader'), false);
+            }
+          } catch(e) {
+            setAuth('');
+            show(els.loginCard, true);
+            show(document.getElementById('mainHeader'), false);
+          }
+        } else {
+          show(els.loginCard, true);
+          show(document.getElementById('mainHeader'), false);
+        }
+      });
     </script>
   </body>
   </html>
