@@ -260,7 +260,7 @@ final class WebhookController
                 .credentials { background: #fff; border: 2px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0; }
                 .credential-item { margin: 10px 0; }
                 .credential-label { font-weight: bold; color: #495057; }
-                .credential-value { color: #667eea; font-family: monospace; background: #f8f9fa; padding: 5px 10px; border-radius: 4px; display: inline-block; }
+                .credential-value { color:rgb(255, 255, 255); font-family: monospace; background: #f8f9fa; padding: 5px 10px; border-radius: 4px; display: inline-block; }
                 .cta-button { display: inline-block; background: #000; color: white; text-decoration: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; margin: 20px 0; transition: transform 0.2s; }
                 .cta-button:hover { transform: translateY(-2px); }
                 .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
