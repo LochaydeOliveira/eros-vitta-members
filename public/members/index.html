@@ -63,12 +63,8 @@
     @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
     .card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
     .card.blocked {
-      opacity: .75;
-      filter: grayscale(20%);
-      background-image: url('https://erosvitta.com.br/public/covers/trancar.svg');
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
+      opacity: .55;
+      filter: grayscale(85%);
     }
     .badge-lock { position:absolute; top:10px; right:10px; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; border-radius:999px; padding:2px 8px; font-size:11px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
@@ -445,7 +441,7 @@
         btnBuy.href = checkout;
         btnBuy.target = '_blank';
         btnBuy.rel = 'noopener';
-        btnBuy.innerHTML = '<i class="fas fa-shopping-cart"></i> Comprar e liberar';
+        btnBuy.innerHTML = '<i class="fas fa-shopping-cart"></i> Comprar e Liberar';
         actions.appendChild(btnBuy);
         const lock = document.createElement('div'); lock.className='badge-lock'; lock.innerHTML='<i class="fas fa-lock"></i> Bloqueado'; el.appendChild(lock);
       }
@@ -836,6 +832,7 @@
     });
   </script>
   </head>
+
 <body>
   <div id="toast" style="position: fixed; right: 16px; bottom: 16px; z-index: 2000; max-width: 360px; display:none;"><div class="tcard" id="toast-msg">...</div></div>
   <header>
