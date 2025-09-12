@@ -11,6 +11,37 @@ use PDO;
 
 final class AdminAuthController
 {
+    /**
+     * Criar admin de backup
+     */
+    public static function createBackup(array $body): void
+    {
+        $pdo = Database::pdo();
+        
+        // Verificar se já existe admin de backup
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM admins WHERE email = ?');
+        $stmt->execute(['backup@erosvitta.com.br']);
+        if ((int)$stmt->fetchColumn() > 0) {
+            JsonResponse::error('Admin de backup já existe', 400);
+            return;
+        }
+        
+        // Gerar senha aleatória
+        $senhaPlain = bin2hex(random_bytes(8)); // 16 caracteres
+        $senhaHash = password_hash($senhaPlain, PASSWORD_BCRYPT);
+        
+        // Criar admin de backup
+        $stmt = $pdo->prepare('INSERT INTO admins (nome, email, senha_hash, ativo, criado_em, atualizado_em) VALUES (?, ?, ?, 1, NOW(), NOW())');
+        $stmt->execute(['Admin Backup', 'backup@erosvitta.com.br', $senhaHash]);
+        
+        JsonResponse::ok([
+            'success' => true,
+            'email' => 'backup@erosvitta.com.br',
+            'senha' => $senhaPlain,
+            'message' => 'Admin de backup criado com sucesso. Guarde essas credenciais em local seguro!'
+        ]);
+    }
+
     public static function login(array $body): void
     {
         // Rate limiting por IP + email

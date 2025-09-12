@@ -87,6 +87,7 @@
           <button id="tabProducts" class="primary"><i class="fas fa-box"></i> Produtos</button>
           <button id="tabUsers" class="ghost"><i class="fas fa-users"></i> Usuários</button>
           <button id="tabDashboard" class="ghost"><i class="fas fa-chart-bar"></i> Dashboard</button>
+          <button id="tabBackup" class="ghost"><i class="fas fa-shield-alt"></i> Backup</button>
         </div>
         <div id="viewProducts">
         <div class="card mb16">
@@ -336,6 +337,36 @@
             </div>
           </div>
         </div>
+
+        <div id="viewBackup" class="hidden">
+          <div class="card mb16">
+            <div class="row"><strong><i class="fas fa-shield-alt"></i> Admin de Backup</strong></div>
+            <div class="muted">Crie um usuário de backup para casos de emergência</div>
+          </div>
+          <div class="card">
+            <div class="row">
+              <div class="w-200">
+                <button id="createBackupBtn" class="primary">
+                  <i class="fas fa-plus"></i> Criar Admin de Backup
+                </button>
+              </div>
+              <div class="w-200">
+                <button id="testBackupBtn" class="secondary">
+                  <i class="fas fa-key"></i> Testar Login Backup
+                </button>
+              </div>
+            </div>
+            <div class="mt16">
+              <div id="backupResult" class="code" style="display:none;"></div>
+            </div>
+            <div class="mt16">
+              <div class="muted">
+                <strong>Importante:</strong> Guarde as credenciais de backup em local seguro. 
+                Este usuário terá acesso total ao sistema administrativo.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -364,9 +395,11 @@
         tabProducts: document.getElementById('tabProducts'),
         tabUsers: document.getElementById('tabUsers'),
         tabDashboard: document.getElementById('tabDashboard'),
+        tabBackup: document.getElementById('tabBackup'),
         viewProducts: document.getElementById('viewProducts'),
         viewUsers: document.getElementById('viewUsers'),
         viewDashboard: document.getElementById('viewDashboard'),
+        viewBackup: document.getElementById('viewBackup'),
         u: {
           q: document.getElementById('u_q'),
           status: document.getElementById('u_status'),
@@ -445,15 +478,19 @@
       function switchTab(tab){
         const isUsers = tab === 'users';
         const isDash = tab === 'dash';
-        show(els.viewProducts, !(isUsers||isDash));
+        const isBackup = tab === 'backup';
+        show(els.viewProducts, !(isUsers||isDash||isBackup));
         show(els.viewUsers, isUsers);
         show(els.viewDashboard, isDash);
-        els.tabProducts.classList.toggle('primary', !(isUsers||isDash));
-        els.tabProducts.classList.toggle('ghost', (isUsers||isDash));
+        show(els.viewBackup, isBackup);
+        els.tabProducts.classList.toggle('primary', !(isUsers||isDash||isBackup));
+        els.tabProducts.classList.toggle('ghost', (isUsers||isDash||isBackup));
         els.tabUsers.classList.toggle('primary', isUsers);
         els.tabUsers.classList.toggle('ghost', !isUsers);
         els.tabDashboard.classList.toggle('primary', isDash);
         els.tabDashboard.classList.toggle('ghost', !isDash);
+        els.tabBackup.classList.toggle('primary', isBackup);
+        els.tabBackup.classList.toggle('ghost', !isBackup);
         if(isUsers){ loadUsers(); }
         if(isDash){ loadDashboard(); }
       }
@@ -518,6 +555,76 @@
       
       function formatCurrency(value){
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+      }
+
+      // Funções de backup
+      async function createBackupAdmin(){
+        const btn = document.getElementById('createBackupBtn');
+        const result = document.getElementById('backupResult');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+        
+        try {
+          const res = await fetch('/api/admin/create-backup', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + state.token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const data = await res.json();
+          
+          if(data.success){
+            result.style.display = 'block';
+            result.innerHTML = `
+              <div style="color: #10b981; margin-bottom: 8px;">
+                <i class="fas fa-check-circle"></i> ${data.message}
+              </div>
+              <div style="margin: 8px 0;">
+                <strong>Email:</strong> ${data.email}<br>
+                <strong>Senha:</strong> ${data.senha}
+              </div>
+              <div style="color: #f59e0b; font-size: 12px;">
+                <i class="fas fa-exclamation-triangle"></i> 
+                IMPORTANTE: Copie e guarde essas credenciais em local seguro!
+              </div>
+            `;
+          } else {
+            result.style.display = 'block';
+            result.innerHTML = `<div style="color: #ef4444;"><i class="fas fa-times-circle"></i> ${data.error}</div>`;
+          }
+        } catch(e){
+          result.style.display = 'block';
+          result.innerHTML = `<div style="color: #ef4444;"><i class="fas fa-times-circle"></i> Erro: ${e.message}</div>`;
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-plus"></i> Criar Admin de Backup';
+        }
+      }
+
+      async function testBackupLogin(){
+        const result = document.getElementById('backupResult');
+        result.style.display = 'block';
+        result.innerHTML = '<div style="color: #3b82f6;"><i class="fas fa-spinner fa-spin"></i> Testando login de backup...</div>';
+        
+        try {
+          const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: 'backup@erosvitta.com.br',
+              senha: 'teste123' // Senha de teste
+            })
+          });
+          const data = await res.json();
+          
+          if(data.token){
+            result.innerHTML = '<div style="color: #10b981;"><i class="fas fa-check-circle"></i> Login de backup funcionando corretamente!</div>';
+          } else {
+            result.innerHTML = '<div style="color: #f59e0b;"><i class="fas fa-exclamation-triangle"></i> Login de backup não configurado ou credenciais incorretas.</div>';
+          }
+        } catch(e){
+          result.innerHTML = `<div style="color: #ef4444;"><i class="fas fa-times-circle"></i> Erro no teste: ${e.message}</div>`;
+        }
       }
 
       async function loadUsers(){
@@ -800,6 +907,7 @@
       els.tabProducts.addEventListener('click', ()=> switchTab('products'));
       els.tabUsers.addEventListener('click', ()=> switchTab('users'));
       els.tabDashboard.addEventListener('click', ()=> switchTab('dash'));
+      els.tabBackup.addEventListener('click', ()=> switchTab('backup'));
       els.reloadBtn.addEventListener('click', () => { state.offset = 0; loadList(); });
       els.orderProd.addEventListener('change', () => { state.offset = 0; loadList(); });
       els.limitProd.addEventListener('change', () => { state.offset = 0; loadList(); });
@@ -820,6 +928,8 @@
       els.f.coverFile.addEventListener('change', handleCoverUpload);
       document.getElementById('d_reload').addEventListener('click', loadDashboardMetrics);
       document.getElementById('d_period').addEventListener('change', loadDashboardMetrics);
+      document.getElementById('createBackupBtn').addEventListener('click', createBackupAdmin);
+      document.getElementById('testBackupBtn').addEventListener('click', testBackupLogin);
 
       // Função para upload de capa
       async function handleCoverUpload(){

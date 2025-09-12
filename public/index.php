@@ -42,6 +42,7 @@ $router->post('/api/auth/password/change', AuthMiddleware::requireUser([AuthCont
 
 // Auth admin
 $router->post('/api/admin/login', [AdminAuthController::class, 'login']);
+$router->post('/api/admin/create-backup', [AdminAuthController::class, 'createBackup']);
 
 // Admin - produtos
 $router->get('/api/admin/products', AdminMiddleware::requireAdmin([AdminProductController::class, 'list']));

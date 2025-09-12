@@ -79,17 +79,18 @@ Eros Vitta Members - Progresso do Projeto
 
 3) O que falta para continuar
   - Operacional imediato:
-    - Criar um admin de backup e guardar as credenciais com gerenciador
+    - Criar um admin de backup e guardar as credenciais com gerenciador ✅ CONCLUÍDO
     - Validar execução do CRON em produção e logs de envio D+7
     - Rodar migração SQL (se ainda não aplicada) para o novo campo de checkout:
       ALTER TABLE produtos ADD COLUMN checkout_url varchar(500) NULL AFTER hotmart_product_id;
   - Painel Admin (backoffice):
-    - Produtos: upload de capas (opcional), ordenação por colunas, limite configurável
-    - Usuários: paginação/ordenação avançadas, filtros por status
-    - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos)
+    - Produtos: upload de capas (opcional), ordenação por colunas, limite configurável ✅ CONCLUÍDO
+    - Usuários: paginação/ordenação avançadas, filtros por status ✅ CONCLUÍDO
+    - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos) ✅ CONCLUÍDO
   - Front-end Área do Membro (refino do MVP atual):
-    - Ajuste visual fino restante (microespaçamentos e responsividade extrema)
+    - Ajuste visual fino restante (microespaçamentos e responsividade extrema) ✅ CONCLUÍDO
     - Exibir duração total do álbum ao lado do título (opcional)
+    - Ícones Font Awesome implementados ✅ CONCLUÍDO
     - Melhorar UX de feedbacks (toasts não intrusivos) ✅ CONCLUÍDO
     - Tratar eventuais 404 de assets (ex.: favicon); precisa da URL específica do erro
   - Segurança e robustez:
