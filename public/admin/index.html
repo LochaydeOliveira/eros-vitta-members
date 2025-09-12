@@ -5,30 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin - Eros Vitta Members</title>
     <style>
-      :root { color-scheme: light dark; --bg:#0b0b0c; --fg:#e9eaed; --muted:#9aa0a6; --card:#151517; --acc:#4f46e5; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; }
+      :root { color-scheme: light; --bg:#f8fafc; --fg:#1e293b; --muted:#64748b; --card:#ffffff; --acc:#3b82f6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --border:#e2e8f0; }
       * { box-sizing: border-box; }
       body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); }
       header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background: var(--card); position: sticky; top:0; z-index:10; }
       header h1 { margin:0; font-size:16px; letter-spacing:.3px; }
       .container { padding: 16px; max-width: 1200px; margin: 0 auto; }
-      .card { background: var(--card); border:1px solid #2a2b2f; border-radius: 10px; padding:16px; }
+      .card { background: var(--card); border:1px solid var(--border); border-radius: 8px; padding:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
       .grid { display: grid; gap:12px; }
       .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-      input, select, textarea { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #2a2b2f; background:#0e0f12; color:var(--fg); }
+      input, select, textarea { width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--fg); }
       textarea { min-height: 96px; resize: vertical; }
       label { font-size:12px; color: var(--muted); display:block; margin-bottom:6px; }
-      button { padding:10px 14px; border-radius:8px; border:1px solid #2a2b2f; background:#16181d; color:var(--fg); cursor:pointer; }
-      button.primary { background: var(--acc); border-color: var(--acc); }
+      button { padding:10px 14px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--fg); cursor:pointer; transition: all 0.2s; }
+      button:hover { background: #f1f5f9; }
+      button.primary { background: var(--acc); border-color: var(--acc); color: white; }
+      button.primary:hover { background: #2563eb; }
       button.ghost { background: transparent; }
-      button.danger { background: #211314; border-color:#3a1b1e; color:#ffb4b4; }
+      button.ghost:hover { background: #f1f5f9; }
+      button.danger { background: #fef2f2; border-color:#fecaca; color:#dc2626; }
+      button.danger:hover { background: #fee2e2; }
       table { width:100%; border-collapse: collapse; }
-      th, td { border-bottom:1px solid #2a2b2f; padding:10px; text-align:left; vertical-align: top; }
+      th, td { border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align: top; }
       th { font-weight:600; font-size:12px; color: var(--muted); }
-      .pill { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #2a2b2f; }
-      .pill.ok { background:#0f2a21; color:#8be0c2; border-color:#173f31; }
-      .pill.off { background:#2a1a1a; color:#ffc3c3; border-color:#3a1b1e; }
+      .pill { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); }
+      .pill.ok { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
+      .pill.off { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
       .hidden { display:none !important; }
       .right { margin-left:auto; }
       .mt8 { margin-top: 8px; }
@@ -41,13 +45,13 @@
       .w-160 { width:160px; }
       .w-200 { width:200px; }
       .center { text-align:center; }
-      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:#b3c0ff; }
-      a { color:#93c5fd; text-decoration:none; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:var(--muted); }
+      a { color:var(--acc); text-decoration:none; }
       a:hover { text-decoration: underline; }
     </style>
   </head>
   <body>
-    <header>
+    <header id="mainHeader" class="hidden">
       <h1>Admin - Eros Vitta Members</h1>
       <div class="row">
         <span id="whoami" class="code"></span>
@@ -275,14 +279,55 @@
 
         <div id="viewDashboard" class="hidden">
           <div class="card mb16">
-            <div class="row"><strong>Resumo</strong></div>
+            <div class="row">
+              <strong>Dashboard</strong>
+              <div class="right">
+                <select id="d_period">
+                  <option value="7d">Últimos 7 dias</option>
+                  <option value="30d" selected>Últimos 30 dias</option>
+                  <option value="90d">Últimos 90 dias</option>
+                  <option value="1y">Último ano</option>
+                </select>
+                <button id="d_reload">Atualizar</button>
+              </div>
+            </div>
           </div>
-          <div class="card">
+          
+          <!-- Resumo básico -->
+          <div class="card mb16">
             <div class="row">
               <div class="w-200"><div class="muted">Usuários</div><div id="d_users" class="title">-</div></div>
               <div class="w-200"><div class="muted">Produtos</div><div id="d_products" class="title">-</div></div>
               <div class="w-200"><div class="muted">Acessos ativos</div><div id="d_accesses" class="title">-</div></div>
               <div class="w-200"><div class="muted">Vendas aprovadas</div><div id="d_sales" class="title">-</div></div>
+            </div>
+          </div>
+          
+          <!-- Métricas de faturamento -->
+          <div class="card mb16">
+            <div class="row"><strong>Faturamento do Período</strong></div>
+            <div class="row mt12">
+              <div class="w-200"><div class="muted">Total de vendas</div><div id="d_total_vendas" class="title">-</div></div>
+              <div class="w-200"><div class="muted">Faturamento total</div><div id="d_faturamento" class="title">-</div></div>
+              <div class="w-200"><div class="muted">Ticket médio</div><div id="d_ticket_medio" class="title">-</div></div>
+            </div>
+          </div>
+          
+          <!-- Top produtos -->
+          <div class="card">
+            <div class="row"><strong>Top Produtos</strong></div>
+            <div class="mt12">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Vendas</th>
+                    <th>Faturamento</th>
+                  </tr>
+                </thead>
+                <tbody id="d_top_produtos"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -386,6 +431,7 @@
       function enterApp(){
         show(els.loginCard, false);
         show(els.app, true);
+        show(document.getElementById('mainHeader'), true);
         els.whoami.textContent = 'admin';
         show(els.viewProducts, true);
         show(els.viewUsers, false);
@@ -409,6 +455,7 @@
 
       async function loadDashboard(){
         try{
+          // Carregar resumo básico
           const r = await fetch('/api/admin/dashboard/summary?_ts=' + Date.now(), { headers: hdr(), cache: 'no-store' });
           const j = await r.json();
           if(!r.ok){ throw new Error(j.error||'Erro'); }
@@ -417,7 +464,55 @@
           document.getElementById('d_products').textContent = `${s.produtos_ativos||0}/${s.produtos_total||0}`;
           document.getElementById('d_accesses').textContent = String(s.acessos_ativos||0);
           document.getElementById('d_sales').textContent = String(s.vendas_confirmadas||0);
+          
+          // Carregar métricas avançadas
+          await loadDashboardMetrics();
         }catch(e){ alert('Erro ao carregar dashboard: ' + e.message); }
+      }
+      
+      async function loadDashboardMetrics(){
+        try{
+          const period = document.getElementById('d_period').value;
+          const r = await fetch(`/api/admin/dashboard/metrics?period=${period}&_ts=${Date.now()}`, { headers: hdr(), cache: 'no-store' });
+          const j = await r.json();
+          if(!r.ok){ throw new Error(j.error||'Erro'); }
+          
+          const data = j.data || j;
+          
+          // Resumo do período
+          if(data.resumo){
+            document.getElementById('d_total_vendas').textContent = String(data.resumo.total_vendas || 0);
+            document.getElementById('d_faturamento').textContent = formatCurrency(data.resumo.total_faturamento || 0);
+            document.getElementById('d_ticket_medio').textContent = formatCurrency(data.resumo.ticket_medio || 0);
+          }
+          
+          // Top produtos
+          const tbody = document.getElementById('d_top_produtos');
+          tbody.innerHTML = '';
+          if(data.top_produtos && data.top_produtos.length > 0){
+            data.top_produtos.forEach(prod => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${escapeHtml(prod.titulo)}</td>
+                <td><span class="tag">${prod.tipo === 'ebook' ? 'Ebook' : 'Áudio'}</span></td>
+                <td>${prod.vendas}</td>
+                <td>${formatCurrency(prod.faturamento)}</td>
+              `;
+              tbody.appendChild(tr);
+            });
+          } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="muted">Nenhuma venda no período</td></tr>';
+          }
+        }catch(e){ 
+          console.error('Erro ao carregar métricas:', e);
+          document.getElementById('d_total_vendas').textContent = '-';
+          document.getElementById('d_faturamento').textContent = '-';
+          document.getElementById('d_ticket_medio').textContent = '-';
+        }
+      }
+      
+      function formatCurrency(value){
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
       }
 
       async function loadUsers(){
@@ -513,7 +608,7 @@
         }catch(e){ els.u.accesses.innerHTML = 'Erro: ' + e.message; }
       }
 
-      function exitApp(){ setAuth(''); show(els.app, false); show(els.loginCard, true); els.whoami.textContent=''; }
+      function exitApp(){ setAuth(''); show(els.app, false); show(els.loginCard, true); show(document.getElementById('mainHeader'), false); els.whoami.textContent=''; }
 
       function buildQuery(){
         const p = new URLSearchParams();
@@ -718,6 +813,8 @@
       els.deactBtn.addEventListener('click', deactivate);
       els.f.uploadBtn.addEventListener('click', () => els.f.coverFile.click());
       els.f.coverFile.addEventListener('change', handleCoverUpload);
+      document.getElementById('d_reload').addEventListener('click', loadDashboardMetrics);
+      document.getElementById('d_period').addEventListener('change', loadDashboardMetrics);
 
       // Função para upload de capa
       async function handleCoverUpload(){

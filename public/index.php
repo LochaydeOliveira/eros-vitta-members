@@ -62,6 +62,7 @@ $router->post('/api/admin/cron/run-d7', AdminMiddleware::requireAdmin([AdminCron
 
 // Admin - dashboard
 $router->get('/api/admin/dashboard/summary', AdminMiddleware::requireAdmin([AdminDashboardController::class, 'summary']));
+$router->get('/api/admin/dashboard/metrics', AdminMiddleware::requireAdmin([AdminDashboardController::class, 'metrics']));
 
 // Admin - acessos
 $router->post('/api/admin/accesses/assign', AdminMiddleware::requireAdmin([AdminAccessController::class, 'assign']));
