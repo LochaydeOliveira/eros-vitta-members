@@ -395,12 +395,34 @@ $adminToken='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaG
 Invoke-RestMethod -Uri 'https://erosvitta.com.br/api/admin/products' -Headers @{ Authorization = "Bearer $adminToken" } | ConvertTo-Json -Depth 6
 
 
-$adminToken='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibG9jaGF5ZGVndWVycmVpcm9AaG90bWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NTg4MjgsImV4cCI6MTc1NzY0NTIyOH0.Zb_qV9sOfqqNLsTbCM6DabdaB44shHupbrhxsi37JG0'
+
+
+$headers = @{
+    "Content-Type" = "application/json"
+    "X-Hotmart-Hottok" = "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+}
+
 $body = @{
-  id = 1
-  storage_view_pdf = '/home1/paymen58/storage/ebooks/view/o-segredo-da-resistencia.pdf'
-} | ConvertTo-Json -Compress
-Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/products/update' -ContentType 'application/json' -Headers @{ Authorization = "Bearer $adminToken" } -Body $body | ConvertTo-Json -Depth 6
+    event = "PURCHASE_APPROVED"
+    data = @{
+        purchase = @{
+            transaction = "HP123456789"
+            product = @{
+                id = "123456"
+                name = "Produto Teste"
+            }
+            buyer = @{
+                email = "lochaydeguerreiro2@gmail.com"
+                name = "João Silva"
+            }
+            purchase_date = "2024-01-15T10:30:00Z"
+            price = @{
+                value = 97.00
+                currency_code = "BRL"
+            }
+            status = "APPROVED"
+        }
+    }
+} | ConvertTo-Json -Depth 10
 
-
-php -r "$p='Lochayde@2025!'; echo password_hash($p, PASSWORD_BCRYPT), PHP_EOL;"
+Invoke-RestMethod -Uri "https://erosvitta.com.br/api/hotmart/webhook" -Method POST -Headers $headers -Body $body

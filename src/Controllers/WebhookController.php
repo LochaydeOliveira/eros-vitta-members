@@ -48,15 +48,17 @@ final class WebhookController
             // Daqui em diante, faz a escrita de negócio dentro de transação
             $pdo->beginTransaction();
 
-            $email = strtolower(trim((string)($body['buyer']['email'] ?? $body['email'] ?? '')));
-            $nome = trim((string)($body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
-            $hotmartUserId = (string)($body['buyer']['ucode'] ?? $body['hotmart_user_id'] ?? null);
-            $produtoHotmartId = (string)($body['product']['id'] ?? $body['product_id'] ?? '');
-            $transactionId = (string)($body['purchase']['transaction'] ?? $body['transaction'] ?? null);
-            $status = strtolower((string)($body['purchase']['status'] ?? $body['status'] ?? 'pendente'));
-            $valor = (float)($body['purchase']['price'] ?? $body['price'] ?? 0);
-            $moeda = (string)($body['purchase']['currency'] ?? $body['currency'] ?? 'BRL');
-            $dataCompra = self::parseDate((string)($body['purchase']['approved_date'] ?? $body['approved_date'] ?? ''));
+            // Extrair dados da estrutura real da Hotmart
+            $data = $body['data'] ?? $body; // Fallback para estrutura antiga
+            $email = strtolower(trim((string)($data['buyer']['email'] ?? $body['buyer']['email'] ?? $body['email'] ?? '')));
+            $nome = trim((string)($data['buyer']['name'] ?? $body['buyer']['name'] ?? $body['nome'] ?? 'Cliente'));
+            $hotmartUserId = (string)($data['buyer']['ucode'] ?? $body['buyer']['ucode'] ?? $body['hotmart_user_id'] ?? null);
+            $produtoHotmartId = (string)($data['product']['id'] ?? $body['product']['id'] ?? $body['product_id'] ?? '');
+            $transactionId = (string)($data['purchase']['transaction'] ?? $body['purchase']['transaction'] ?? $body['transaction'] ?? null);
+            $status = strtolower((string)($data['purchase']['status'] ?? $body['purchase']['status'] ?? $body['status'] ?? 'pendente'));
+            $valor = (float)($data['purchase']['price']['value'] ?? $body['purchase']['price'] ?? $body['price'] ?? 0);
+            $moeda = (string)($data['purchase']['price']['currency_value'] ?? $body['purchase']['currency'] ?? $body['currency'] ?? 'BRL');
+            $dataCompra = self::parseDate((string)($data['purchase']['approved_date'] ?? $body['purchase']['approved_date'] ?? $body['approved_date'] ?? ''));
             $confirmada = in_array($status, ['approved','aprovada','completed','complete'], true);
             $cancelada = in_array($status, ['refunded','chargeback','canceled','cancelled','cancelada','reembolsado'], true);
 
@@ -178,9 +180,21 @@ final class WebhookController
         return $headers;
     }
 
-    private static function parseDate(string $str): ?string
+    private static function parseDate($str): ?string
     {
-        if ($str === '') return null;
+        if ($str === '' || $str === null) return null;
+        
+        // Se for timestamp (número), converter diretamente
+        if (is_numeric($str)) {
+            $ts = (int)$str;
+            // Se for timestamp em milissegundos, converter para segundos
+            if ($ts > 1000000000000) {
+                $ts = $ts / 1000;
+            }
+            return date('Y-m-d H:i:s', $ts);
+        }
+        
+        // Se for string, tentar parsear
         $ts = strtotime($str);
         return $ts ? date('Y-m-d H:i:s', $ts) : null;
     }
