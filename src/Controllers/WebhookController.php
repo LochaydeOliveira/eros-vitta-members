@@ -125,11 +125,8 @@ final class WebhookController
                     ->execute([$nome ?: 'Cliente', $email, $senhaHash, $hotmartUserId ?: null, $telefone, $documento, $tipoDocumento, $cidade, $estado, $pais, $cep, $endereco, $numero, $complemento]);
                 $userId = (int)$pdo->lastInsertId();
                 // Email de boas-vindas com credenciais
-                $loginUrl = rtrim(Config::appUrl(), '/') . '/login';
-                $html = '<p>Olá ' . htmlspecialchars($nome ?: 'Cliente') . ',</p>' .
-                        '<p>Bem-vindo à área de membros Eros Vitta. Sua compra foi confirmada e sua conta foi criada automaticamente.</p>' .
-                        '<p><strong>Login:</strong> ' . htmlspecialchars($email) . '<br><strong>Senha provisória:</strong> ' . htmlspecialchars($senhaPlain) . '</p>' .
-                        '<p>Acesse: <a href="' . $loginUrl . '">' . $loginUrl . '</a></p>';
+                $loginUrl = rtrim(Config::appUrl(), '/') . '/members';
+                $html = self::getWelcomeEmailTemplate($nome ?: 'Cliente', $email, $senhaPlain, $loginUrl);
                 Mailer::send($email, 'Bem-vindo | Eros Vitta Members', $html);
             }
 
@@ -165,16 +162,16 @@ final class WebhookController
                 $compraId = (int)$pdo->lastInsertId();
             }
 
-            // Upsert acesso
+            // Upsert acesso - SEMPRE libera para compras aprovadas
             if ($confirmada) {
                 $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
                 $stmt->execute([$userId, $produtoId]);
                 $ac = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($ac) {
-                    $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
+                    $pdo->prepare('UPDATE acessos SET status = "ativo", ativo = 1, data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
                         ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
                 } else {
-                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
+                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, ativo, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", 1, ?, NOW(), NOW())')
                         ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
                 }
             } elseif ($cancelada) {
@@ -241,5 +238,88 @@ final class WebhookController
         // Se for string, tentar parsear
         $ts = strtotime($str);
         return $ts ? date('Y-m-d H:i:s', $ts) : null;
+    }
+
+    private static function getWelcomeEmailTemplate(string $nome, string $email, string $senha, string $loginUrl): string
+    {
+        return '
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Bem-vindo ao Eros Vitta</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+                .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+                .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+                .content { padding: 40px 30px; }
+                .welcome-box { background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+                .credentials { background: #fff; border: 2px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .credential-item { margin: 10px 0; }
+                .credential-label { font-weight: bold; color: #495057; }
+                .credential-value { color: #667eea; font-family: monospace; background: #f8f9fa; padding: 5px 10px; border-radius: 4px; display: inline-block; }
+                .cta-button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; margin: 20px 0; transition: transform 0.2s; }
+                .cta-button:hover { transform: translateY(-2px); }
+                .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
+                .security-note { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0; }
+                .icon { font-size: 24px; margin-right: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎉 Bem-vindo ao Eros Vitta!</h1>
+                    <p>Sua jornada para uma vida íntima plena começa agora</p>
+                </div>
+                
+                <div class="content">
+                    <div class="welcome-box">
+                        <h2>Olá, ' . htmlspecialchars($nome) . '!</h2>
+                        <p>Sua compra foi confirmada com sucesso e sua conta na área de membros foi criada automaticamente. Agora você tem acesso completo a todo o conteúdo exclusivo do Eros Vitta.</p>
+                    </div>
+
+                    <div class="credentials">
+                        <h3>🔐 Suas Credenciais de Acesso</h3>
+                        <div class="credential-item">
+                            <span class="credential-label">📧 Email:</span>
+                            <span class="credential-value">' . htmlspecialchars($email) . '</span>
+                        </div>
+                        <div class="credential-item">
+                            <span class="credential-label">🔑 Senha Provisória:</span>
+                            <span class="credential-value">' . htmlspecialchars($senha) . '</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <a href="' . htmlspecialchars($loginUrl) . '" class="cta-button">
+                            🚀 Acessar Área de Membros
+                        </a>
+                    </div>
+
+                    <div class="security-note">
+                        <strong>🔒 Importante:</strong> Esta é uma senha provisória. Recomendamos que você altere sua senha após o primeiro login por questões de segurança.
+                    </div>
+
+                    <h3>✨ O que você encontrará na área de membros:</h3>
+                    <ul>
+                        <li>📚 E-books exclusivos sobre relacionamentos íntimos</li>
+                        <li>🎧 Áudios guiados para exercícios práticos</li>
+                        <li>💡 Dicas e técnicas comprovadas</li>
+                        <li>🎯 Conteúdo atualizado regularmente</li>
+                    </ul>
+
+                    <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>
+                </div>
+
+                <div class="footer">
+                    <p><strong>Eros Vitta</strong> - Transformando relacionamentos, uma conexão por vez</p>
+                    <p>Este é um email automático, por favor não responda diretamente.</p>
+                </div>
+            </div>
+        </body>
+        </html>';
     }
 }

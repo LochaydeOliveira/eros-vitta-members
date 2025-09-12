@@ -379,76 +379,43 @@ Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/cron/run
 
 
 
-  -H "Content-Type: application/json" \
-  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
-  -d '{
-    "id": "test-completo",
-    "creation_date": 1757694018639,
-    "event": "PURCHASE_APPROVED",
-    "version": "2.0.0",
-    "data": {
-      "product": {
-        "id": 6157971,
-        "ucode": "fb056612-bcc6-4217-9e6d-2a5d1110ac2f",
-        "name": "Produto test postback2"
-      },
-      "buyer": {
-        "email": "lochaydeguerreiro2@gmail.com",
-        "name": "Teste Comprador",
-        "first_name": "Teste",
-        "last_name": "Comprador",
-        "checkout_phone": "99999999900",
-        "address": {
-          "city": "Uberlândia",
-          "country": "Brasil",
-          "state": "Minas Gerais",
-          "zipcode": "38400123",
-          "address": "Avenida Francisco Galassi",
-          "number": "10",
-          "complement": "Perto do shopping"
-        },
-        "document": "69526128664",
-        "document_type": "CPF"
-      },
-      "purchase": {
-        "approved_date": 1511783346000,
-        "price": {
-          "value": 1500,
-          "currency_value": "BRL"
-        },
-        "status": "APPROVED",
-        "transaction": "HP16015479281022",
-        "payment": {
-          "installments_number": 12,
-          "type": "CREDIT_CARD"
-        },
-        "offer": {
-          "code": "test",
-          "coupon_code": "SHHUHA"
-        },
-        "original_offer_price": {
-          "value": 1500,
-          "currency_value": "BRL"
-        },
-        "order_bump": {
-          "is_order_bump": true,
-          "parent_purchase_transaction": "HP02316330308193"
-        },
-        "business_model": "I",
-        "is_funnel": false,
-        "checkout_country": {
-          "iso": "BR"
-        }
-      },
-      "subscription": {
-        "status": "ACTIVE",
-        "plan": {
-          "id": 123,
-          "name": "plano de teste"
-        },
-        "subscriber": {
-          "code": "I9OT62C3"
-        }
+
+
+$headers = @{"Content-Type" = "application/json; charset=utf-8"; "X-Hotmart-Hottok" = "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"}
+$body = @'
+{
+  "id": "test-debug-brasil-utf8",
+  "event": "PURCHASE_APPROVED",
+  "data": {
+    "product": {
+      "id": 6157971
+    },
+    "buyer": {
+      "email": "brasilhilariooficial@gmail.com",
+      "name": "Brasil Hilário"
+    },
+    "purchase": {
+      "status": "APPROVED",
+      "transaction": "HP123456789012345",
+      "price": {
+        "value": 100.00,
+        "currency_value": "BRL"
       }
     }
-  }'
+  },
+  "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+}
+'@
+
+try {
+  $response = Invoke-RestMethod -Uri "https://erosvitta.com.br/api/hotmart/webhook" -Method POST -Headers $headers -Body $body -ContentType "application/json; charset=utf-8"
+  Write-Host "✅ Sucesso: $($response | ConvertTo-Json)"
+} catch {
+  Write-Host "❌ Erro: $($_.Exception.Message)"
+  if($_.Exception.Response) {
+    $stream = $_.Exception.Response.GetResponseStream()
+    $reader = New-Object System.IO.StreamReader($stream)
+    $responseBody = $reader.ReadToEnd()
+    Write-Host "Resposta do servidor: $responseBody"
+  }
+}
