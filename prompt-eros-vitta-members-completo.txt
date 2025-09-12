@@ -381,46 +381,28 @@ Invoke-RestMethod -Method Post -Uri 'https://erosvitta.com.br/api/admin/cron/run
 
 
 
-$headers = @{"Content-Type" = "application/json; charset=utf-8"; "X-Hotmart-Hottok" = "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"}
-$body = @'
-{
-  "id": "test-debug-brasil-utf8",
-  "event": "PURCHASE_APPROVED",
-  "data": {
-    "product": {
-      "id": 6157971
-    },
-    "buyer": {
-      "email": "brasilhilariooficial@gmail.com",
-      "name": "Brasil Hilário"
-    },
-    "purchase": {
-      "status": "APPROVED",
-      "transaction": "HP123456789012345",
-      "price": {
-        "value": 100.00,
-        "currency_value": "BRL"
+curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
+  -d '{
+    "id": "test-final-brasil",
+    "event": "PURCHASE_APPROVED",
+    "data": {
+      "product": {
+        "id": 6157971
+      },
+      "buyer": {
+        "email": "helivaoficial@gmail.com",
+        "name": "Heliva Oficial"
+      },
+      "purchase": {
+        "status": "APPROVED",
+        "transaction": "HP123456789012345",
+        "price": {
+          "value": 100.00,
+          "currency_value": "BRL"
+        }
       }
-    }
-  },
-  "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
-}
-'@
-
-try {
-  $response = Invoke-RestMethod -Uri "https://erosvitta.com.br/api/hotmart/webhook" -Method POST -Headers $headers -Body $body -ContentType "application/json; charset=utf-8"
-  Write-Host "✅ Sucesso: $($response | ConvertTo-Json)"
-} catch {
-  Write-Host "❌ Erro: $($_.Exception.Message)"
-  if($_.Exception.Response) {
-    $stream = $_.Exception.Response.GetResponseStream()
-    $reader = New-Object System.IO.StreamReader($stream)
-    $responseBody = $reader.ReadToEnd()
-    Write-Host "Resposta do servidor: $responseBody"
-  }
-}
-
-
-$headers = @{"Content-Type" = "application/json; charset=utf-8"; "X-Hotmart-Hottok" = "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"}
-$body = '{"id": "test-final-brasil", "event": "PURCHASE_APPROVED", "data": {"product": {"id": 6157971}, "buyer": {"email": "brasilhilariooficial@gmail.com", "name": "Brasil Hilario"}, "purchase": {"status": "APPROVED", "transaction": "HP123456789012345", "price": {"value": 100.00, "currency_value": "BRL"}}}, "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"}'
-try { $response = Invoke-RestMethod -Uri "https://erosvitta.com.br/api/hotmart/webhook" -Method POST -Headers $headers -Body $body -ContentType "application/json; charset=utf-8"; Write-Host "✅ Sucesso: $($response | ConvertTo-Json)" } catch { Write-Host "❌ Erro: $($_.Exception.Message)"; if($_.Exception.Response) { $stream = $_.Exception.Response.GetResponseStream(); $reader = New-Object System.IO.StreamReader($stream); $responseBody = $reader.ReadToEnd(); Write-Host "Resposta do servidor: $responseBody" } }
+    },
+    "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+  }'

@@ -252,7 +252,7 @@ final class WebhookController
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
                 .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+                .header { background: #000; color: white; padding: 30px; text-align: center; }
                 .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
                 .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
                 .content { padding: 40px 30px; }
@@ -261,7 +261,7 @@ final class WebhookController
                 .credential-item { margin: 10px 0; }
                 .credential-label { font-weight: bold; color: #495057; }
                 .credential-value { color: #667eea; font-family: monospace; background: #f8f9fa; padding: 5px 10px; border-radius: 4px; display: inline-block; }
-                .cta-button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; margin: 20px 0; transition: transform 0.2s; }
+                .cta-button { display: inline-block; background: #000; color: white; text-decoration: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; margin: 20px 0; transition: transform 0.2s; }
                 .cta-button:hover { transform: translateY(-2px); }
                 .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #6c757d; font-size: 14px; }
                 .security-note { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0; }
@@ -278,7 +278,7 @@ final class WebhookController
                 <div class="content">
                     <div class="welcome-box">
                         <h2>Olá, ' . htmlspecialchars($nome) . '!</h2>
-                        <p>Sua compra foi confirmada com sucesso e sua conta na área de membros foi criada automaticamente. Agora você tem acesso completo a todo o conteúdo exclusivo do Eros Vitta.</p>
+                        <p>Sua compra foi confirmada com sucesso e sua conta na área de membros foi criada automaticamente. Lá dentro você tem acesso completo a todo o conteúdo que você comprou do Eros Vitta.</p>
                     </div>
 
                     <div class="credentials">
@@ -309,6 +309,7 @@ final class WebhookController
                         <li>🎧 Áudios guiados para exercícios práticos</li>
                         <li>💡 Dicas e técnicas comprovadas</li>
                         <li>🎯 Conteúdo atualizado regularmente</li>
+                        <li>🔍 Obs: Somente os produtos que você comprou estarão LIBERADOS na área de membros.</li>
                     </ul>
 
                     <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>
