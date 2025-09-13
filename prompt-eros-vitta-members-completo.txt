@@ -493,19 +493,17 @@ curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
           "is_order_bump": true,
           "parent_purchase_transaction": "HP987654321000000"
         }
+        },
+        "content": {
+          "products": [
+            {
+              "id": 6161888
+            },
+            {
+              "id": 6206330
+            }
+          ]
+        }
       },
-      "content": {
-        "products": [
-          {
-            "id": 6161888,
-            "name": "Ebook Principal"
-          },
-          {
-            "id": 6206330,
-            "name": "Order Bump - Checklist VIP"
-          }
-        ]
-      }
-    },
     "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
   }'
