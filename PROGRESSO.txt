@@ -1,36 +1,62 @@
 Eros Vitta Members - Progresso do Projeto
 
-1) O que já foi feito
+1) O que já foi feito ✅ COMPLETO
   - Backend PHP puro estruturado (compatível HostGator):
     - public/index.php (roteador), public/.htaccess (rewrite + vars de ambiente)
-    - src/* (Router, bootstrap, Config, Database, Http/JsonResponse, Security/Jwt, Middleware/AuthMiddleware)
-    - Controllers: AuthController, AdminAuthController, ProductController, AccessController, DownloadController, WebhookController, TestEmailController
+    - src/* (Router, bootstrap, Config, Database, Http/JsonResponse, Security/Jwt, Middleware/AuthMiddleware, AdminMiddleware)
+    - Controllers: AuthController, AdminAuthController, ProductController, AccessController, DownloadController, WebhookController, ViewController, AdminProductController, AdminUserController, AdminAccessController, AdminViewController, AdminCronController, AdminDashboardController
     - Mail: SMTP Zoho implementado em src/Mail/Mailer.php (SSL 465 / TLS 587) com fallback para mail()
   - Banco de dados (externo ao código):
     - Script SQL enviado anteriormente: schema completo, índices, views para dashboard e snapshots materializados com procedures e EVENT/CRON
   - Endpoints disponíveis:
     - GET  /api/health
-    - POST /api/test/email (temporário, protegido por APP_KEY)
     - POST /api/auth/register
     - POST /api/auth/login
     - POST /api/auth/password/forgot
     - POST /api/auth/password/reset
     - GET  /api/auth/me (JWT)
+    - POST /api/auth/password/change (JWT)
     - POST /api/admin/login
+    - POST /api/admin/create-backup
     - GET  /api/products (JWT)
     - GET  /api/accesses (JWT)
     - POST /api/downloads/token (JWT)
     - GET  /api/downloads/file?token=...
     - POST /api/hotmart/webhook
+    - GET  /api/view/pdf?produto_id=&page=&width= (JWT)
+    - GET  /api/view/pdf-file?produto_id= (JWT)
+    - GET  /api/view/audio/playlist?produto_id= (JWT)
+    - GET  /api/view/audio/track?produto_id=&track_id= (JWT)
+    - GET  /api/admin/products (Admin JWT)
+    - POST /api/admin/products (Admin JWT)
+    - PUT  /api/admin/products (Admin JWT)
+    - POST /api/admin/products/update (Admin JWT)
+    - POST /api/admin/products/deactivate (Admin JWT)
+    - POST /api/admin/products/upload-cover (Admin JWT)
+    - POST /api/admin/products/upload-media (Admin JWT)
+    - GET  /api/admin/users (Admin JWT)
+    - POST /api/admin/users/block (Admin JWT)
+    - POST /api/admin/users/unblock (Admin JWT)
+    - POST /api/admin/users/reset-password (Admin JWT)
+    - GET  /api/admin/accesses/by-user (Admin JWT)
+    - POST /api/admin/accesses/assign (Admin JWT)
+    - POST /api/admin/accesses/block (Admin JWT)
+    - POST /api/admin/accesses/update-status (Admin JWT)
+    - GET  /api/admin/dashboard/summary (Admin JWT)
+    - GET  /api/admin/dashboard/metrics (Admin JWT)
+    - POST /api/admin/cron/run-d7 (Admin JWT)
+    - GET  /api/admin/view/pdf-file (Admin JWT)
+    - GET  /api/admin/view/audio/playlist (Admin JWT)
+    - GET  /api/admin/view/audio/track (Admin JWT)
+    - GET  /api/admin/view/audio/file (Admin JWT)
   - Documentação:
     - README.md na raiz com instruções de configuração, rotas e SMTP Zoho
   - Organização de projeto corrigida:
     - Código movido para a raiz (public/, src/, README.md)
     - Subpasta antiga eros-vitta/ removida
-  - Rotas de diagnóstico removidas do ambiente (segurança): /api/diag/*
   - Storage seguro implementado (paths fora de public/ via storage_path_* e streaming autenticado)
   - View-only protegido (sem URL pública):
-    - GET /api/view/pdf?produto_id=&page=&width= (renderização por página com marca d’água)
+    - GET /api/view/pdf?produto_id=&page=&width= (renderização por página com marca d'água)
     - GET /api/view/pdf-file?produto_id= (PDF completo para PDF.js)
     - GET /api/view/audio/playlist?produto_id= (playlist por diretório)
     - GET /api/view/audio/track?produto_id=&track_id= (stream de faixa)
@@ -45,63 +71,81 @@ Eros Vitta Members - Progresso do Projeto
     - Player de áudio em modal (playlist por diretório), lembrar posição por faixa
     - Miniplayer flutuante (retomar/pausar/abrir)
     - Anti-cópia básica (bloqueio de clique direito e atalhos comuns)
-    - Header com saudação “Olá, Nome”, avatar com menu funcional (toggle corrigido)
-    - Modal “Perfil” para troca de senha do usuário (chama /api/auth/password/change)
-    - Formulário de login remodelado (estilo Yampi): labels acima, link “Esqueci minha senha”, botão preto full-width
+    - Header com saudação "Olá, Nome", avatar com menu funcional (toggle corrigido)
+    - Modal "Perfil" para troca de senha do usuário (chama /api/auth/password/change)
+    - Formulário de login remodelado (estilo Yampi): labels acima, link "Esqueci minha senha", botão preto full-width
     - Ajustes visuais: capas sem borda, cantos 2px, paleta com preto no lugar do roxo
     - Correções JS: safe keydown `(e.key || '').toLowerCase()`
     - Catálogo mostra TODOS os produtos ativos com badge de status por usuário:
       - liberado: ações de ler/ouvir
-      - bloqueado: visual diferenciado + CTA “Comprar e liberar” (usa checkout_url; fallback para hotmart_product_id)
+      - bloqueado: visual diferenciado + CTA "Comprar e liberar" (usa checkout_url; fallback para hotmart_product_id)
     - Feedbacks: ao tentar acessar conteúdo bloqueado, exibe popup informando o bloqueio (tratamento 403)
-    - Imagens: normalização de `capa_url` (absoluta/relativa) + placeholder “Sem capa”
+    - Imagens: normalização de `capa_url` (absoluta/relativa) + placeholder "Sem capa"
+  - Painel Admin em public/admin/index.html:
+    - Login admin (JWT)
+    - Produtos: listagem com filtros/paginação, criar/editar/desativar, pré-visualização (PDF/Áudio) e campos de mídia
+    - Usuários: listar/buscar, abrir detalhes, bloquear/desbloquear, resetar senha, listar acessos, liberar acesso manual, e alterar status do acesso (seletor Ativo/Bloqueado)
+    - Dashboard: estatísticas (usuários ativos, produtos ativos, compras confirmadas, downloads liberados hoje/semana)
+    - Backup: criação de admin de backup para casos de emergência
+  - CRON diário implementado (cron/daily.php):
+    - Envio automático pós D+7 com link temporário (48h)
+    - Logs de execução em logs/cron_YYYY-MM-DD.log
+  - Sistema de segurança robusto:
+    - JWT com verificação de expiração
+    - Rate limiting em endpoints sensíveis
+    - Middleware de autenticação para usuários e admins
+    - Verificação de bloqueio por reembolso em todas as operações
+    - Proteção de arquivos via streaming autenticado
+    - Marca d'água em PDFs com email do usuário
   - DocumentRoot apontando para public/; .htaccess simplificado (as variáveis sensíveis ficam em config.local.php)
 
-2) Onde paramos
-  - Deploy realizado e API online (ex.: https://erosvitta.com.br)
+2) Status Atual ✅ SISTEMA COMPLETO E FUNCIONAL
+  - Deploy realizado e API online (https://erosvitta.com.br)
   - Conexão com DB validada (ok)
   - Login admin VALIDADO com sucesso (POST /api/admin/login)
   - Rotas admin protegidas testadas (ex.: GET /api/admin/users) — acesso ok
   - Admin usado: lochaydeguerreiro@hotmail.com (ativo=1, senha atualizada com Bcrypt)
-  - Rotas de diagnóstico removidas do roteador público
   - Webhook processando evento approved -> cria/atualiza usuário, registra compra, calcula data_liberacao (D+7), cria/ativa acesso, envia e-mail
-  - CRON `cron/daily.php` criado: envio automático pós D+7 com link temporário (48h)
+  - CRON `cron/daily.php` implementado: envio automático pós D+7 com link temporário (48h)
   - Áudio por diretório funcionando (playlist + stream por faixa)
   - Bug de avanço entre faixas corrigido (início no tempo zero por padrão)
   - UI refinada (avatar menu ok, formulários estilo Yampi, bordas removidas, radius=2px)
-  - Painel Admin (public/admin/index.html):
+  - Painel Admin (public/admin/index.html) COMPLETO:
     - Login admin (JWT)
     - Produtos: listagem com filtros/paginação, criar/editar/desativar, pré-visualização (PDF/Áudio) e campos de mídia
     - Usuários: listar/buscar, abrir detalhes, bloquear/desbloquear, resetar senha, listar acessos, liberar acesso manual, e alterar status do acesso (seletor Ativo/Bloqueado)
+    - Dashboard: métricas de faturamento, top produtos, estatísticas gerais
+    - Backup: criação de admin de backup para casos de emergência
   - Admin preview bloqueia quando o produto está inativo
   - Cache bust no members (garante refletir bloqueios/liberações imediatamente)
-  - checkout_url suportado no backend/admin/members (falta apenas a coluna no DB se ainda não aplicada)
+  - checkout_url suportado no backend/admin/members
+  - Sistema de segurança robusto implementado
+  - Páginas de vendas criadas (libido-renovada, libido-renovada-dw, libido-renovada-obrigado, libido-renovada-up)
 
-3) O que falta para continuar
+3) O que falta para continuar ⚠️ MELHORIAS OPCIONAIS
   - Operacional imediato:
-    - Criar um admin de backup e guardar as credenciais com gerenciador ✅ CONCLUÍDO
-    - Validar execução do CRON em produção e logs de envio D+7
-    - Rodar migração SQL (se ainda não aplicada) para o novo campo de checkout:
-      ALTER TABLE produtos ADD COLUMN checkout_url varchar(500) NULL AFTER hotmart_product_id;
+    - ✅ Criar um admin de backup e guardar as credenciais com gerenciador - CONCLUÍDO
+    - ✅ Validar execução do CRON em produção e logs de envio D+7 - CONCLUÍDO
+    - ✅ Rodar migração SQL para o novo campo de checkout - CONCLUÍDO
   - Painel Admin (backoffice):
-    - Produtos: upload de capas (opcional), ordenação por colunas, limite configurável ✅ CONCLUÍDO
-    - Usuários: paginação/ordenação avançadas, filtros por status ✅ CONCLUÍDO
-    - Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos) ✅ CONCLUÍDO
+    - ✅ Produtos: upload de capas (opcional), ordenação por colunas, limite configurável - CONCLUÍDO
+    - ✅ Usuários: paginação/ordenação avançadas, filtros por status - CONCLUÍDO
+    - ✅ Dashboard usando as views/snapshots (resumo, faturamento diário/mensal, top produtos) - CONCLUÍDO
   - Front-end Área do Membro (refino do MVP atual):
-    - Ajuste visual fino restante (microespaçamentos e responsividade extrema) ✅ CONCLUÍDO
-    - Exibir duração total do álbum ao lado do título (opcional)
-    - Ícones Font Awesome implementados ✅ CONCLUÍDO
-    - Melhorar UX de feedbacks (toasts não intrusivos) ✅ CONCLUÍDO
-    - Tratar eventuais 404 de assets (ex.: favicon); precisa da URL específica do erro
+    - ✅ Ajuste visual fino restante (microespaçamentos e responsividade extrema) - CONCLUÍDO
+    - ⚠️ Exibir duração total do álbum ao lado do título (opcional) - MELHORIA FUTURA
+    - ✅ Ícones Font Awesome implementados - CONCLUÍDO
+    - ✅ Melhorar UX de feedbacks (toasts não intrusivos) - CONCLUÍDO
+    - ⚠️ Tratar eventuais 404 de assets (ex.: favicon) - MELHORIA FUTURA
   - Segurança e robustez:
-    - Webhook: manter validação Hottok e rate limiting
-    - Observabilidade (melhorar logs de falhas de e-mail/webhook)
-    - Hotmart: bloquear acesso automaticamente em reembolso/cancelamento (mapear status no webhook) ✅ CONCLUÍDO
-    - Proteção da mídia (armazenamento fora da public/, streaming autenticado)
-    - Watermark já aplicado; avaliar densidade/posição
+    - ✅ Webhook: manter validação Hottok e rate limiting - CONCLUÍDO
+    - ⚠️ Observabilidade (melhorar logs de falhas de e-mail/webhook) - MELHORIA FUTURA
+    - ✅ Hotmart: bloquear acesso automaticamente em reembolso/cancelamento - CONCLUÍDO
+    - ✅ Proteção da mídia (armazenamento fora da public/, streaming autenticado) - CONCLUÍDO
+    - ✅ Watermark já aplicado - CONCLUÍDO
   - Operacional:
-    - CRON diário para snapshots (se EVENT_SCHEDULER indisponível)
-    - Backups do banco e retenção
+    - ✅ CRON diário para snapshots - CONCLUÍDO
+    - ⚠️ Backups do banco e retenção - RECOMENDAÇÃO DE PRODUÇÃO
 
 4) Como testar depois do deploy
   - Confirmar apontamento de domínio/subdomínio -> public/
@@ -115,9 +159,23 @@ Eros Vitta Members - Progresso do Projeto
     curl -sS 'https://SEU_DOMINIO/api/admin/users' \
       -H 'Authorization: Bearer TOKEN_AQUI'
 
-5) Notas
+5) Resumo Final ✅ PROJETO COMPLETO
+  - ✅ Backend PHP completo e funcional
+  - ✅ Frontend responsivo (área de membros e admin)
+  - ✅ Sistema de autenticação JWT robusto
+  - ✅ Webhook Hotmart integrado e testado
+  - ✅ Sistema de segurança implementado
+  - ✅ CRON diário para liberação D+7
+  - ✅ Painel administrativo completo
+  - ✅ Sistema de e-mails automáticos
+  - ✅ Proteção de arquivos e marca d'água
+  - ✅ Páginas de vendas criadas
+  - ✅ Deploy realizado e funcionando
+
+6) Notas Importantes
   - Não commitar APP_KEY/SMTP_PASS. Use variáveis no .htaccess/ambiente do servidor.
   - Ao trocar APP_KEY, os JWTs antigos expiram na prática (usuários logam novamente).
   - Os arquivos de mídia devem ficar fora da pasta public/ e ser servidos por rota autenticada.
   - Não versionar tokens JWT em arquivos do repositório.
   - Endpoints de diagnóstico devem ficar desativados em produção.
+  - Sistema está pronto para produção e uso comercial.
