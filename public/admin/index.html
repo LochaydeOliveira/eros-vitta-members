@@ -162,7 +162,7 @@
   </head>
   <body>
 
-    <header id="mainHeader" class="hidden">
+    <header id="mainHeader">
       <h1><i class="fas fa-cog"></i> Admin - Eros Vitta Members</h1>
       <div class="row">
         <span id="whoami" class="code"><i class="fas fa-user-shield"></i> admin</span>
@@ -195,152 +195,155 @@
       </div>
 
       <div id="app" class="hidden">
+
         <div style="margin-bottom:12px">
           <button id="tabProducts" class="primary"><i class="fas fa-box"></i> Produtos</button>
           <button id="tabUsers" class="ghost"><i class="fas fa-users"></i> Usuários</button>
           <button id="tabDashboard" class="ghost"><i class="fas fa-chart-bar"></i> Dashboard</button>
           <button id="tabBackup" class="ghost"><i class="fas fa-shield-alt"></i> Backup</button>
         </div>
+
+
         <div id="viewProducts">
-        <div class="card mb16">
-          <div>
-            <strong>Produtos</strong>
-            <div class="right">
-              <input id="q" class="w-200" placeholder="Buscar por título/slug" />
-              <select id="tipoFilter" class="w-160">
-                <option value="">Tipo (todos)</option>
-                <option value="ebook">ebook</option>
-                <option value="audio">audio</option>
-              </select>
-              <select id="ativoFilter" class="w-160">
-                <option value="">Status (todos)</option>
-                <option value="1">Ativo</option>
-                <option value="0">Inativo</option>
-              </select>
-              <select id="orderProd" class="w-160">
-                <option value="id:desc">Mais recentes</option>
-                <option value="titulo:asc">Título (A→Z)</option>
-                <option value="titulo:desc">Título (Z→A)</option>
-                <option value="tipo:asc">Tipo</option>
-              </select>
-              <select id="limitProd" class="w-160">
-                <option value="20">20 por página</option>
-                <option value="50">50 por página</option>
-                <option value="100">100 por página</option>
-              </select>
-              <button id="reloadBtn"><i class="fas fa-sync-alt"></i> Atualizar</button>
-              <button id="newBtn" class="primary"><i class="fas fa-plus"></i> Novo produto</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card mb16">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Título</th>
-                <th>Tipo</th>
-                <th>Slug</th>
-                <th>Ativo</th>
-                <th>PDF</th>
-                <th>Áudio</th>
-                <th class="right">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-          <div class="mt12">
-            <button id="prevBtn">Anterior</button>
-            <button id="nextBtn">Próxima</button>
-            <span id="pageInfo" class="code"></span>
-          </div>
-        </div>
-
-        <div id="formCard" class="card hidden">
-          <h3 id="formTitle">Novo produto</h3>
-          <div class="grid grid-3 mt12">
+          <div class="card mb16">
             <div>
-              <label>Título</label>
-              <input id="f_titulo" />
-            </div>
-            <div>
-              <label>Tipo</label>
-              <select id="f_tipo">
-                <option value="ebook">ebook</option>
-                <option value="audio">audio</option>
-              </select>
-            </div>
-            <div>
-              <label>Slug</label>
-              <input id="f_slug" />
-            </div>
-          </div>
-
-          <div class="grid grid-3 mt12">
-            <div>
-              <label>Capa URL</label>
-              <input id="f_capa" />
-              <div class="mt8">
-                <input type="file" id="f_cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" />
-                <button type="button" id="f_upload_btn" class="secondary small"><i class="fas fa-upload"></i> Upload de capa</button>
-                <div id="f_cover_preview" class="mt8"></div>
+              <strong>Produtos</strong>
+              <div class="right">
+                <input id="q" class="w-200" placeholder="Buscar por título/slug" />
+                <select id="tipoFilter" class="w-160">
+                  <option value="">Tipo (todos)</option>
+                  <option value="ebook">ebook</option>
+                  <option value="audio">audio</option>
+                </select>
+                <select id="ativoFilter" class="w-160">
+                  <option value="">Status (todos)</option>
+                  <option value="1">Ativo</option>
+                  <option value="0">Inativo</option>
+                </select>
+                <select id="orderProd" class="w-160">
+                  <option value="id:desc">Mais recentes</option>
+                  <option value="titulo:asc">Título (A→Z)</option>
+                  <option value="titulo:desc">Título (Z→A)</option>
+                  <option value="tipo:asc">Tipo</option>
+                </select>
+                <select id="limitProd" class="w-160">
+                  <option value="20">20 por página</option>
+                  <option value="50">50 por página</option>
+                  <option value="100">100 por página</option>
+                </select>
+                <button id="reloadBtn"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                <button id="newBtn" class="primary"><i class="fas fa-plus"></i> Novo produto</button>
               </div>
             </div>
-            <div>
-              <label>Ativo</label>
-              <select id="f_ativo">
-                <option value="1">Sim</option>
-                <option value="0">Não</option>
-              </select>
-            </div>
-            <div>
-              <label>Hotmart Product ID</label>
-              <input id="f_hotmart" />
+          </div>
+
+          <div class="card mb16">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Título</th>
+                  <th>Tipo</th>
+                  <th>Slug</th>
+                  <th>Ativo</th>
+                  <th>PDF</th>
+                  <th>Áudio</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+            <div class="mt12">
+              <button id="prevBtn">Anterior</button>
+              <button id="nextBtn">Próxima</button>
+              <span id="pageInfo" class="code"></span>
             </div>
           </div>
 
-          <div class="grid grid-3 mt12">
-            <div>
-              <label>Checkout URL (prioritário)</label>
-              <input id="f_checkout" placeholder="https://..." />
-            </div>
-          </div>
-
-          <div class="grid grid-2 mt12">
-            <div>
-              <label>Descrição</label>
-              <textarea id="f_desc"></textarea>
-            </div>
-            <div>
+          <div id="formCard" class="card hidden">
+            <h3 id="formTitle">Novo produto</h3>
+            <div class="grid grid-3 mt12">
               <div>
-                <label>PDF - storage_view_pdf</label>
-                <input id="f_pdf_view" placeholder="/view/pdf?file=..." />
+                <label>Título</label>
+                <input id="f_titulo" />
+              </div>
+              <div>
+                <label>Tipo</label>
+                <select id="f_tipo">
+                  <option value="ebook">ebook</option>
+                  <option value="audio">audio</option>
+                </select>
+              </div>
+              <div>
+                <label>Slug</label>
+                <input id="f_slug" />
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt12">
+              <div>
+                <label>Capa URL</label>
+                <input id="f_capa" />
                 <div class="mt8">
-                  <input type="file" id="f_pdf_file" accept=".pdf" style="display:none" />
-                  <button type="button" id="f_upload_pdf_btn" class="secondary small"><i class="fas fa-file-pdf"></i> Upload PDF</button>
-                  <div id="f_pdf_preview" class="mt8"></div>
+                  <input type="file" id="f_cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" />
+                  <button type="button" id="f_upload_btn" class="secondary small"><i class="fas fa-upload"></i> Upload de capa</button>
+                  <div id="f_cover_preview" class="mt8"></div>
                 </div>
               </div>
-              <div class="mt8">
-                <label>Áudio - storage_view_audio_dir</label>
-                <input id="f_audio_dir" placeholder="/view/audio/playlist?dir=..." />
+              <div>
+                <label>Ativo</label>
+                <select id="f_ativo">
+                  <option value="1">Sim</option>
+                  <option value="0">Não</option>
+                </select>
+              </div>
+              <div>
+                <label>Hotmart Product ID</label>
+                <input id="f_hotmart" />
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt12">
+              <div>
+                <label>Checkout URL (prioritário)</label>
+                <input id="f_checkout" placeholder="https://..." />
+              </div>
+            </div>
+
+            <div class="grid grid-2 mt12">
+              <div>
+                <label>Descrição</label>
+                <textarea id="f_desc"></textarea>
+              </div>
+              <div>
+                <div>
+                  <label>PDF - storage_view_pdf</label>
+                  <input id="f_pdf_view" placeholder="/view/pdf?file=..." />
+                  <div class="mt8">
+                    <input type="file" id="f_pdf_file" accept=".pdf" style="display:none" />
+                    <button type="button" id="f_upload_pdf_btn" class="secondary small"><i class="fas fa-file-pdf"></i> Upload PDF</button>
+                    <div id="f_pdf_preview" class="mt8"></div>
+                  </div>
+                </div>
                 <div class="mt8">
-                  <input type="file" id="f_audio_file" accept=".mp3,.wav,.ogg,.m4a" style="display:none" />
-                  <button type="button" id="f_upload_audio_btn" class="secondary small"><i class="fas fa-music"></i> Upload Áudio</button>
-                  <div id="f_audio_preview" class="mt8"></div>
+                  <label>Áudio - storage_view_audio_dir</label>
+                  <input id="f_audio_dir" placeholder="/view/audio/playlist?dir=..." />
+                  <div class="mt8">
+                    <input type="file" id="f_audio_file" accept=".mp3,.wav,.ogg,.m4a" style="display:none" />
+                    <button type="button" id="f_upload_audio_btn" class="secondary small"><i class="fas fa-music"></i> Upload Áudio</button>
+                    <div id="f_audio_preview" class="mt8"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="row mt16">
-            <button id="saveBtn" class="primary"><i class="fas fa-save"></i> Salvar</button>
-            <button id="cancelBtn" class="ghost"><i class="fas fa-times"></i> Cancelar</button>
-            <button id="deactBtn" class="danger hidden"><i class="fas fa-ban"></i> Desativar</button>
-            <span id="formMsg" class="code"></span>
+            <div class="row mt16">
+              <button id="saveBtn" class="primary"><i class="fas fa-save"></i> Salvar</button>
+              <button id="cancelBtn" class="ghost"><i class="fas fa-times"></i> Cancelar</button>
+              <button id="deactBtn" class="danger hidden"><i class="fas fa-ban"></i> Desativar</button>
+              <span id="formMsg" class="code"></span>
+            </div>
           </div>
-        </div>
         </div>
 
         <div id="viewUsers" class="hidden">
