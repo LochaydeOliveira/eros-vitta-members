@@ -35,7 +35,7 @@ final class MetaConversionsController
 
         $eventData = self::buildEventData($body);
         if (!$eventData) {
-            JsonResponse::error('Dados do evento inválidos', 422);
+            JsonResponse::error('Dados do evento inválidos', 400);
             return;
         }
 
@@ -67,26 +67,25 @@ final class MetaConversionsController
                     'event_time' => time(),
                     'user_data' => [
                         'em' => hash('sha256', strtolower($purchaseData['email'] ?? '')),
-                        'ph' => isset($purchaseData['phone']) ? hash('sha256', preg_replace('/[^0-9]/', '', $purchaseData['phone'])) : null,
-                        'fn' => isset($purchaseData['first_name']) ? hash('sha256', strtolower($purchaseData['first_name'])) : null,
-                        'ln' => isset($purchaseData['last_name']) ? hash('sha256', strtolower($purchaseData['last_name'])) : null,
-                        'ct' => isset($purchaseData['city']) ? hash('sha256', strtolower($purchaseData['city'])) : null,
-                        'st' => isset($purchaseData['state']) ? hash('sha256', strtolower($purchaseData['state'])) : null,
-                        'country' => isset($purchaseData['country']) ? hash('sha256', strtolower($purchaseData['country'])) : null,
-                        'zp' => isset($purchaseData['zip']) ? hash('sha256', $purchaseData['zip']) : null,
+                        'ph' => hash('sha256', preg_replace('/[^0-9]/', '', $purchaseData['phone'] ?? '')),
+                        'fn' => hash('sha256', strtolower($purchaseData['first_name'] ?? '')),
+                        'ln' => hash('sha256', strtolower($purchaseData['last_name'] ?? '')),
+                        'ct' => hash('sha256', strtolower($purchaseData['city'] ?? '')),
+                        'st' => hash('sha256', strtolower($purchaseData['state'] ?? '')),
+                        'country' => hash('sha256', strtolower($purchaseData['country'] ?? '')),
+                        'zp' => hash('sha256', $purchaseData['zip'] ?? '')
                     ],
                     'custom_data' => [
-                        'value' => $purchaseData['value'] ?? 0,
-                        'currency' => $purchaseData['currency'] ?? 'BRL',
-                        'content_name' => $purchaseData['product_name'] ?? '',
-                        'content_category' => $purchaseData['product_category'] ?? 'Digital Product',
-                        'content_ids' => [$purchaseData['product_id'] ?? ''],
-                        'num_items' => 1,
+                        'value' => (float)($purchaseData['value'] ?? 0),
+                        'currency' => 'BRL',
+                        'content_name' => $purchaseData['product_name'] ?? 'Produto Digital',
+                        'content_category' => 'Digital Product'
                     ],
-                    'event_source_url' => $purchaseData['source_url'] ?? Config::appUrl(),
-                    'action_source' => 'website',
+                    'event_source_url' => Config::appUrl(),
+                    'action_source' => 'website'
                 ]
-            ]
+            ],
+            'partner_agent' => 'ErosVitta-1.0'
         ];
 
         $response = self::sendToMeta($pixelId, $accessToken, $eventData);
@@ -116,7 +115,8 @@ final class MetaConversionsController
                         'em' => hash('sha256', strtolower($userEmail))
                     ] : [],
                 ]
-            ]
+            ],
+            'partner_agent' => 'ErosVitta-1.0'
         ];
 
         $response = self::sendToMeta($pixelId, $accessToken, $eventData);
@@ -150,18 +150,47 @@ final class MetaConversionsController
         if (isset($userData['last_name'])) {
             $hashedUserData['ln'] = hash('sha256', strtolower($userData['last_name']));
         }
+        if (isset($userData['city'])) {
+            $hashedUserData['ct'] = hash('sha256', strtolower($userData['city']));
+        }
+        if (isset($userData['state'])) {
+            $hashedUserData['st'] = hash('sha256', strtolower($userData['state']));
+        }
+        if (isset($userData['country'])) {
+            $hashedUserData['country'] = hash('sha256', strtolower($userData['country']));
+        }
+        if (isset($userData['zip'])) {
+            $hashedUserData['zp'] = hash('sha256', $userData['zip']);
+        }
 
+        // Processar dados customizados
+        $processedCustomData = [];
+        if (isset($customData['value'])) {
+            $processedCustomData['value'] = (float)$customData['value'];
+        }
+        if (isset($customData['currency'])) {
+            $processedCustomData['currency'] = strtoupper($customData['currency']);
+        }
+        if (isset($customData['content_name'])) {
+            $processedCustomData['content_name'] = $customData['content_name'];
+        }
+        if (isset($customData['content_category'])) {
+            $processedCustomData['content_category'] = $customData['content_category'];
+        }
+
+        // Formato correto para Meta Conversions API
         return [
             'data' => [
                 [
                     'event_name' => $eventName,
                     'event_time' => $eventTime,
-                    'user_data' => $hashedUserData,
-                    'custom_data' => $customData,
                     'event_source_url' => $sourceUrl,
                     'action_source' => 'website',
+                    'user_data' => $hashedUserData,
+                    'custom_data' => $processedCustomData
                 ]
-            ]
+            ],
+            'partner_agent' => 'ErosVitta-1.0'
         ];
     }
 
@@ -203,7 +232,7 @@ final class MetaConversionsController
         
         return [
             'success' => false, 
-            'error' => $responseData['error']['message'] ?? 'Erro desconhecido'
+            'error' => $responseData['error']['message'] ?? 'Erro desconhecido (HTTP ' . $httpCode . ')'
         ];
     }
 }
