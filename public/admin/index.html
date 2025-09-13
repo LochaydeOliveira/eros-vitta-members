@@ -38,6 +38,14 @@
         top: 0; 
         z-index: 10; 
       }
+      #loginCard, #app {
+          position: absolute; /* Os elementos se sobrepõem */
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto; /* Centraliza a caixa no meio */
+      }
       @media(max-width: 640px){ header { padding: 10px 12px; } }
       .header-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
       .header-actions { display: flex; align-items: center; gap: 12px; }
@@ -162,7 +170,7 @@
   </head>
   <body>
 
-    <header id="mainHeader">
+    <header id="mainHeader" class="hidden">
       <h1><i class="fas fa-cog"></i> Admin - Eros Vitta Members</h1>
       <div class="row">
         <span id="whoami" class="code"><i class="fas fa-user-shield"></i> admin</span>
@@ -497,6 +505,7 @@
       const els = {
         loginCard: document.getElementById('loginCard'),
         app: document.getElementById('app'),
+        mainHeader: document.getElementById('mainHeader'),
         email: document.getElementById('email'),
         senha: document.getElementById('senha'),
         loginMsg: document.getElementById('loginMsg'),
@@ -597,7 +606,7 @@
       function enterApp(){
         show(els.loginCard, false);
         show(els.app, true);
-        show(document.getElementById('mainHeader'), true);
+        show(els.mainHeader, true);
         els.whoami.textContent = 'admin';
         show(els.viewProducts, true);
         show(els.viewUsers, false);
@@ -1193,7 +1202,6 @@
           } catch(e) {
             setAuth('');
             show(els.loginCard, true);
-            show(document.getElementById('mainHeader'), false);
           }
         } else {
           show(els.loginCard, true);
