@@ -389,7 +389,14 @@ curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
     "event": "PURCHASE_APPROVED",
     "data": {
       "product": {
-        "id": 6157971
+        "id": 6157971,
+        "content": {
+          "products": [
+            {
+              "id": 6206330
+            }
+          ]
+        }
       },
       "buyer": {
         "email": "helivaoficial@gmail.com",
@@ -433,3 +440,25 @@ curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
     },
     "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
   }'
+
+
+
+  {
+  "data": {
+    "product": {
+      "id": 1,  // Produto principal
+      "content": {
+        "products": [
+          {"id": 4774438, "name": "Produto Adicional 1"},
+          {"id": 4999597, "name": "Produto Adicional 2"}
+        ]
+      }
+    },
+    "purchase": {
+      "order_bump": {
+        "is_order_bump": true,
+        "parent_purchase_transaction": "HP123456"
+      }
+    }
+  }
+}

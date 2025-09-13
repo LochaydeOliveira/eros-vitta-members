@@ -338,9 +338,9 @@ final class WebhookController
                         <li>💡 Dicas e técnicas comprovadas</li>
                         <li>🎯 Conteúdo atualizado regularmente</li>
                         <li style="color: red;">🔍 Obs: Somente os produtos que você comprou estarão LIBERADOS na área de membros.</li>
-                    </ul>';
+                    </ul>
 
-                    <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>
+                    <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>';
                 </div>
 
                 <div class="footer">
