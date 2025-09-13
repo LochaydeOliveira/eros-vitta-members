@@ -126,8 +126,7 @@ final class WebhookController
                 $userId = (int)$pdo->lastInsertId();
                 // Email de boas-vindas com credenciais
                 $loginUrl = rtrim(Config::appUrl(), '/') . '/members';
-                $produtosComprados = self::getProdutosComprados($pdo, $userId);
-                $html = self::getWelcomeEmailTemplate($nome ?: 'Cliente', $email, $senhaPlain, $loginUrl, $produtosComprados);
+                $html = self::getWelcomeEmailTemplate($nome ?: 'Cliente', $email, $senhaPlain, $loginUrl);
                 Mailer::send($email, 'Bem-vindo | Eros Vitta Members', $html);
             }
 
@@ -165,24 +164,15 @@ final class WebhookController
 
             // Upsert acesso - SEMPRE libera para compras aprovadas
             if ($confirmada) {
-                // Liberar acesso ao produto principal
-                self::liberarAcessoProduto($pdo, $userId, $produtoId, $compraId, $dataLiberacao);
-                
-                // Se for Order Bump, liberar acesso a TODOS os produtos adicionais
-                if ($isOrderBump && isset($data['product']['content']['products']) && is_array($data['product']['content']['products'])) {
-                    foreach ($data['product']['content']['products'] as $produtoAdicional) {
-                        $produtoAdicionalId = (int)($produtoAdicional['id'] ?? 0);
-                        if ($produtoAdicionalId > 0) {
-                            // Verificar se o produto adicional existe no banco
-                            $stmt = $pdo->prepare('SELECT id FROM produtos WHERE hotmart_product_id = ? LIMIT 1');
-                            $stmt->execute([$produtoAdicionalId]);
-                            $produtoExiste = $stmt->fetch(PDO::FETCH_ASSOC);
-                            
-                            if ($produtoExiste) {
-                                self::liberarAcessoProduto($pdo, $userId, (int)$produtoExiste['id'], $compraId, $dataLiberacao);
-                            }
-                        }
-                    }
+                $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
+                $stmt->execute([$userId, $produtoId]);
+                $ac = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($ac) {
+                    $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
+                        ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
+                } else {
+                    $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
+                        ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
                 }
             } elseif ($cancelada) {
                 // Bloqueia TODOS os acessos do usuário imediatamente em caso de reembolso/cancelamento
@@ -254,7 +244,7 @@ final class WebhookController
         return $ts ? date('Y-m-d H:i:s', $ts) : null;
     }
 
-    private static function getWelcomeEmailTemplate(string $nome, string $email, string $senha, string $loginUrl, array $produtosComprados = []): string
+    private static function getWelcomeEmailTemplate(string $nome, string $email, string $senha, string $loginUrl): string
     {
         return '
         <!DOCTYPE html>
@@ -317,21 +307,7 @@ final class WebhookController
                         <strong>🔒 Importante:</strong> Esta é uma senha provisória. Recomendamos que você altere sua senha após o primeiro login por questões de segurança.
                     </div>
 
-                    <h3>✨ Produtos Liberados para Você:</h3>';
-        
-        if (!empty($produtosComprados)) {
-            $html .= '<ul>';
-            foreach ($produtosComprados as $produto) {
-                $icone = $produto['tipo'] === 'audio' ? '🎧' : '📚';
-                $html .= '<li>' . $icone . ' ' . htmlspecialchars($produto['titulo']) . '</li>';
-            }
-            $html .= '</ul>';
-        } else {
-            $html .= '<p>Seus produtos serão liberados automaticamente após a confirmação da compra.</p>';
-        }
-        
-        $html .= '
-                    <h3>🎯 O que você encontrará na área de membros:</h3>
+                    <h3>✨ O que você encontrará na área de membros:</h3>
                     <ul>
                         <li>📚 E-books exclusivos sobre relacionamentos íntimos</li>
                         <li>🎧 Áudios guiados para exercícios práticos</li>
@@ -340,7 +316,7 @@ final class WebhookController
                         <li style="color: red;">🔍 Obs: Somente os produtos que você comprou estarão LIBERADOS na área de membros.</li>
                     </ul>
 
-                    <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>';
+                    <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está sempre disponível para ajudar.</p>
                 </div>
 
                 <div class="footer">
@@ -424,33 +400,5 @@ final class WebhookController
             </div>
         </body>
         </html>';
-    }
-
-    private static function liberarAcessoProduto(PDO $pdo, int $userId, int $produtoId, int $compraId, ?string $dataLiberacao): void
-    {
-        $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
-        $stmt->execute([$userId, $produtoId]);
-        $ac = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($ac) {
-            $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
-                ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
-        } else {
-            $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
-                ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
-        }
-    }
-
-    private static function getProdutosComprados(PDO $pdo, int $userId): array
-    {
-        $stmt = $pdo->prepare('
-            SELECT p.titulo, p.tipo 
-            FROM acessos a 
-            JOIN produtos p ON a.produto_id = p.id 
-            WHERE a.usuario_id = ? AND a.status = "ativo" 
-            ORDER BY a.criado_em DESC
-        ');
-        $stmt->execute([$userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

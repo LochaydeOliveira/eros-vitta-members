@@ -346,4 +346,3 @@ final class AdminProductController
     }
 }
 
-
