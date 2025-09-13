@@ -131,36 +131,70 @@ final class WebhookController
             }
 
             // Buscar produto por hotmart_product_id
-            $stmt = $pdo->prepare('SELECT id FROM produtos WHERE hotmart_product_id = ? LIMIT 1');
-            $stmt->execute([$produtoHotmartId]);
-            $prod = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$prod) {
-                throw new \RuntimeException('Produto não cadastrado para hotmart_product_id=' . $produtoHotmartId);
-            }
-            $produtoId = (int)$prod['id'];
+                // Se a Hotmart enviou múltiplos produtos (principal + bumps)
+                $produtosComprados = $data['content']['products'] ?? [$data['product'] ?? []];
 
-            // Upsert compra por transactionId quando houver
-            if ($transactionId) {
-                $stmt = $pdo->prepare('SELECT id FROM compras WHERE hotmart_transaction_id = ? LIMIT 1');
-                $stmt->execute([$transactionId]);
-                $compra = $stmt->fetch(PDO::FETCH_ASSOC);
-            } else {
-                $compra = false;
-            }
+                // Se não veio array válido, converte para lista
+                if (!is_array($produtosComprados) || isset($produtosComprados['id'])) {
+                    $produtosComprados = [$produtosComprados];
+                }
 
-            $statusCompra = $confirmada ? 'aprovada' : ($cancelada ? 'cancelada' : 'pendente');
-            $dataConfirmacao = $confirmada ? ($dataCompra ?: date('Y-m-d H:i:s')) : null;
-            $dataLiberacao = $confirmada ? date('Y-m-d H:i:s', strtotime(($dataConfirmacao ?? date('Y-m-d H:i:s')) . ' +7 days')) : null;
+                foreach ($produtosComprados as $produto) {
+                    $produtoHotmartId = (string)($produto['id'] ?? '');
+                    if ($produtoHotmartId === '') {
+                        continue; // ignora itens sem ID
+                    }
 
-            if ($compra) {
-                $pdo->prepare('UPDATE compras SET usuario_id = ?, produto_id = ?, origem = "hotmart", status = ?, valor_pago = ?, moeda = ?, data_compra = COALESCE(?, data_compra), data_confirmacao = ?, data_liberacao = ?, affiliate_code = ?, affiliate_name = ?, parcelas = ?, tipo_pagamento = ?, pais_checkout = ?, codigo_oferta = ?, cupom_desconto = ?, preco_original = ?, assinatura_ativa = ?, plano_id = ?, plano_nome = ?, codigo_assinante = ?, is_order_bump = ?, parent_transaction = ?, business_model = ?, is_funnel = ?, atualizado_em = NOW() WHERE id = ?')
-                    ->execute([$userId, $produtoId, $statusCompra, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel, (int)$compra['id']]);
-                $compraId = (int)$compra['id'];
-            } else {
-                $pdo->prepare('INSERT INTO compras (usuario_id, produto_id, origem, status, hotmart_transaction_id, valor_pago, moeda, data_compra, data_confirmacao, data_liberacao, affiliate_code, affiliate_name, parcelas, tipo_pagamento, pais_checkout, codigo_oferta, cupom_desconto, preco_original, assinatura_ativa, plano_id, plano_nome, codigo_assinante, is_order_bump, parent_transaction, business_model, is_funnel, criado_em, atualizado_em) VALUES (?, ?, "hotmart", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())')
-                    ->execute([$userId, $produtoId, $statusCompra, $transactionId, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel]);
-                $compraId = (int)$pdo->lastInsertId();
-            }
+                    // Buscar produto no banco
+                    $stmt = $pdo->prepare('SELECT id FROM produtos WHERE hotmart_product_id = ? LIMIT 1');
+                    $stmt->execute([$produtoHotmartId]);
+                    $prod = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$prod) {
+                        throw new \RuntimeException('Produto não cadastrado: hotmart_product_id=' . $produtoHotmartId);
+                    }
+                    $produtoId = (int)$prod['id'];
+
+                    // Upsert compra
+                    if ($transactionId) {
+                        $stmt = $pdo->prepare('SELECT id FROM compras WHERE hotmart_transaction_id = ? AND produto_id = ? LIMIT 1');
+                        $stmt->execute([$transactionId, $produtoId]);
+                        $compra = $stmt->fetch(PDO::FETCH_ASSOC);
+                    } else {
+                        $compra = false;
+                    }
+
+                    $statusCompra = $confirmada ? 'aprovada' : ($cancelada ? 'cancelada' : 'pendente');
+                    $dataConfirmacao = $confirmada ? ($dataCompra ?: date('Y-m-d H:i:s')) : null;
+                    $dataLiberacao = $confirmada ? date('Y-m-d H:i:s', strtotime(($dataConfirmacao ?? date('Y-m-d H:i:s')) . ' +7 days')) : null;
+
+                    if ($compra) {
+                        $pdo->prepare('UPDATE compras SET usuario_id = ?, produto_id = ?, origem = "hotmart", status = ?, valor_pago = ?, moeda = ?, data_compra = COALESCE(?, data_compra), data_confirmacao = ?, data_liberacao = ?, affiliate_code = ?, affiliate_name = ?, parcelas = ?, tipo_pagamento = ?, pais_checkout = ?, codigo_oferta = ?, cupom_desconto = ?, preco_original = ?, assinatura_ativa = ?, plano_id = ?, plano_nome = ?, codigo_assinante = ?, is_order_bump = ?, parent_transaction = ?, business_model = ?, is_funnel = ?, atualizado_em = NOW() WHERE id = ?')
+                            ->execute([$userId, $produtoId, $statusCompra, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel, (int)$compra['id']]);
+                        $compraId = (int)$compra['id'];
+                    } else {
+                        $pdo->prepare('INSERT INTO compras (usuario_id, produto_id, origem, status, hotmart_transaction_id, valor_pago, moeda, data_compra, data_confirmacao, data_liberacao, affiliate_code, affiliate_name, parcelas, tipo_pagamento, pais_checkout, codigo_oferta, cupom_desconto, preco_original, assinatura_ativa, plano_id, plano_nome, codigo_assinante, is_order_bump, parent_transaction, business_model, is_funnel, criado_em, atualizado_em) VALUES (?, ?, "hotmart", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())')
+                            ->execute([$userId, $produtoId, $statusCompra, $transactionId, $valor, $moeda, $dataCompra, $dataConfirmacao, $dataLiberacao, $affiliateCode, $affiliateName, $parcelas, $tipoPagamento, $paisCheckout, $codigoOferta, $cupomDesconto, $precoOriginal, $assinaturaAtiva, $planoId, $planoNome, $codigoAssinante, $isOrderBump, $parentTransaction, $businessModel, $isFunnel]);
+                        $compraId = (int)$pdo->lastInsertId();
+                    }
+
+                    // Upsert acesso
+                    if ($confirmada) {
+                        $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
+                        $stmt->execute([$userId, $produtoId]);
+                        $ac = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($ac) {
+                            $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
+                                ->execute([$dataLiberacao, $compraId, (int)$ac['id']]);
+                        } else {
+                            $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
+                                ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
+                        }
+                    } elseif ($cancelada) {
+                        $pdo->prepare('UPDATE acessos SET status = "bloqueado", data_bloqueio = NOW(), motivo_bloqueio = "webhook_reembolso", atualizado_em = NOW() WHERE usuario_id = ? AND produto_id = ?')
+                            ->execute([$userId, $produtoId]);
+                    }
+                }
+
 
             // Upsert acesso - SEMPRE libera para compras aprovadas
             if ($confirmada) {
