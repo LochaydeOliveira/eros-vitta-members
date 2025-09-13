@@ -435,4 +435,77 @@ curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
   }'
 
 
+
+curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
+  -d '{
+    "id": "test-order-bump-heliva",
+    "event": "PURCHASE_APPROVED",
+    "data": {
+      "product": {
+        "id": 6157971
+      },
+      "buyer": {
+        "email": "helivaoficial@gmail.com",
+        "name": "Heliva Oficial"
+      },
+      "purchase": {
+        "status": "APPROVED",
+        "transaction": "HP123456789012345",
+        "price": {
+          "value": 150.00,
+          "currency_value": "BRL"
+        },
+        "order_bump": {
+          "is_order_bump": true,
+          "parent_purchase_transaction": "HP123456"
+        }
+      }
+    },
+    "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+  }'
   
+
+
+  curl -X POST "https://erosvitta.com.br/api/hotmart/webhook" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -H "X-Hotmart-Hottok: JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873" \
+  -d '{
+    "id": "test-orderbump-brasil",
+    "event": "PURCHASE_APPROVED",
+    "data": {
+      "product": {
+        "id": 6157971
+      },
+      "buyer": {
+        "email": "helivaoficial@gmail.com",
+        "name": "Heliva Oficial"
+      },
+      "purchase": {
+        "status": "APPROVED",
+        "transaction": "HP987654321098765",
+        "price": {
+          "value": 150.00,
+          "currency_value": "BRL"
+        },
+        "order_bump": {
+          "is_order_bump": true,
+          "parent_purchase_transaction": "HP987654321000000"
+        }
+      },
+      "content": {
+        "products": [
+          {
+            "id": 6161888,
+            "name": "Ebook Principal"
+          },
+          {
+            "id": 6206330,
+            "name": "Order Bump - Checklist VIP"
+          }
+        ]
+      }
+    },
+    "hottok": "JXw991Om7EB7yY0Xf8ptOB4FJMlQaP534873"
+  }'
