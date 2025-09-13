@@ -1,0 +1,30 @@
+# Configurações sensíveis
+config.local.php
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Uploads de mídia (se houver)
+uploads/
+storage/
+
+# Cache
+cache/
+*.cache

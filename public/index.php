@@ -19,6 +19,7 @@ use App\Controllers\ViewController;
 use App\Controllers\AdminViewController;
 use App\Controllers\AdminCronController;
 use App\Controllers\AdminDashboardController;
+use App\Controllers\MetaConversionsController;
  
 
 $router = new Router();
@@ -95,6 +96,9 @@ $router->get('/api/downloads/file', [DownloadController::class, 'streamByToken']
 
 // Webhook Hotmart
 $router->post('/api/hotmart/webhook', [WebhookController::class, 'handle']);
+
+// Meta Conversions API
+$router->post('/api/meta/conversion', [MetaConversionsController::class, 'sendConversion']);
 
  
 

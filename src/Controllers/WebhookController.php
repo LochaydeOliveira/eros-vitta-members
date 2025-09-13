@@ -193,6 +193,32 @@ final class WebhookController
                 Mailer::send($email, 'Reembolso Processado | Eros Vitta', $refundEmailHtml);
             }
 
+            // Enviar evento de compra para Meta Conversions API
+            if ($confirmada) {
+                try {
+                    $metaData = [
+                        'email' => $email,
+                        'phone' => $telefone,
+                        'first_name' => explode(' ', $nome)[0] ?? '',
+                        'last_name' => implode(' ', array_slice(explode(' ', $nome), 1)) ?: '',
+                        'city' => $cidade,
+                        'state' => $estado,
+                        'country' => $pais,
+                        'zip' => $cep,
+                        'value' => $valor,
+                        'currency' => $moeda,
+                        'product_name' => $prod['titulo'] ?? 'Produto Eros Vitta',
+                        'product_category' => 'Digital Product',
+                        'product_id' => $produtoId,
+                        'source_url' => rtrim(Config::appUrl(), '/') . '/libido-renovada'
+                    ];
+                    \App\Controllers\MetaConversionsController::sendPurchaseEvent($metaData);
+                } catch (\Throwable $e) {
+                    // Log do erro mas não falha o webhook
+                    error_log('Meta Conversions API error: ' . $e->getMessage());
+                }
+            }
+
             // Marca processamento OK
             $pdo->prepare('UPDATE webhook_eventos SET processado_em = NOW(), resultado_status = "sucesso" WHERE id = ?')->execute([$webhookId]);
             $pdo->commit();

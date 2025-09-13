@@ -72,4 +72,15 @@ final class Config
     {
         return self::local('HOTMART_HOTTOK', getenv('HOTMART_HOTTOK') ?: '') ?: '';
     }
+
+    // Meta Conversions API
+    public static function metaPixelId(): string
+    {
+        return self::local('META_PIXEL_ID', getenv('META_PIXEL_ID') ?: '') ?: '';
+    }
+
+    public static function metaAccessToken(): string
+    {
+        return self::local('META_ACCESS_TOKEN', getenv('META_ACCESS_TOKEN') ?: '') ?: '';
+    }
 }

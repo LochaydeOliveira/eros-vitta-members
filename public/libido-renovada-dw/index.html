@@ -106,5 +106,34 @@
     </div>
   </footer>
 
+  <!-- Meta Conversions API -->
+  <script src="/assets/js/meta-conversions.js"></script>
+  <script>
+    // Rastrear visualização da página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Track page view
+      trackMetaPageView();
+      
+      // Track view content
+      trackMetaViewContent('Libido Renovada - Downsell', 'Digital Product', 97);
+      
+      // Rastrear cliques no botão de compra
+      const buyButtons = document.querySelectorAll('a[href*="hotmart"], a[href*="pay.hotmart"]');
+      buyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          trackMetaInitiateCheckout('Libido Renovada - Downsell', 'libido-renovada-dw', 97);
+        });
+      });
+      
+      // Rastrear cliques em links de contato/lead
+      const contactLinks = document.querySelectorAll('a[href*="mailto"], a[href*="whatsapp"]');
+      contactLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          trackMetaLead('', 'Contact');
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>
