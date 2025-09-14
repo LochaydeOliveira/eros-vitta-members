@@ -67,22 +67,16 @@
       transition: all 0.2s ease;
     }
 
-    .badge-lock,
-.btn.secondary {
-  position: relative; /* ou absolute, se quiser fixar em um ponto específico */
-  z-index: 9999;      /* bem alto para garantir que fique no topo */
-}
 
 /* Se quiser posicionar o badge no canto superior direito da .card */
-.card .badge-lock {
+.card::before {
+  content: '';
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
 }
 
     @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
