@@ -81,9 +81,11 @@
         opacity: 1;
     }
 
-    .btn.secondary.blocked {
-      z-index: 9;
+    .card.blocked.thumb {
+      opacity: .55;
+      filter: grayscale(85%);
     }
+
 
     @media(max-width: 480px){ .card { min-height: 280px; padding: 14px; } }
     .card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); transform: translateY(-1px); }
@@ -112,7 +114,7 @@
     }
     .btn:hover { background: #1f2937; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
-    .btn.secondary { background: #0ea5e9; max-height: max-content; }
+    .btn.secondary { background: #0ea5e9; max-height: max-content; z-index: 9; }
     .btn.secondary:hover { background: #0284c7; }
     .btn.muted { background: #cbd5e1; color: #0f172a; cursor: not-allowed; }
     .btn.muted:hover { background: #cbd5e1; transform: none; }
