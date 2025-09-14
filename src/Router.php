@@ -56,9 +56,17 @@ class Router
     {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         if (stripos($contentType, 'application/json') !== false) {
+            // Se o body estiver vazio, retornar array vazio
+            if (trim($raw) === '') {
+                return [];
+            }
+            
             $data = json_decode($raw, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                error_log('JSON decode error: ' . json_last_error_msg() . ' | Raw body: ' . $raw);
+                // Só logar se não for um body vazio ou requisição GET
+                if (trim($raw) !== '' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+                    error_log('JSON decode error: ' . json_last_error_msg() . ' | Raw body: ' . substr($raw, 0, 200));
+                }
                 return [];
             }
             return is_array($data) ? $data : [];

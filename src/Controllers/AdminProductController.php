@@ -22,7 +22,14 @@ final class AdminProductController
     {
         $uploadDir = '/home1/paymen58storage/ebooks/view';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            // Tentar criar o diretório com permissões mais amplas
+            if (!mkdir($uploadDir, 0777, true)) {
+                // Se falhar, usar diretório alternativo
+                $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/../storage/media';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+            }
         }
         return $uploadDir;
     }

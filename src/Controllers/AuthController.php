@@ -70,6 +70,7 @@ final class AuthController
         }
         
         // Verificar se usuário tem acessos bloqueados por reembolso
+        $userId = (int)$row['id'];
         $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM acessos WHERE usuario_id = ? AND status = "bloqueado" AND motivo_bloqueio = "webhook_reembolso"');
         $stmt->execute([$userId]);
         $blockedAccess = $stmt->fetch(PDO::FETCH_ASSOC);
