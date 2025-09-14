@@ -9,6 +9,38 @@ use PDO;
 
 final class ViewController
 {
+    private static function resolveFilePath(string $input): string
+    {
+        $input = trim($input);
+        if ($input === '') { return ''; }
+        if (is_file($input)) { return $input; }
+        // Se for URL, pega apenas o path
+        if (stripos($input, 'http://') === 0 || stripos($input, 'https://') === 0) {
+            $urlPath = parse_url($input, PHP_URL_PATH) ?: '';
+        } else {
+            $urlPath = $input;
+        }
+        // Se já for um caminho absoluto tipo /home1/... tenta diretamente
+        if ($urlPath !== '' && $urlPath[0] === '/' && is_file($urlPath)) { return $urlPath; }
+        
+        // Mapeia /ebooks/view/... para /home1/paymen58storage/ebooks/view
+        if ($urlPath !== '' && strpos($urlPath, '/ebooks/view/') === 0) {
+            $candidate = '/home1/paymen58storage' . $urlPath;
+            if (is_file($candidate)) { return $candidate; }
+        }
+        
+        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT (fallback)
+        if ($urlPath !== '' && $urlPath[0] === '/') {
+            $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            if ($docRoot !== '') {
+                $base = rtrim(dirname($docRoot), '/');
+                $candidate = $base . $urlPath;
+                if (is_file($candidate)) { return $candidate; }
+            }
+        }
+        return '';
+    }
+
     /**
      * Lê manifesto de álbum, se existir, no formato album.json
      * { "tracks": [{"file":"01 - Intro.mp3","title":"Intro","duration":180}, ...] }
@@ -136,8 +168,8 @@ final class ViewController
             JsonResponse::error('Sem acesso ou PDF não configurado', 403);
             return;
         }
-        $path = (string)$row['storage_path_pdf'];
-        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        $path = self::resolveFilePath((string)$row['storage_path_pdf']);
+        if ($path === '' || !is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
 
         // Renderiza página
         try {
@@ -211,8 +243,8 @@ final class ViewController
         $stmt->execute([$userId, $produtoId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row || empty($row['storage_path_pdf'])) { JsonResponse::error('Sem acesso ou PDF não configurado', 403); return; }
-        $path = (string)$row['storage_path_pdf'];
-        if (!is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
+        $path = self::resolveFilePath((string)$row['storage_path_pdf']);
+        if ($path === '' || !is_file($path)) { JsonResponse::error('Arquivo não encontrado', 404); return; }
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . basename($path) . '"');
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');

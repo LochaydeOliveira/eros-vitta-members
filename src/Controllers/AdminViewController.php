@@ -22,7 +22,14 @@ final class AdminViewController
         }
         // Se já for um caminho absoluto tipo /home1/... tenta diretamente
         if ($urlPath !== '' && $urlPath[0] === '/' && is_file($urlPath)) { return $urlPath; }
-        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT
+        
+        // Mapeia /ebooks/view/... para /home1/paymen58storage/ebooks/view
+        if ($urlPath !== '' && strpos($urlPath, '/ebooks/view/') === 0) {
+            $candidate = '/home1/paymen58storage' . $urlPath;
+            if (is_file($candidate)) { return $candidate; }
+        }
+        
+        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT (fallback)
         if ($urlPath !== '' && $urlPath[0] === '/') {
             $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
             if ($docRoot !== '') {

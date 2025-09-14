@@ -11,6 +11,38 @@ use PDO;
 
 final class AdminCronController
 {
+    private static function resolveFilePath(string $input): string
+    {
+        $input = trim($input);
+        if ($input === '') { return ''; }
+        if (is_file($input)) { return $input; }
+        // Se for URL, pega apenas o path
+        if (stripos($input, 'http://') === 0 || stripos($input, 'https://') === 0) {
+            $urlPath = parse_url($input, PHP_URL_PATH) ?: '';
+        } else {
+            $urlPath = $input;
+        }
+        // Se já for um caminho absoluto tipo /home1/... tenta diretamente
+        if ($urlPath !== '' && $urlPath[0] === '/' && is_file($urlPath)) { return $urlPath; }
+        
+        // Mapeia /ebooks/view/... para /home1/paymen58storage/ebooks/view
+        if ($urlPath !== '' && strpos($urlPath, '/ebooks/view/') === 0) {
+            $candidate = '/home1/paymen58storage' . $urlPath;
+            if (is_file($candidate)) { return $candidate; }
+        }
+        
+        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT (fallback)
+        if ($urlPath !== '' && $urlPath[0] === '/') {
+            $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            if ($docRoot !== '') {
+                $base = rtrim(dirname($docRoot), '/');
+                $candidate = $base . $urlPath;
+                if (is_file($candidate)) { return $candidate; }
+            }
+        }
+        return '';
+    }
+
     /**
      * Dispara manualmente o envio D+7 (para testes). Processa até N acessos.
      * Body opcional: { limit?: number }
@@ -59,7 +91,7 @@ final class AdminCronController
             $produtoId = (int)$row['produto_id'];
             $acessoId = (int)$row['acesso_id'];
             if ($tipo === 'ebook') {
-                $path = (string)($row['storage_dl_pdf'] ?: $row['storage_view_pdf'] ?: $row['storage_path_pdf'] ?: '');
+                $path = self::resolveFilePath((string)($row['storage_dl_pdf'] ?: $row['storage_view_pdf'] ?: $row['storage_path_pdf'] ?: ''));
                 if ($path !== '' && is_file($path)) {
                     $tok = self::generateDownloadToken($usuarioId, $produtoId, 48);
                     if ($tok) { $ebookLink = rtrim(Config::appUrl(), '/') . '/api/downloads/file?token=' . $tok; }

@@ -20,7 +20,7 @@ final class AdminProductController
 
     private static function getMediaUploadDir(): string
     {
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/../storage/media';
+        $uploadDir = '/home1/paymen58storage/ebooks/view';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -311,7 +311,7 @@ final class AdminProductController
         }
 
         // Atualizar campo apropriado no banco
-        $webPath = '/storage/media/' . $filename;
+        $webPath = '/ebooks/view/' . $filename;
         $fieldName = match($mediaType) {
             'pdf' => 'storage_view_pdf',
             'audio' => 'storage_path_audio',

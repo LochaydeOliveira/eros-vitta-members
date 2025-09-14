@@ -9,6 +9,38 @@ use PDO;
 
 final class DownloadController
 {
+    private static function resolveFilePath(string $input): string
+    {
+        $input = trim($input);
+        if ($input === '') { return ''; }
+        if (is_file($input)) { return $input; }
+        // Se for URL, pega apenas o path
+        if (stripos($input, 'http://') === 0 || stripos($input, 'https://') === 0) {
+            $urlPath = parse_url($input, PHP_URL_PATH) ?: '';
+        } else {
+            $urlPath = $input;
+        }
+        // Se já for um caminho absoluto tipo /home1/... tenta diretamente
+        if ($urlPath !== '' && $urlPath[0] === '/' && is_file($urlPath)) { return $urlPath; }
+        
+        // Mapeia /ebooks/view/... para /home1/paymen58storage/ebooks/view
+        if ($urlPath !== '' && strpos($urlPath, '/ebooks/view/') === 0) {
+            $candidate = '/home1/paymen58storage' . $urlPath;
+            if (is_file($candidate)) { return $candidate; }
+        }
+        
+        // Mapeia /storage/... para filesystem baseado no DOCUMENT_ROOT (fallback)
+        if ($urlPath !== '' && $urlPath[0] === '/') {
+            $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            if ($docRoot !== '') {
+                $base = rtrim(dirname($docRoot), '/');
+                $candidate = $base . $urlPath;
+                if (is_file($candidate)) { return $candidate; }
+            }
+        }
+        return '';
+    }
+
     public static function createToken(array $body, array $req): void
     {
         $userId = (int)($req['user_id'] ?? 0);
@@ -61,10 +93,10 @@ final class DownloadController
         $path = null;
         $mime = 'application/octet-stream';
         if ($row['tipo'] === 'ebook') {
-            $path = (string)$row['storage_path_pdf'];
+            $path = self::resolveFilePath((string)$row['storage_path_pdf']);
             $mime = 'application/pdf';
         } else {
-            $path = (string)$row['storage_path_audio'];
+            $path = self::resolveFilePath((string)$row['storage_path_audio']);
             $mime = 'audio/mpeg';
         }
         if (!$path || !is_file($path)) {
