@@ -164,6 +164,7 @@ final class WebhookController
 
             // Upsert acesso - SEMPRE libera para compras aprovadas
             if ($confirmada) {
+                // Processar produto principal
                 $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
                 $stmt->execute([$userId, $produtoId]);
                 $ac = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -173,6 +174,38 @@ final class WebhookController
                 } else {
                     $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
                         ->execute([$userId, $produtoId, $compraId, $dataLiberacao]);
+                }
+
+                // Processar produtos adicionais do content.products (order bumps, upsells, etc.)
+                if (isset($data['content']['products']) && is_array($data['content']['products'])) {
+                    foreach ($data['content']['products'] as $contentProduct) {
+                        $contentProductId = (string)($contentProduct['id'] ?? '');
+                        if ($contentProductId === '') continue;
+
+                        // Buscar produto por hotmart_product_id
+                        $stmt = $pdo->prepare('SELECT id FROM produtos WHERE hotmart_product_id = ? LIMIT 1');
+                        $stmt->execute([$contentProductId]);
+                        $contentProd = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($contentProd) {
+                            $contentProdutoId = (int)$contentProd['id'];
+                            
+                            // Verificar se já existe acesso para este produto
+                            $stmt = $pdo->prepare('SELECT id FROM acessos WHERE usuario_id = ? AND produto_id = ? LIMIT 1');
+                            $stmt->execute([$userId, $contentProdutoId]);
+                            $contentAc = $stmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($contentAc) {
+                                // Atualizar acesso existente
+                                $pdo->prepare('UPDATE acessos SET status = "ativo", data_liberacao = ?, compra_id = ?, data_bloqueio = NULL, motivo_bloqueio = NULL, atualizado_em = NOW() WHERE id = ?')
+                                    ->execute([$dataLiberacao, $compraId, (int)$contentAc['id']]);
+                            } else {
+                                // Criar novo acesso
+                                $pdo->prepare('INSERT INTO acessos (usuario_id, produto_id, compra_id, origem, status, data_liberacao, criado_em, atualizado_em) VALUES (?, ?, ?, "hotmart", "ativo", ?, NOW(), NOW())')
+                                    ->execute([$userId, $contentProdutoId, $compraId, $dataLiberacao]);
+                            }
+                        }
+                    }
                 }
             } elseif ($cancelada) {
                 // Bloqueia TODOS os acessos do usuário imediatamente em caso de reembolso/cancelamento
