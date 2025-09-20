@@ -51,17 +51,7 @@
       <div class="relative">
         <div class="w-full overflow-hidden rounded-xl shadow-lg border border-[#e7ddd6]">
           <div class="relative" style="aspect-ratio: 16/9;">
-            <video id="upsell-video" controls class="absolute inset-0 w-full h-full object-cover" poster="assets/img/thumbnail-vsl-libido-renovada.jpg">
-              <source src="assets/img/vsl-libido-renovada-up.mp4" type="video/mp4">
-              Seu navegador não suporta a reprodução de vídeo.
-            </video>
-            <button id="video-play-overlay" aria-label="Reproduzir vídeo" class="absolute inset-0 grid place-items-center">
-              <span class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full shadow-lg ring-1 ring-white/50" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(6px); color: #fff;">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </span>
-            </button>
+            <iframe id="upsell-video" width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/Zh7ZLP1AcXs?si=dVc9xoYBBkTMlWru&controls=0&autoplay=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
           </div>
         </div>
       </div>
@@ -141,14 +131,16 @@
 
   <script>
     (function(){
-      var video = document.getElementById('upsell-video');
-      var overlay = document.getElementById('video-play-overlay');
+      var iframe = document.getElementById('upsell-video');
       var benefits = document.getElementById('beneficios');
-      if (!video || !overlay) return;
-      function hideOverlay(){ overlay.style.display = 'none'; }
-      function showOverlay(){ overlay.style.display = ''; }
+      var player;
+      var benefitsRevealed = false;
+      
+      if (!iframe || !benefits) return;
+      
       function revealBenefits(){
-        if (!benefits) return;
+        if (benefitsRevealed) return;
+        benefitsRevealed = true;
         if (!benefits.classList.contains('hidden')) return;
         benefits.classList.remove('hidden');
         requestAnimationFrame(function(){
@@ -156,20 +148,56 @@
           try { benefits.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) {}
         });
       }
-      overlay.addEventListener('click', function(){
-        if (video.paused) {
-          var p = video.play();
-          if (p && typeof p.catch === 'function') p.catch(function(){});
+      
+      // Carregar a API do YouTube
+      function loadYouTubeAPI() {
+        if (window.YT && window.YT.Player) {
+          initializePlayer();
+        } else {
+          var tag = document.createElement('script');
+          tag.src = 'https://www.youtube.com/iframe_api';
+          var firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         }
-      });
-      video.addEventListener('play', hideOverlay);
-      video.addEventListener('pause', function(){ if (!video.ended && video.currentTime > 0) showOverlay(); });
-      video.addEventListener('ended', showOverlay);
-      video.addEventListener('timeupdate', function(){
-        if (!video.duration || video.duration === Infinity) return;
-        var progress = video.currentTime / video.duration;
-        if (progress >= 0.98) revealBenefits();
-      });
+      }
+      
+      // Inicializar o player quando a API estiver carregada
+      function initializePlayer() {
+        player = new YT.Player('upsell-video', {
+          events: {
+            'onReady': function(event) {
+              // Player está pronto
+            },
+            'onStateChange': function(event) {
+              // Verificar quando o vídeo está reproduzindo
+              if (event.data === YT.PlayerState.PLAYING) {
+                // Verificar progresso periodicamente
+                var checkProgress = setInterval(function() {
+                  if (player && player.getCurrentTime && player.getDuration) {
+                    var currentTime = player.getCurrentTime();
+                    var duration = player.getDuration();
+                    if (duration > 0) {
+                      var progress = currentTime / duration;
+                      if (progress >= 0.98) {
+                        revealBenefits();
+                        clearInterval(checkProgress);
+                      }
+                    }
+                  }
+                }, 1000);
+              }
+            }
+          }
+        });
+      }
+      
+      // Quando a API do YouTube estiver carregada
+      window.onYouTubeIframeAPIReady = function() {
+        initializePlayer();
+      };
+      
+      // Carregar a API do YouTube
+      loadYouTubeAPI();
     })();
   </script>
 
